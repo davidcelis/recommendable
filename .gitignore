@@ -10,6 +10,7 @@ doc
 
 # bundler
 .bundle
+vendor/bundle
 
 # jeweler generated
 pkg
@@ -26,12 +27,12 @@ pkg
 # Not sure what to needs to be ignored for particular editors/OSes? Here's some ideas to get you started. (Remember, remove the leading # of the line)
 #
 # For MacOS:
-#
-#.DS_Store
+
+.DS_Store
 
 # For TextMate
-#*.tmproj
-#tmtags
+*.tmproj
+tmtags
 
 # For emacs:
 #*~
@@ -39,7 +40,7 @@ pkg
 #.\#*
 
 # For vim:
-#*.swp
+*.swp
 
 # For redcar:
 #.redcar

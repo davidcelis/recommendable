@@ -1,6 +1,6 @@
 = recommendable
 
-Description goes here.
+This is a work in progess. Check back later!
 
 == Contributing to recommendable
  
@@ -16,4 +16,3 @@ Description goes here.
 
 Copyright (c) 2012 David Celis. See LICENSE.txt for
 further details.
-

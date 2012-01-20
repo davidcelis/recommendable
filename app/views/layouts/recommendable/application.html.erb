@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Recommendable</title>
+    <%= stylesheet_link_tag    "recommendable/application", :media => "all" %>
+    <%= javascript_include_tag "recommendable/application" %>
+    <%= csrf_meta_tags %>
+  </head>
+
+  <body>
+    <%= yield %>
+  </body>
+</html>

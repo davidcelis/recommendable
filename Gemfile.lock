@@ -1,0 +1,26 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    git (1.2.5)
+    jeweler (1.6.4)
+      bundler (~> 1.0)
+      git (>= 1.2.5)
+      rake
+    minitest (2.10.1)
+    mysql2 (0.3.11)
+    rake (0.9.2.2)
+    rcov (0.9.11)
+    redis (2.2.2)
+    yard (0.6.8)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.0.0)
+  jeweler (~> 1.6.4)
+  minitest
+  mysql2
+  rcov
+  redis (>= 2.2.0)
+  yard (~> 0.6.0)
