@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
     "lib/recommendable/engine.rb",
     "lib/recommendable/version.rb",
     "lib/tasks/recommendable_tasks.rake",
+    "recommendable.gemspec",
     "script/rails",
     "test/dummy/README.rdoc",
     "test/dummy/Rakefile",
