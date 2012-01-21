@@ -1,3 +1,7 @@
+# RVM / rbenv version files
+.rvmrc
+.rbenv-version
+
 # rcov generated
 coverage
 
@@ -14,6 +18,9 @@ vendor/bundle
 
 # jeweler generated
 pkg
+
+# logging
+*.log
 
 # Have editor/IDE/OS specific files you need to ignore? Consider using a global gitignore: 
 #
