@@ -28,7 +28,6 @@ GEM
     activesupport (3.2.0)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    app (1.0.3)
     arel (3.0.0)
     builder (3.0.0)
     erubis (2.7.0)
@@ -94,7 +93,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  app
   bundler (~> 1.0.0)
   jeweler (~> 1.6.4)
   minitest

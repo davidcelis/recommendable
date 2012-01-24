@@ -36,8 +36,13 @@ module Recommendable
         like.destroy
       end
       
+      def likes
+        Like.select(:id).where(:user_id => self.id).map {|l| l.likeable_type.constantize.find(l.id)}
+      end
+      
       def likes_for(klass)
-        self.likes.where(:likeable_type => klass.to_s)
+        klass = klass.is_a?(String) ? klass.camelize.constantize : klass
+        klass.find self.likes.where(:likeable_type => klass.to_s).map(&:id)
       end
     end
     
@@ -55,8 +60,13 @@ module Recommendable
         dislike.destroy
       end
       
+      def dislikes
+        Dislike.select(:id).where(:user_id => self.id).map {|d| d.dislikeable_type.constantize.find(d.id)}
+      end
+      
       def dislikes_for(klass)
-        self.dislikes.where(:dislikeable_type => klass.to_s)
+        klass = klass.is_a?(String) ? klass.camelize.constantize : klass
+        klass.find self.dislikes.where(:dislikeable_type => klass.to_s).map(&:id)
       end
     end
     
