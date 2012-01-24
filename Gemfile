@@ -2,7 +2,6 @@ source "http://rubygems.org"
 # Add dependencies required to use your gem here.
 gem "rails", ">= 3.2.0"
 gem "redis", ">= 2.2.0"
-gem "app"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
