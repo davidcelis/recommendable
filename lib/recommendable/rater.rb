@@ -4,6 +4,10 @@ module Recommendable
       base.extend ClassMethods
     end
     
+    def can_rate?(user)
+      user.respond_to?(:like) || user.respond_to?(:dislike)
+    end
+    
     module ClassMethods
       def acts_as_liker
         class_eval do
@@ -42,7 +46,7 @@ module Recommendable
       
       def likes_for(klass)
         klass = klass.is_a?(String) ? klass.camelize.constantize : klass
-        klass.find self.likes.where(:likeable_type => klass.to_s).map(&:id)
+        klass.find self.likes.where(:likeable_type => klass).map(&:id)
       end
     end
     
@@ -66,7 +70,7 @@ module Recommendable
       
       def dislikes_for(klass)
         klass = klass.is_a?(String) ? klass.camelize.constantize : klass
-        klass.find self.dislikes.where(:dislikeable_type => klass.to_s).map(&:id)
+        klass.find self.dislikes.where(:dislikeable_type => klass).map(&:id)
       end
     end
     

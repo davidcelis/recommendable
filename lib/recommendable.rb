@@ -2,7 +2,7 @@ require "recommendable/engine"
 require "recommendable/rater"
 
 module Recommendable
-  mattr_accessor :user_class, :redis, :redis_host, :redis_port
+  mattr_accessor :user_class, :redis, :redis_host, :redis_port, :redis_socket
   
   class << self
     def user_class
@@ -10,7 +10,11 @@ module Recommendable
     end
     
     def redis
-      @@redis ||= Redis.new(@@redis_host, @@redis_port)
+      if @@redis_socket
+        @@redis ||= Redis.new(:path => @@redis_socket)
+      else
+        @@redis ||= Redis.new(@@redis_host, @@redis_port)
+      end
     end
   end
 end
