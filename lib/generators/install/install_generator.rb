@@ -1,7 +1,7 @@
 require 'rails/generators'
 module Recommendable
   module Generators
-    class InstallGenerator < Rails::Generators
+    class InstallGenerator < Rails::Generators::Base
       class_option "no-migrate", :type => :boolean
       class_option "user-class", :type => :string
       class_option "redis-host", :type => :string
@@ -28,25 +28,25 @@ module Recommendable
       end
       
       def finished
-        puts "Done! Recommendable has been successfully installed."
+        puts "Done! Recommendable has been successfully installed. Please configure it in config/intializers/recommendable.rb"
       end
       
       private
       
       def user_class
-        @user_class ||= "User"
+        @user_class.to_sym || :user
       end
       
       def redis_host
-        @redis_host ||= "127.0.0.1"
+        @redis_host || "127.0.0.1"
       end
       
       def redis_port
-        @redis_port ||= 6379
+        @redis_port || 6379
       end
       
       def redis_socket
-        @redis_socket
+        @redis_socket || "/tmp/redis.sock"
       end
     end
   end
