@@ -80,50 +80,47 @@ module Recommendable
     end
     
     module RecommendationMethods
-      # def similarity_with(rater)
-      #   similarity = 0.0
-      # 
-      #   return similarity if like_count + dislike_count == 0
-      # 
-      #   agreements = common_likes_with(rater).size + common_dislikes(rater).size
-      #   disagreements = disagreements_with(rater).size
-      #   similarity = (agreements - disagreements).to_f / (like_count + dislike_count)
-      # 
-      #   return similarity
-      # end
-      # 
-      # def common_likes_with(rater)
-      #   Recommendable.redis.sinter "rater:#{id}:likes", "rater:#{rater.id}:likes"
-      # end
-      # 
-      # def common_dislikes_with(rater)
-      #   Recommendable.redis.sinter "rater:#{id}:dislikes", "rater:#{rater.id}:dislikes"
-      # end
-      # 
-      # def disagreements_with(rater)
-      #   Recommendable.redis.sinter("rater:#{id}:likes", "rater:#{rater.id}:dislikes") +
-      #   Recommendable.redis.sinter("rater:#{id}:dislikes", "rater:#{rater.id}:likes")
-      # end
-      # 
-      # def similar_raters(options)
-      #   defaults = { :count => 10 }
-      #   options.merge! defaults
-      #   
-      #   ids = Recommendable.redis.zrevrange "user_#{id}:similarities", 0, options[:count] - 1
-      #   class.find ids, order: "field(id, #{ids.join(',')})"
-      # end
-      # 
-      # 
-      # def update_similarities
-      #   self.class.find_each do |rater|
-      #     next if self == rater
-      #     
-      #     similarity = similarity_with(rater)
-      #     Recommendable.redis.zadd "rater:#{id}:similarities", similarity, rater.id
-      #     Recommendable.redis.zadd "rater:#{rater.id}:similarities", similarity, id
-      #   end
-      # end
-      # 
+      def similarity_with(rater)
+        return 0.0 if likes.count + dislikes.count == 0
+      
+        agreements = common_likes_with(rater).size + common_dislikes(rater).size
+        disagreements = disagreements_with(rater).size
+        
+        (agreements - disagreements).to_f / (likes.count + dislikes)
+      end
+      
+      def common_likes_with(rater)
+        Recommendable.redis.sinter "#{self.class}:#{id}:likes", "#{rater.class}:#{rater.id}:likes"
+      end
+      
+      def common_dislikes_with(rater)
+        Recommendable.redis.sinter "#{self.class}:#{id}:dislikes", "#{rater.class}:#{rater.id}:dislikes"
+      end
+      
+      def disagreements_with(rater)
+        Recommendable.redis.sinter("#{self.class}:#{id}:likes", "#{rater.class}:#{rater.id}:dislikes") +
+        Recommendable.redis.sinter("#{self.class}:#{id}:dislikes", "#{rater.class}:#{rater.id}:likes")
+      end
+      
+      def similar_raters(options)
+        defaults = { :count => 10 }
+        options = defaults.merge(options)
+        
+        rater_ids = Recommendable.redis.zrevrange "#{self.class}:#{id}:similarities", 0, options[:count] - 1
+        Recommendable.user_class.find rater_ids, order: "field(id, #{ids.join(',')})"
+      end
+      
+      
+      def update_similarities
+        Recommendable.user_class.find_each do |rater|
+          next if self == rater
+          
+          similarity = similarity_with(rater)
+          Recommendable.redis.zadd "#{self.class}:#{id}:similarities", similarity, "#{rater.id}"
+          Recommendable.redis.zadd "#{rater.class}:#{rater.id}:similarities", similarity, "#{id}"
+        end
+      end
+      
       # def update_predictions_for(klass)
       #   klass.find_each do |item|
       #     unless has_liked?(item) || has_disliked?(item)
@@ -166,6 +163,13 @@ module Recommendable
       # def probability_of_disliking(item)
       #   -probability_of_liking(item)
       # end
+      
+      private
+      
+      def build_sets
+        likes.each {|like| Recommendable.redis.sadd "#{self.class}:#{id}:likes", "#{like.likeable_type}_#{like.id}"}
+        dislikes.each {|dislike| Recommendable.redis.sadd "#{self.class}:#{id}:dislikes", "#{dislike.dislikeable_type}_#{dislike.id}"}
+      end
     end
   end
 end

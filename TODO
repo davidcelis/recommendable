@@ -1,4 +1,3 @@
 = TODO
 
-* Rater#likes and Rater#dislikes return actual Like and Dislike objects. How
-  should I go about returning the liked/disliked objects themselves?
+* Consider Ruby's Set class

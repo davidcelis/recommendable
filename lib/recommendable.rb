@@ -4,7 +4,8 @@ require 'recommendable/acts_as_rateable'
 require 'recommendable/railtie' if defined?(Rails)
 
 module Recommendable
-  mattr_writer :user_class, :redis
+  mattr_accessor :redis
+  mattr_writer :user_class
   
   def self.user_class
     @@user_class.camelize.constantize
