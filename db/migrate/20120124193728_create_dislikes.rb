@@ -8,7 +8,7 @@ class CreateDislikes < ActiveRecord::Migration
     
     add_index :dislikes, :dislikeable_id
     add_index :dislikes, :dislikeable_type
-    add_index :dislikes, :user_id, :dislikeable_id, :dislikeable_type, :unique => true
+    add_index :dislikes, [:user_id, :dislikeable_id, :dislikeable_type], :unique => true, :name => "user_dislike_constraint"
   end
 
   def down

@@ -1,3 +1,4 @@
 = TODO
 
-* List rails as a dependency?
+* Rater#likes and Rater#dislikes return actual Like and Dislike objects. How
+  should I go about returning the liked/disliked objects themselves?

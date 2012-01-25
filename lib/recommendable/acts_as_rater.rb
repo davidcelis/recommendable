@@ -1,76 +1,81 @@
+require 'active_support/concern'
+
 module Recommendable
-  module Rater
-    def included(base)
-      base.extend ClassMethods
-    end
+  module ActsAsRater
+    extend ActiveSupport::Concern
     
-    def can_rate?(user)
+    def can_things_be_rated_by?(user)
       user.respond_to?(:like) || user.respond_to?(:dislike)
     end
     
     module ClassMethods
-      def acts_as_liker
+      def acts_as_recommendable
         class_eval do
-          send :has_many, :likes, :as => :likeable
-          send :include, LikeMethods
-          send :include, RecommendationMethods
-        end
-      end
-      
-      def acts_as_disliker
-        class_eval do
-          send :has_many, :dislikes, :as => :dislikeable
-          send :include, DislikeMethods
-          send :include, RecommendationMethods
+          has_many :likes, :class_name => "Recommendable::Like"
+          has_many :dislikes, :class_name => "Recommendable::Dislike"
+          
+          include LikeMethods
+          include DislikeMethods 
+          include RecommendationMethods
         end
       end
     end
     
     module LikeMethods
       def like(item)
-        self.create_like(item)
+        likes.create(:likeable_id => item.id, :likeable_type => item.class.to_s)
       end
       
       def likes?(item)
-        self.likes.where(:likeable_id => item.id, :likeable_type => item.class.to_s).first
+        likes.exists?(:likeable_id => item.id, :likeable_type => item.class.to_s)
       end
       
       def unlike(item)
-        return unless like = self.likes?(item)
-        like.destroy
+        return unless likes?(item)
+        likes.where(:likeable_id => item.id, :likeable_type => item.class.to_s).first.destroy
       end
       
-      def likes
-        Like.select(:id).where(:user_id => self.id).map {|l| l.likeable_type.constantize.find(l.id)}
+      def liked_records
+        likes.map {|like| like.likeable_type.constantize.find(like.likeable_id)}
       end
       
       def likes_for(klass)
         klass = klass.is_a?(String) ? klass.camelize.constantize : klass
-        klass.find self.likes.where(:likeable_type => klass).map(&:id)
+        likes.where(:likeable_type => klass.to_s)
+      end
+      
+      def liked_records_for(klass)
+        klass = klass.is_a?(String) ? klass.camelize.constantize : klass
+        klass.find likes_for(klass).map(&:dislikeable_id)
       end
     end
     
     module DislikeMethods
       def dislike(item)
-        self.create_dislike(item)
+        dislikes.create(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s)
       end
       
       def dislikes?(item)
-        self.dislikes.where(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s).first
+        dislikes.exists?(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s)
       end
       
       def undislike(item)
-        return unless dislike = self.dislikes?(item)
-        dislike.destroy
+        return unless dislikes?(item)
+        dislikes.where(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s).first.destroy
       end
       
-      def dislikes
-        Dislike.select(:id).where(:user_id => self.id).map {|d| d.dislikeable_type.constantize.find(d.id)}
+      def disliked_records
+        dislikes.map {|dislike| dislike.dislikeable_type.constantize.find(dislike.dislikeable_id)}
       end
       
       def dislikes_for(klass)
         klass = klass.is_a?(String) ? klass.camelize.constantize : klass
-        klass.find self.dislikes.where(:dislikeable_type => klass).map(&:id)
+        dislikes.where(:dislikeable_type => klass.to_s)
+      end
+      
+      def disliked_records_for(klass)
+        klass = klass.is_a?(String) ? klass.camelize.constantize : klass
+        klass.find dislikes_for(klass).map(&:dislikeable_id)
       end
     end
     

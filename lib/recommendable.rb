@@ -1,8 +1,10 @@
-require "recommendable/engine"
-require "recommendable/rater"
+require 'recommendable/engine'
+require 'recommendable/acts_as_rater'
+require 'recommendable/acts_as_rateable'
+require 'recommendable/railtie' if defined?(Rails)
 
 module Recommendable
-  mattr_accessor :user_class, :redis
+  mattr_writer :user_class, :redis
   
   def self.user_class
     @@user_class.camelize.constantize

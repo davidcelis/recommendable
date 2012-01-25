@@ -21,10 +21,15 @@ module Recommendable
         end
       end
       
+      def install_migrations
+        puts "Copying migrations..."
+        Dir.chdir(Rails.root) { puts `rake recommendable:install:migrations` }
+      end
+      
       def run_migrations
         unless options[:no_migrate]
           puts "Running rake db:migrate"
-          `rake db:migrate`
+          puts `rake db:migrate`
         end
       end
       
