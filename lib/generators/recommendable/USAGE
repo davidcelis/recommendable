@@ -1,0 +1,8 @@
+Description:
+    This generator will install Recommendable's initializer.rb file and migrate the Like and Dislike tables into your database unless specified.
+
+Example:
+    rails generate recommendable:install --user-class=YourUserClass
+
+    This will create:
+        config/initializers/recommendable.rb

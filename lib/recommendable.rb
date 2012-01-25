@@ -5,6 +5,6 @@ module Recommendable
   mattr_accessor :user_class, :redis
   
   def self.user_class
-    @@user_class.to_s.camelize.constantize
+    @@user_class.camelize.constantize
   end
 end
