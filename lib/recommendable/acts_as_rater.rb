@@ -110,7 +110,6 @@ module Recommendable
         Recommendable.user_class.find rater_ids, order: "field(id, #{ids.join(',')})"
       end
       
-      
       def update_similarities
         Recommendable.user_class.find_each do |rater|
           next if self == rater
@@ -121,54 +120,67 @@ module Recommendable
         end
       end
       
-      # def update_predictions_for(klass)
-      #   klass.find_each do |item|
-      #     unless has_liked?(item) || has_disliked?(item)
-      #       prediction = predict(item)
-      #       Recommendable.redis.zadd "rater:#{id}:predictions", prediction, item.id if prediction
-      #     end
-      #   end
+      def update_recommendations
+        classes = [Like.select(:likeable_type).uniq, Dislike.select(:dislikeable_type).uniq].flatten.uniq
+        
+        classes.each do |klass|
+          update_predictions_for(klass.constantize)
+        end
+      end
+      
+      def update_recommendations_for(klass)
+        klass.find_each do |item|
+          unless has_liked?(item) || has_disliked?(item)
+            prediction = predict(item)
+            Recommendable.redis.zadd "#{self.class}:#{id}:predictions", prediction, "#{item.class}:#{item.id}" if prediction
+          end
+        end
+      end
+      
+      # def recommend(options = {})
+      #   
       # end
       # 
-      # def recommend_for(klass)
+      # def recommend_for(klass, options = {})
       #   predictions = []
-      #   return predictions if like_count + dislike_count == 0
-      #   return predictions if Recommendable.redis.zcard("rater:#{id}:predictions") == 0
+      #   return predictions if likes.count + dislikes.count == 0
+      #   return predictions if Recommendable.redis.zcard("#{self.class}:#{id}:predictions") == 0
       #   i = options[:offset]
       # 
       #   until predictions.size == count
+      #     i += 1
       #     item = klass.find Recommendable.redis.zrevrange("rater:#{id}:predictions", i, i).first
       #     predictions << item unless has_rated?(item) || has_hidden?(beer)
-      #     i += 1
       #   end
       # 
       #   return predictions
       # end
-      # 
-      # def predict(item)
-      #   sum = 0.0
-      #   prediction = 0.0
-      # 
-      #   Recommendable.redis.smembers("rateable:#{item.id}:liked_by").inject(sum) {|r, sum| sum += Recommendable.redis.zscore("rater:#{id}:similarities", r)}
-      #   Recommendable.redis.smembers("rateable:#{item.id}:disliked_by").inject(sum) {|r, sum| sum -= Recommendable.redis.zscore("rater:#{id}:similarities", r)}
-      # 
-      #   rated_by = Recommendable.redis.scard("rateable:#{item.id}:liked_by") + Recommendable.redis.scard("rateable:#{item.id}:disliked_by")
-      #   prediction = similarity_sum / rated_by.to_f unless rated_by == 0
-      # end
-      # 
-      # def probability_of_liking(item)
-      #   Recommendable.redis.zscore "rater:#{id}:predictions", item.id
-      # end
-      # 
-      # def probability_of_disliking(item)
-      #   -probability_of_liking(item)
-      # end
+      
+      def predict(item)
+        liked_by, disliked_by = item.build_liked_by_set, item.build_disliked_by_set
+        sum = 0.0
+        prediction = 0.0
+      
+        Recommendable.redis.smembers(liked_by).inject(sum) {|r, sum| sum += Recommendable.redis.zscore("#{self.class}:#{id}:similarities", r)}
+        Recommendable.redis.smembers(disliked_by).inject(sum) {|r, sum| sum -= Recommendable.redis.zscore("#{self.class}:#{id}:similarities", r)}
+      
+        rated_by = Recommendable.redis.scard(liked_by) + Recommendable.redis.scard(disliked_by)
+        prediction = similarity_sum / rated_by.to_f unless rated_by == 0
+      end
+      
+      def probability_of_liking(item)
+        Recommendable.redis.zscore "#{self.class}:#{id}:predictions", "#{item.class}:#{item.id}"
+      end
+      
+      def probability_of_disliking(item)
+        -probability_of_liking(item)
+      end
       
       private
       
       def build_sets
-        likes.each {|like| Recommendable.redis.sadd "#{self.class}:#{id}:likes", "#{like.likeable_type}_#{like.id}"}
-        dislikes.each {|dislike| Recommendable.redis.sadd "#{self.class}:#{id}:dislikes", "#{dislike.dislikeable_type}_#{dislike.id}"}
+        likes.each {|like| Recommendable.redis.sadd "#{self.class}:#{id}:likes", "#{like.likeable_type}:#{like.id}"}
+        dislikes.each {|dislike| Recommendable.redis.sadd "#{self.class}:#{id}:dislikes", "#{dislike.dislikeable_type}:#{dislike.id}"}
       end
     end
   end

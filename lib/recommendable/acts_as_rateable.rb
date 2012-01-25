@@ -19,11 +19,19 @@ module Recommendable
     end
     
     module LikeableMethods
-      
+      def build_liked_by_set
+        set = "#{likeable_type}:#{id}:liked_by"
+        liked_by.each {|rater| Recommendable.redis.sadd set, rater.id}
+        return set
+      end
     end
     
     module DislikeableMethods
-      
+      def build_disliked_by_set
+        set = "#{dislikeable_type}:#{id}:disliked_by"
+        disliked_by.each {|rater| Recommendable.redis.sadd set, rater.id}
+        return set
+      end
     end
   end
 end
