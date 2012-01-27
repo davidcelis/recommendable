@@ -13,9 +13,11 @@ module Recommendable
         class_eval do
           has_many :likes, :class_name => "Recommendable::Like", :dependent => :destroy
           has_many :dislikes, :class_name => "Recommendable::Dislike", :dependent => :destroy
+          has_many :ignores, :class_name => "Recommendable::Ignore", :dependent => :destroy
           
           include LikeMethods
           include DislikeMethods 
+          include IgnoreMethods
           include RecommendationMethods
         end
       end
@@ -76,7 +78,30 @@ module Recommendable
     end
     
     module IgnoreMethods
-      # TODO: this
+      def ignore(item)
+        ignores.create!(:ignoreable_id => item.id, :ignoreable_type => item.class.to_s)
+        Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{item.class}:#{item.id}"
+      end
+      
+      def has_ignored?(item)
+        ignores.exists?(:ignoreable_id => item.id, :ignoreable_type => item.class.to_s)
+      end
+      
+      def unignore(item)
+        ignores.where(:ignoreable_id => item.id, :ignoreable_type => item.class.to_s).first.try(:destroy)
+      end
+      
+      def ignored_objects
+        ignores.map {|ignore| ignore.ignoreable}
+      end
+      
+      def ignores_for(klass)
+        ignores.where(:ignoreable_type => klassify(klass).to_s)
+      end
+      
+      def ignored_objects_for(klass)
+        klassify(klass).find ignores_for(klass).map(&:ignoreable_id)
+      end
     end
     
     module RecommendationMethods

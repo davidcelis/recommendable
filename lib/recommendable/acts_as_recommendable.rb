@@ -11,6 +11,7 @@ module Recommendable
           has_many :dislikes, :as => :dislikeable, :dependent => :destroy, :class_name => "Recommendable::Dislike"
           has_many :liked_by, :through => :likes, :source => :user
           has_many :disliked_by, :through => :dislikes, :source => :user
+          has_many :ignores, :as => :ignoreable, :dependent => :destroy, :class_name => "Recommendable::Ignore"
           
           include LikeableMethods
           include DislikeableMethods
