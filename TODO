@@ -7,3 +7,7 @@
 * A good README
 * Code cleanup in RecommendationMethods
 * Magic method_missing bullshit for Like/Dislike/IgnoreMethods modules
+
+=== Next update
+
+* Allow the option of common_likes_with and common_dislikes_with to return the actual objects so users get more use out of this
