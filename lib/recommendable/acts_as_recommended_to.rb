@@ -35,7 +35,7 @@ module Recommendable
       def like(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         undislike(object) if dislikes?(object)
-        Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{object.class}:#{object.id}"
+        unpredict(object)
         likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
         true
@@ -102,7 +102,7 @@ module Recommendable
       def dislike(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         unlike(object) if likes?(object)
-        Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{object.class}:#{object.id}"
+        unpredict(object)
         dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
         true
@@ -170,7 +170,7 @@ module Recommendable
       def ignore(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         unlike(object) if likes?(object) || undislike(object) if dislikes?(object)
-        Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{object.class}:#{object.id}"
+        unpredict(object)
         ignores.create!(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
         true
@@ -281,10 +281,10 @@ module Recommendable
         options = defaults.merge(options)
         
         if options[:class]
-          Recommendable.redis.sinter "#{self.class}:#{id}:likes:#{options[:class]}", "#{rater.class}:#{rater.id}:likes:#{options[:class]}"
+          Recommendable.redis.sinter likes_set_for(options[:class]), rater.likes_set_for(options[:class])
         else
           Recommendable.recommendable_classes.map do |klass|
-            Recommendable.redis.sinter("#{self.class}:#{id}:likes:#{klass}", "#{rater.class}:#{rater.id}:likes:#{klass}").map {|id| "#{klass}:#{id}"}
+            Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass)).map {|id| "#{klass}:#{id}"}
           end
         end
       end
@@ -305,10 +305,10 @@ module Recommendable
         options = defaults.merge(options)
         
         if options[:class]
-          Recommendable.redis.sinter "#{self.class}:#{id}:dislikes:#{options[:class]}", "#{rater.class}:#{rater.id}:dislikes:#{options[:class]}"
+          Recommendable.redis.sinter dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])
         else
           Recommendable.recommendable_classes.map do |klass|
-            Recommendable.redis.sinter("#{self.class}:#{id}:dislikes:#{klass}", "#{rater.class}:#{rater.id}:dislikes:#{klass}").map {|id| "#{klass}:#{id}"}
+            Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass)).map {|id| "#{klass}:#{id}"}
           end
         end
       end
@@ -331,12 +331,12 @@ module Recommendable
         options = defaults.merge(options)
         
         if options[:class]
-          Recommendable.redis.sinter("#{self.class}:#{id}:likes:#{options[:class]}", "#{rater.class}:#{rater.id}:dislikes").size +
-          Recommendable.redis.sinter("#{self.class}:#{id}:dislikes:#{options[:class]}", "#{rater.class}:#{rater.id}:likes").size
+          Recommendable.redis.sinter(likes_set_for(options[:class]), rater.likes_set_for(options[:class])).size +
+          Recommendable.redis.sinter(dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])).size
         else
           Recommendable.recommendable_classes.inject(0) do |sum, klass|
-            sum += Recommendable.redis.sinter("#{self.class}:#{id}:likes:#{klass}", "#{rater.class}:#{rater.id}:dislikes").size
-            sum += Recommendable.redis.sinter("#{self.class}:#{id}:dislikes:#{klass}", "#{rater.class}:#{rater.id}:likes").size
+            sum += Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass)).size
+            sum += Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass)).size
           end
         end
       end
@@ -352,7 +352,7 @@ module Recommendable
         defaults = { :count => 10 }
         options = defaults.merge(options)
         
-        rater_ids = Recommendable.redis.zrevrange "#{self.class}:#{id}:similarities", 0, options[:count] - 1
+        rater_ids = Recommendable.redis.zrevrange similarity_set, 0, options[:count] - 1
         Recommendable.user_class.find rater_ids, order: "field(id, #{ids.join(',')})"
       end
       
@@ -365,11 +365,12 @@ module Recommendable
         self.create_recommended_to_sets
         
         Recommendable.user_class.find_each do |rater|
+          rater.create_recommended_to_sets
           next unless things_can_be_recommended_to?(rater) && self != rater
           
-          similarity = similarity_with(rater)
-          Recommendable.redis.zadd "#{self.class}:#{id}:similarities", similarity, "#{rater.id}"
-          Recommendable.redis.zadd "#{rater.class}:#{rater.id}:similarities", similarity, "#{id}"
+          Recommendable.redis.zadd similarity_set, similarity_with(rater), "#{rater.id}"
+          Recommendable.redis.zadd rater.similarity_set, rater.similarity_with(self), "#{id}"
+          rater.destroy_recommended_to_sets
         end
         
         self.destroy_recommended_to_sets
@@ -395,7 +396,7 @@ module Recommendable
         klass.find_each do |object|
           unless has_rated?(object)
             prediction = predict(object)
-            Recommendable.redis.zadd "#{self.class}:#{id}:predictions:#{object.class}", prediction, "#{object.class}:#{object.id}" if prediction
+            Recommendable.redis.zadd predictions_set_for(object.class), prediction, "#{object.class}:#{object.id}" if prediction
           end
         end
       end
@@ -412,7 +413,7 @@ module Recommendable
         options = defaults.merge options
 
         unioned_predictions = "#{self.class}:#{id}:predictions"
-        Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map {|klass| "#{self.class}:#{id}:predictions:#{klass}"}
+        Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map {|klass| predictions_set_for(klass)}
         return [] if likes.count + dislikes.count == 0 || Recommendable.redis.zcard(unioned_predictions) == 0
         
         recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, options[:count]).map do |object|
@@ -438,11 +439,11 @@ module Recommendable
         options = defaults.merge options
         
         recommendations = []
-        return recommendations if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard("#{self.class}:#{id}:predictions:#{klass}") == 0
+        return recommendations if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(object.class)) == 0
       
         until predictions.size == options[:count]
           i += 1
-          object = klassify(klass).find(Recommendable.redis.zrevrange("#{self.class}:#{id}:predictions:#{klass}", i, i).first.split(":")[1])
+          object = klassify(klass).find(Recommendable.redis.zrevrange(predictions_set_for(object.class), i, i).first.split(":")[1])
           recommendations << object unless has_ignored?(object)
         end
       
@@ -464,8 +465,8 @@ module Recommendable
         sum = 0.0
         prediction = 0.0
       
-        Recommendable.redis.smembers(liked_by).inject(sum) {|r, sum| sum += Recommendable.redis.zscore("#{self.class}:#{id}:similarities", r) }
-        Recommendable.redis.smembers(disliked_by).inject(sum) {|r, sum| sum -= Recommendable.redis.zscore("#{self.class}:#{id}:similarities", r) }
+        Recommendable.redis.smembers(liked_by).inject(sum) {|r, sum| sum += Recommendable.redis.zscore(similarity_set, r) }
+        Recommendable.redis.smembers(disliked_by).inject(sum) {|r, sum| sum -= Recommendable.redis.zscore(similarity_set, r) }
       
         prediction = similarity_sum / rated_by.to_f
         
@@ -479,7 +480,7 @@ module Recommendable
       # @param [Object] object the object to fetch the probability for
       # @return [Float] the likelihood of `self` liking the passed object
       def probability_of_liking(object)
-        Recommendable.redis.zscore "#{self.class}:#{id}:predictions:#{object.class}", "#{object.class}:#{object.id}"
+        Recommendable.redis.zscore predictions_set_for(object.class), "#{object.class}:#{object.id}"
       end
       
       # Return the negation of the value calculated by {#predict} on `self`
@@ -494,17 +495,37 @@ module Recommendable
       
       private
       
+      def likes_set_for(klass)
+        "#{self.class}:#{id}:likes:#{klass}"
+      end
+      
+      def dislikes_set_for(klass)
+        "#{self.class}:#{id}:dislikes:#{klass}"
+      end
+      
+      def similarity_set
+        "#{self.class}:#{id}:similarities"
+      end
+      
+      def predictions_set_for(klass)
+        "#{self.class}:#{id}:predictions:#{klass}"
+      end
+      
+      def unpredict(object)
+        Recommendable.redis.zrem predictions_set_for(object.class), "#{object.class}:#{object.id}"
+      end
+      
       def create_recommended_to_sets
         Recommendable.recommendable_class.each do |klass|
-          likes_for(klass).each {|like| Recommendable.redis.sadd "#{self.class}:#{id}:likes:#{klass}", like.likeable_id }
-          dislikes_for(klass).each {|dislike| Recommendable.redis.sadd "#{self.class}:#{id}:dislikes:#{klass}", dislike.dislikeable_id }
+          likes_for(klass).each {|like| Recommendable.redis.sadd likes_set_for(klass), like.likeable_id }
+          dislikes_for(klass).each {|dislike| Recommendable.redis.sadd dislikes_set_for(klass), dislike.dislikeable_id }
         end
       end
       
       def destroy_recommended_to_sets
         Recommendable.recommendable_classes.each do |klass|
-          Recommendable.redis.del "#{self.class}:#{id}:likes:#{klass}"
-          Recommendable.redis.del "#{self.class}:#{id}:dislikes:#{klass}"
+          Recommendable.redis.del likes_set_for(klass)
+          Recommendable.redis.del dislikes_set_for(klass)
         end
       end
     end
