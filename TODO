@@ -1,9 +1,9 @@
 === TODO
 
-* IgnoreMethods
-* Toss out sets after use
 * Resque
 * Ensure correct privacy levels for methods
-
-=== FOR NEXT MAJOR VERSION
-* Allow the recommendation helper methods to return records if users want to use them
+* Write some fucking tests you poor excuse for a TDD
+* Documentation
+* A good README
+* Code cleanup in RecommendationMethods
+* Magic method_missing bullshit for Like/Dislike/IgnoreMethods modules

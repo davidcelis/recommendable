@@ -1,6 +1,6 @@
 = recommendable
 
-This is a work in progess. Check back later!
+This is a work in progress. Check back later!
 
 == Contributing to recommendable
  
