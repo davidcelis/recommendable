@@ -2,11 +2,21 @@
 
 NOTE: This is a work in progress, and has not yet been fully pushed to RubyGems. Check back later!
 
-Recommendable is a Rails Engine to add Like/Dislike functionality to your application and uses redis to generate recommendations quickly through collaborative filtering. Your users' tastes are compared with one another and used to give them great recommendations!
+Recommendable is a Rails Engine to add Like/Dislike functionality to your 
+application and uses redis to generate recommendations quickly through 
+collaborative filtering. Your users' tastes are compared with one another and 
+used to give them great recommendations!
 
 == Installation
 
-Recommendable currently depends on {redis}[http://redis.io/]. It will install the gem as a dependency, but you must have a redis server running for Recommendable to connect to. If you have not yet installed redis, here's how:
+Recommendable currently depends on {redis}[http://redis.io/]. It will install 
+the gem as a dependency, but you must have a redis server running for 
+Recommendable to connect to. Also note that your redis database must be 
+persistent. While much of Recommendable's logic uses redis only for temporary 
+storage, the sorted sets that contain the ultimate results of the collaborative 
+filtering algorithm (the similarity values and predictions for recommendations)
+are stored in redis. If your redis database is not persistent, they will be lost. 
+If you have not yet installed redis, here's how:
 
 For Mac OS X:
 
@@ -30,7 +40,7 @@ Once redis-server is running, you're ready to install Recommendable. Simply add
 
   gem "recommendable"
 
-To your Rails app's Gemfile. Then, from your shell:
+to your Rails app's Gemfile and bundle. Then, from your shell:
 
   $ rails g recommendable:install (--user-class=User)
 

@@ -1,6 +1,7 @@
 require 'recommendable/engine'
 require 'recommendable/acts_as_recommended_to'
 require 'recommendable/acts_as_recommendable'
+require 'recommendable/exceptions'
 require 'recommendable/railtie' if defined?(Rails)
 
 module Recommendable
