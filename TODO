@@ -1,3 +1,9 @@
-= TODO
+=== TODO
 
-* Consider Ruby's Set class
+* IgnoreMethods
+* Toss out sets after use
+* Resque
+* Ensure correct privacy levels for methods
+
+=== FOR NEXT MAJOR VERSION
+* Allow the recommendation helper methods to return records if users want to use them

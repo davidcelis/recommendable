@@ -1,6 +1,6 @@
 module Recommendable
   class Railtie < Rails::Railtie
-    ActiveRecord::Base.send(:include, Recommendable::ActsAsRater)
-    ActiveRecord::Base.send(:include, Recommendable::ActsAsRateable)
+    ActiveRecord::Base.send(:include, Recommendable::ActsAsRecommendedTo)
+    ActiveRecord::Base.send(:include, Recommendable::ActsAsRecommendable)
   end
 end

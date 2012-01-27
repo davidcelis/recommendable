@@ -1,11 +1,11 @@
 module Recommendable
-  module ActsAsRateable
+  module ActsAsRecommendable
     def self.included(base)
       base.extend ClassMethods
     end
     
     module ClassMethods
-      def acts_as_rateable
+      def acts_as_recommendable
         class_eval do
           has_many :likes, :as => :likeable, :dependent => :destroy, :class_name => "Recommendable::Like"
           has_many :dislikes, :as => :dislikeable, :dependent => :destroy, :class_name => "Recommendable::Dislike"
@@ -14,21 +14,32 @@ module Recommendable
           
           include LikeableMethods
           include DislikeableMethods
+          
+          def create_recommendable_sets
+            [create_liked_by_set, create_disliked_by_set]
+          end
+          
+          def destroy_recommendable_sets
+            Recommendable.redis.del "#{self.class}:#{id}:liked_by"
+            Recommendable.redis.del "#{self.class}:#{id}:disliked_by"
+          end
         end
+        
+        Recommendable.recommendable_classes << self
       end
     end
     
     module LikeableMethods
-      def build_liked_by_set
-        set = "#{likeable_type}:#{id}:liked_by"
+      def create_liked_by_set
+        set = "#{self.class}:#{id}:liked_by"
         liked_by.each {|rater| Recommendable.redis.sadd set, rater.id}
         return set
       end
     end
     
     module DislikeableMethods
-      def build_disliked_by_set
-        set = "#{dislikeable_type}:#{id}:disliked_by"
+      def create_disliked_by_set
+        set = "#{self.class}:#{id}:disliked_by"
         disliked_by.each {|rater| Recommendable.redis.sadd set, rater.id}
         return set
       end

@@ -3,7 +3,9 @@ module Recommendable
     belongs_to :user, :class_name => Recommendable.user_class.to_s
     belongs_to :likeable, :polymorphic => :true
     
-    validates_uniqueness_of :likeable_id, :scope => [:user_id, :likeable_type],
-                            :message => "already exists for this item"
+    validates :user_id, :uniqueness => { :scope => [:likeable_id, :likeable_type],
+                                         :message => "has already liked this item" }
+    validates :likeable_type, :inclusion => { :in => Recommendable.recommendable_classes.map(&:to_s),
+                                      :message => "has not been declared as recommendable yet!" }
   end
 end
