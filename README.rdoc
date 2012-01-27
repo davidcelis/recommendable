@@ -1,6 +1,94 @@
 = recommendable
 
-This is a work in progress. Check back later!
+NOTE: This is a work in progress, and has not yet been fully pushed to RubyGems. Check back later!
+
+Recommendable is a Rails Engine to add Like/Dislike functionality to your application. In addition, it uses redis to 
+
+== Installation
+
+To install Recommendable, add
+
+  gem "recommendable"
+
+To your Rails app's `Gemfile`. Then, from your shell:
+
+  $ rails g recommendable:install (--user-class=User)
+
+After running the installation generator, you should double check `config/initializers/recommendable.rb` for options on configuring Redis.
+
+== Usage
+
+In your Rails model that represents your application's user:
+
+  class User < ActiveRecord::Base
+    acts_as_recommended_to
+    
+    # ...
+  end
+
+Then, from any Rails model you wish your user to be able to like/dislike:
+
+  class Movie < ActiveRecord::Base
+    acts_as_recommendable
+    
+    # ...
+  end
+
+=== Liking/Disliking
+
+At this point, your user will be ready to like movies...
+
+  >> user = User.create(:username => 'davidcelis')
+  >> awesome_movie = Movie.create(:title => '2001: A Space Odyssey', :year => 1968)
+  >> user.like(awesome_movie)
+  => true
+  >> another_movie = Movie.create(:title => 'Back to the Future', :year => 1985)
+  >> user.like(another_movie)
+  => true
+
+... or dislike them:
+
+  >> shitty_movie = Movie.create(:title => 'Star Wars: Episode I - The Phantom Menace', :year => 1999)
+  >> user.dislike(shitty_movie)
+
+Several helpful methods are available to your user now:
+
+  >> user.likes?(awesome_movie)
+  => true
+  >> user.dislikes?(shitty_movie)
+  => true
+  >> user.dislikes?(another_movie)
+  => false
+  >> user.liked_objects
+  => [#<Movie id: 1, name: '2001: A Space Odyssey', year: 1968>, #<Movie id: 2, name: 'Back to the Future', :year => 1985>]
+  >> user.disliked_objects
+  => [#<Movie id: 3, name: 'Star Wars: Episode I - The Phantom Menace', year: 1999>]
+
+Liking a movie that has already been disliked (or vice versa) will simply destroy the old rating and create a new one. If you wish to manually remove an item from a user's likes or dislikes, you can:
+
+  >> decent_movie = Movie.create(:title => 'Avatar', :year => 2009)
+  >> user.like(decent_movie)
+  => true
+  >> user.liked_objects
+  => [#<Movie id: 1, name: '2001: A Space Odyssey', year: 1968>, #<Movie id: 2, name: 'Back to the Future', :year => 1985>, #<Movie id: 4, name: 'Avatar', year: 2009>]
+  >> user.unlike(decent_movie)
+  => true
+  >> user.liked_objects
+  => [#<Movie id: 1, name: '2001: A Space Odyssey', year: 1968>, #<Movie id: 2, name: 'Back to the Future', :year => 1985>]
+
+You can call `user.undislike(movie)` in the same way. So, as far as the Likes and Dislikes go, do you think that's enough? Because I didn't.
+
+  >> friend = User.create(:username => 'joeblow')
+  >> friend.like(awesome_movie)
+  => true
+  >> awesome_movie.liked_by
+  => [#<User id: 1, username: 'davidcelis'>, #<User id: 2, username: 'joeblow'>]
+  >> shitty_movie.disliked_by
+  => [#<User id: 1, username: 'davidcelis'>]
+
+=== Recommendations
+
+I'll update this section soon.
 
 == Contributing to recommendable
  

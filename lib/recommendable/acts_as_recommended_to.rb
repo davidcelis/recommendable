@@ -25,8 +25,9 @@ module Recommendable
     
     module LikeMethods
       def like(item)
-        likes.create!(:likeable_id => item.id, :likeable_type => item.class.to_s)
         Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{item.class}:#{item.id}"
+        likes.create!(:likeable_id => item.id, :likeable_type => item.class.to_s)
+        true
       end
       
       def likes?(item)
@@ -35,6 +36,7 @@ module Recommendable
       
       def unlike(item)
         likes.where(:likeable_id => item.id, :likeable_type => item.class.to_s).first.try(:destroy)
+        true
       end
       
       def liked_objects
@@ -52,8 +54,9 @@ module Recommendable
     
     module DislikeMethods
       def dislike(item)
-        dislikes.create!(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s)
         Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{item.class}:#{item.id}"
+        dislikes.create!(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s)
+        true
       end
       
       def dislikes?(item)
@@ -62,6 +65,7 @@ module Recommendable
       
       def undislike(item)
         dislikes.where(:dislikeable_id => item.id, :dislikeable_type => item.class.to_s).first.try(:destroy)
+        true
       end
       
       def disliked_objects
@@ -79,8 +83,9 @@ module Recommendable
     
     module IgnoreMethods
       def ignore(item)
-        ignores.create!(:ignoreable_id => item.id, :ignoreable_type => item.class.to_s)
         Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{item.class}:#{item.id}"
+        ignores.create!(:ignoreable_id => item.id, :ignoreable_type => item.class.to_s)
+        true
       end
       
       def has_ignored?(item)
@@ -89,6 +94,7 @@ module Recommendable
       
       def unignore(item)
         ignores.where(:ignoreable_id => item.id, :ignoreable_type => item.class.to_s).first.try(:destroy)
+        true
       end
       
       def ignored_objects

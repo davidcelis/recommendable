@@ -7,6 +7,8 @@ module Recommendable
     module ClassMethods
       def acts_as_recommendable
         class_eval do
+          Recommendable.recommendable_classes << self
+          
           has_many :likes, :as => :likeable, :dependent => :destroy, :class_name => "Recommendable::Like"
           has_many :dislikes, :as => :dislikeable, :dependent => :destroy, :class_name => "Recommendable::Dislike"
           has_many :liked_by, :through => :likes, :source => :user
@@ -25,8 +27,6 @@ module Recommendable
             Recommendable.redis.del "#{self.class}:#{id}:disliked_by"
           end
         end
-        
-        Recommendable.recommendable_classes << self
       end
     end
     
