@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Celis"]
-  s.date = "2012-01-20"
+  s.date = "2012-01-27"
   s.description = "Not ready for use. Allow a model (typically User) to Like and/or Dislike models in your app. Generate recommendations quickly using redis."
   s.email = "david@davidcelis.com"
   s.extra_rdoc_files = [
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".yardocopts",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
@@ -30,11 +31,24 @@ Gem::Specification.new do |s|
     "app/assets/stylesheets/recommendable/application.css",
     "app/controllers/recommendable/application_controller.rb",
     "app/helpers/recommendable/application_helper.rb",
+    "app/jobs/recommendable/recommendation_refresher.rb",
+    "app/models/recommendable/dislike.rb",
+    "app/models/recommendable/ignore.rb",
+    "app/models/recommendable/like.rb",
     "app/views/layouts/recommendable/application.html.erb",
     "config/routes.rb",
+    "db/migrate/20120124193723_create_likes.rb",
+    "db/migrate/20120124193728_create_dislikes.rb",
+    "db/migrate/20120127092558_create_ignores.rb",
+    "lib/generators/recommendable/USAGE",
+    "lib/generators/recommendable/install_generator.rb",
+    "lib/generators/recommendable/templates/initializer.rb",
     "lib/recommendable.rb",
+    "lib/recommendable/acts_as_recommendable.rb",
+    "lib/recommendable/acts_as_recommended_to.rb",
     "lib/recommendable/engine.rb",
-    "lib/recommendable/version.rb",
+    "lib/recommendable/exceptions.rb",
+    "lib/recommendable/railtie.rb",
     "lib/tasks/recommendable_tasks.rake",
     "recommendable.gemspec",
     "script/rails",
@@ -84,26 +98,38 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<redis>, [">= 2.2.0"])
+      s.add_runtime_dependency(%q<rails>, [">= 3.1.0"])
+      s.add_runtime_dependency(%q<redis>, ["~> 2.2.0"])
+      s.add_runtime_dependency(%q<resque>, ["~> 1.19.0"])
+      s.add_runtime_dependency(%q<resque-loner>, ["~> 1.2.0"])
       s.add_development_dependency(%q<mysql2>, [">= 0"])
       s.add_development_dependency(%q<minitest>, [">= 0"])
+      s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<yard>, ["~> 0.6.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
     else
-      s.add_dependency(%q<redis>, [">= 2.2.0"])
+      s.add_dependency(%q<rails>, [">= 3.1.0"])
+      s.add_dependency(%q<redis>, ["~> 2.2.0"])
+      s.add_dependency(%q<resque>, ["~> 1.19.0"])
+      s.add_dependency(%q<resque-loner>, ["~> 1.2.0"])
       s.add_dependency(%q<mysql2>, [">= 0"])
       s.add_dependency(%q<minitest>, [">= 0"])
+      s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<yard>, ["~> 0.6.0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
     end
   else
-    s.add_dependency(%q<redis>, [">= 2.2.0"])
+    s.add_dependency(%q<rails>, [">= 3.1.0"])
+    s.add_dependency(%q<redis>, ["~> 2.2.0"])
+    s.add_dependency(%q<resque>, ["~> 1.19.0"])
+    s.add_dependency(%q<resque-loner>, ["~> 1.2.0"])
     s.add_dependency(%q<mysql2>, [">= 0"])
     s.add_dependency(%q<minitest>, [">= 0"])
+    s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<yard>, ["~> 0.6.0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])

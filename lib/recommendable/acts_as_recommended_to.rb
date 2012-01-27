@@ -37,6 +37,7 @@ module Recommendable
         undislike(object) if dislikes?(object)
         Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{object.class}:#{object.id}"
         likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
+        Resque.enqueue RecommendationRefresher, self.id
         true
       end
       
@@ -53,7 +54,10 @@ module Recommendable
       # @param [Object] object the object you want to remove from `self`'s likes
       # @return true if `object` is unliked, nil if nothing happened
       def unlike(object)
-        true if likes.where(:likeable_id => object.id, :likeable_type => object.class.to_s).first.try(:destroy)
+        if likes.where(:likeable_id => object.id, :likeable_type => object.class.to_s).first.try(:destroy)
+          Resque.enqueue RecommendationRefresher, self.id
+          true
+        end
       end
       
       # Get a list of records that `self` currently likes
@@ -100,6 +104,7 @@ module Recommendable
         unlike(object) if likes?(object)
         Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{object.class}:#{object.id}"
         dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
+        Resque.enqueue RecommendationRefresher, self.id
         true
       end
       
@@ -116,8 +121,10 @@ module Recommendable
       # @param [Object] object the object you want to remove from `self`'s dislikes
       # @return true if `object` is removed from `self`'s dislikes, nil if nothing happened
       def undislike(object)
-        dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s).first.try(:destroy)
-        true
+        if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s).first.try(:destroy)
+          Resque.enqueue RecommendationRefresher, self.id
+          true
+        end
       end
       
       # Get a list of records that `self` currently dislikes
@@ -165,6 +172,7 @@ module Recommendable
         unlike(object) if likes?(object) || undislike(object) if dislikes?(object)
         Recommendable.redis.zrem "#{self.class}:#{id}:predictions", "#{object.class}:#{object.id}"
         ignores.create!(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
+        Resque.enqueue RecommendationRefresher, self.id
         true
       end
       
@@ -181,8 +189,10 @@ module Recommendable
       # @param [Object] object the object you want to remove from `self`'s ignores
       # @return true if `object` is removed from `self`'s ignores, nil if nothing happened
       def unignore(object)
-        ignores.where(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s).first.try(:destroy)
-        true
+        if ignores.where(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s).first.try(:destroy)
+          Resque.enqueue RecommendationRefresher, self.id
+          true
+        end
       end
       
       # Get a list of records that `self` is currently ignoring

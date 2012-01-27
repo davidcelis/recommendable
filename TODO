@@ -1,6 +1,6 @@
 === TODO
 
-* Resque
+* Allow the option NOT to queue up on like/dislike/ignore?
 * Ensure correct privacy levels for methods
 * Write some fucking tests you poor excuse for a TDD
 * Documentation
