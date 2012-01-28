@@ -83,14 +83,17 @@ And that's it!
 
 At this point, your user will be ready to `like` movies...
 
-  >> current_user.like Movie.create(:title => '2001: A Space Odyssey', :year => 1968)
-  => true
+``` ruby
+current_user.like Movie.create(:title => '2001: A Space Odyssey', :year => 1968)
+#=> true
+```
 
 ... or `dislike` them:
 
 ``` ruby
-  current_user.dislike Movie.create(:title => 'Star Wars: Episode I - The Phantom Menace', :year => 1999)
-  #=> true
+current_user.dislike Movie.create(:title => 'Star Wars: Episode I - The Phantom Menace', :year => 1999)
+#=> true
+```
 
 In addition, several helpful methods are available to your user now:
 
