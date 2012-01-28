@@ -1,5 +1,5 @@
 #  encoding: utf-8
-require File.expand_path('../lib/recommendable/version')
+require File.expand_path('lib/recommendable/version')
 
 Gem::Specification.new do |s|
   s.name = "recommendable"
@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.description = "Allow a model (typically User) to Like and/or Dislike models in your app. Generate recommendations quickly using redis."
   
   s.files = `git ls-files`.split("\n")
+  s.has_rdoc = 'yard'
   
   s.add_development_dependency "sqlite3"
   s.add_development_dependency "minitest"

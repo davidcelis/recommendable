@@ -64,7 +64,7 @@ module Recommendable
       # Get a list of records that `self` currently likes
       
       # @return [Array] an array of ActiveRecord objects that `self` has liked
-      def liked_objects
+      def liked_records
         likes.map {|like| like.likeable}
       end
       
@@ -74,7 +74,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class for which you would like to
       # return `self`'s likes. Can be the class constant, or a String/Symbol
       # representation of the class name.
-      # @note You should not need to use this method. (see {#liked_objects_for})
+      # @note You should not need to use this method. (see {#liked_records_for})
       def likes_for(klass)
         likes.where(:likeable_type => klassify(klass).to_s)
       end
@@ -86,7 +86,7 @@ module Recommendable
       # class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that `self` has liked
       # belonging to `klass`
-      def liked_objects_for(klass)
+      def liked_records_for(klass)
         klassify(klass).find likes_for(klass).map(&:likeable_id)
       end
     end
@@ -132,7 +132,7 @@ module Recommendable
       # Get a list of records that `self` currently dislikes
       
       # @return [Array] an array of ActiveRecord objects that `self` has disliked
-      def disliked_objects
+      def disliked_records
         dislikes.map {|dislike| dislike.dislikeable}
       end
       
@@ -142,7 +142,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class for which you would like to
       # return `self`'s dislikes. Can be the class constant, or a String/Symbol
       # representation of the class name.
-      # @note You should not need to use this method. (see {#disliked_objects_for})
+      # @note You should not need to use this method. (see {#disliked_records_for})
       def dislikes_for(klass)
         dislikes.where(:dislikeable_type => klassify(klass).to_s)
       end
@@ -154,7 +154,7 @@ module Recommendable
       # class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that `self` has disliked
       # belonging to `klass`
-      def disliked_objects_for(klass)
+      def disliked_records_for(klass)
         klassify(klass).find dislikes_for(klass).map(&:dislikeable_id)
       end
     end
@@ -201,7 +201,7 @@ module Recommendable
       # Get a list of records that `self` is currently ignoring
       
       # @return [Array] an array of ActiveRecord objects that `self` has ignored
-      def ignored_objects
+      def ignored_records
         ignores.map {|ignore| ignore.ignoreable}
       end
       
@@ -211,7 +211,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class for which you would like to
       # return `self`'s ignores. Can be the class constant, or a String/Symbol
       # representation of the class name.
-      # @note You should not need to use this method. (see {#ignored_objects_for})
+      # @note You should not need to use this method. (see {#ignored_records_for})
       def ignores_for(klass)
         ignores.where(:ignoreable_type => klassify(klass).to_s)
       end
@@ -223,7 +223,7 @@ module Recommendable
       # class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that `self` has ignored
       # belonging to `klass`
-      def ignored_objects_for(klass)
+      def ignored_records_for(klass)
         klassify(klass).find ignores_for(klass).map(&:ignoreable_id)
       end
     end
