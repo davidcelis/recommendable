@@ -13,7 +13,7 @@ Yes, Redis is required. Scroll to the end of the README for more info on that.
 Binary voting habits are most certainly not an odd phenomenon. People tend to
 vote in only two different ways. Some folks give either 1 star or 5 stars. Some
 people fluctuate between 3 and 4 stars. There are always outliers, but what it
-comes down to is this: peoples binary votes indicate, in general, a dislike
+comes down to is this: a person's binary votes indicate, in general, a dislike
 or like of what they're voting on. I'm just giving the people what they want.
 
 == Installation
@@ -47,12 +47,13 @@ more options on this task, head over to
 == Usage
 
 In your Rails model that represents your application's user:
-
-  class User < ActiveRecord::Base
-    acts_as_recommended_to
-    
-    # ...
-  end
+``` ruby
+class User < ActiveRecord::Base
+  acts_as_recommended_to
+  
+  # ...
+end
+```
 
 Then, from any Rails model you wish your user to be able to like/dislike:
 
