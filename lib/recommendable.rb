@@ -1,5 +1,4 @@
 require 'recommendable/engine'
-require 'recommendable/version'
 require 'recommendable/acts_as_recommended_to'
 require 'recommendable/acts_as_recommendable'
 require 'recommendable/exceptions'

@@ -12,21 +12,6 @@ rescue Bundler::BundlerError => e
 end
 
 require 'rake'
-require 'jeweler'
-
-Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "recommendable"
-  gem.homepage = "http://github.com/davidcelis/recommendable"
-  gem.license = "MIT"
-  gem.summary = %Q{Not ready for use. Add like-based and/or dislike-based recommendations to your app.}
-  gem.description = %Q{Not ready for use. Allow a model (typically User) to Like and/or Dislike models in your app. Generate recommendations quickly using redis.}
-  gem.email = "david@davidcelis.com"
-  gem.authors = ["David Celis"]
-  # dependencies defined in Gemfile
-end
-
-Jeweler::RubygemsDotOrgTasks.new
 
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
