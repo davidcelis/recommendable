@@ -54,3 +54,4 @@ tmtags
 
 # For rubinius:
 #*.rbc
+.rake_tasks*

@@ -34,6 +34,7 @@ module Recommendable
       # object's model to `act_as_recommendable`
       def like(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        return if likes?(object)
         undislike(object) if dislikes?(object)
         unpredict(object)
         likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
@@ -101,6 +102,7 @@ module Recommendable
       # object's model to `act_as_recommendable`
       def dislike(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        return if dislikes?(object)
         unlike(object) if likes?(object)
         unpredict(object)
         dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
@@ -169,6 +171,7 @@ module Recommendable
       # object's model to `act_as_recommendable`
       def ignore(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        return if has_ignored?(object)
         unlike(object) if likes?(object) || undislike(object) if dislikes?(object)
         unpredict(object)
         ignores.create!(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
@@ -257,10 +260,10 @@ module Recommendable
       # `rater` has several likes/dislikes that `current_user` does not.
       def similarity_with(rater)
         rater.create_recommended_to_sets
-        agreements = common_likes_with(rater).size + common_dislikes(rater).size
+        agreements = common_likes_with(rater).size + common_dislikes_with(rater).size
         disagreements = disagreements_with(rater).size
         
-        similarity = (agreements - disagreements).to_f / (likes.count + dislikes)
+        similarity = (agreements - disagreements).to_f / (likes.count + dislikes.count)
         rater.destroy_recommended_to_sets
         
         return similarity
@@ -348,12 +351,17 @@ module Recommendable
       # @param [Hash] options the options for this query
       # @option options [Fixnum] :count (10) The number of raters to return
       # @return [Array] An array of instances of your user class
-      def similar_raters(options)
+      def similar_raters(options = {})
         defaults = { :count => 10 }
         options = defaults.merge(options)
         
-        rater_ids = Recommendable.redis.zrevrange similarity_set, 0, options[:count] - 1
-        Recommendable.user_class.find rater_ids, order: "field(id, #{ids.join(',')})"
+        rater_ids = Recommendable.redis.zrevrange(similarity_set, 0, options[:count] - 1).map!(&:to_i)
+        raters = Recommendable.user_class.where("ID IN (?)", rater_ids)
+        
+        # The query loses the ordering, so...
+        return raters.sort do |x, y|
+          rater_ids.index(x.id) <=> rater_ids.index(y.id)
+        end
       end
       
       # Used internally to update the similarity values between `self` and all
@@ -365,12 +373,10 @@ module Recommendable
         self.create_recommended_to_sets
         
         Recommendable.user_class.find_each do |rater|
-          rater.create_recommended_to_sets
           next unless things_can_be_recommended_to?(rater) && self != rater
           
           Recommendable.redis.zadd similarity_set, similarity_with(rater), "#{rater.id}"
           Recommendable.redis.zadd rater.similarity_set, rater.similarity_with(self), "#{id}"
-          rater.destroy_recommended_to_sets
         end
         
         self.destroy_recommended_to_sets
@@ -383,7 +389,7 @@ module Recommendable
       # @note Do not call this method directly. Seriously, don't do it.
       def update_recommendations
         Recommendable.recommendable_classes.each do |klass|
-          update_predictions_for(klass)
+          update_recommendations_for(klass)
         end
       end
       
@@ -394,9 +400,9 @@ module Recommendable
       # @note Do not call this method directly. Seriously, don't do it.
       def update_recommendations_for(klass)
         klass.find_each do |object|
-          unless has_rated?(object)
+          unless has_rated?(object) || !object.has_been_rated?
             prediction = predict(object)
-            Recommendable.redis.zadd predictions_set_for(object.class), prediction, "#{object.class}:#{object.id}" if prediction
+            Recommendable.redis.zadd(predictions_set_for(object.class), prediction, "#{object.class}:#{object.id}") if prediction
           end
         end
       end
@@ -417,11 +423,12 @@ module Recommendable
         return [] if likes.count + dislikes.count == 0 || Recommendable.redis.zcard(unioned_predictions) == 0
         
         recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, options[:count]).map do |object|
-          object.klass.find(object.likeable_id)
+          klass, id = object.split(":")
+          klass.constantize.find(id)
         end
         
         Recommendable.redis.del unioned_predictions
-        recommendations
+        return recommendations
       end
       
       # Get a list of recommendations for `self` on a single recommendable type.
@@ -439,12 +446,16 @@ module Recommendable
         options = defaults.merge options
         
         recommendations = []
-        return recommendations if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(object.class)) == 0
+        return recommendations if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(klass)) == 0
       
-        until predictions.size == options[:count]
-          i += 1
-          object = klassify(klass).find(Recommendable.redis.zrevrange(predictions_set_for(object.class), i, i).first.split(":")[1])
+        i = 0
+        until recommendations.size == options[:count]
+          prediction = Recommendable.redis.zrevrange(predictions_set_for(klass), i, i).first
+          return recommendations unless prediction # User might not have enough recommendations to return
+          
+          object = klassify(klass).find(prediction.split(":")[1])
           recommendations << object unless has_ignored?(object)
+          i += 1
         end
       
         return recommendations
@@ -465,10 +476,10 @@ module Recommendable
         sum = 0.0
         prediction = 0.0
       
-        Recommendable.redis.smembers(liked_by).inject(sum) {|r, sum| sum += Recommendable.redis.zscore(similarity_set, r) }
-        Recommendable.redis.smembers(disliked_by).inject(sum) {|r, sum| sum -= Recommendable.redis.zscore(similarity_set, r) }
+        Recommendable.redis.smembers(liked_by).inject(sum) {|sum, r| sum += Recommendable.redis.zscore(similarity_set, r).to_f }
+        Recommendable.redis.smembers(disliked_by).inject(sum) {|sum, r| sum -= Recommendable.redis.zscore(similarity_set, r).to_f }
       
-        prediction = similarity_sum / rated_by.to_f
+        prediction = sum / rated_by.to_f
         
         object.destroy_recommendable_sets
         
@@ -493,8 +504,6 @@ module Recommendable
         -probability_of_liking(object)
       end
       
-      private
-      
       def likes_set_for(klass)
         "#{self.class}:#{id}:likes:#{klass}"
       end
@@ -516,7 +525,7 @@ module Recommendable
       end
       
       def create_recommended_to_sets
-        Recommendable.recommendable_class.each do |klass|
+        Recommendable.recommendable_classes.each do |klass|
           likes_for(klass).each {|like| Recommendable.redis.sadd likes_set_for(klass), like.likeable_id }
           dislikes_for(klass).each {|dislike| Recommendable.redis.sadd dislikes_set_for(klass), dislike.dislikeable_id }
         end

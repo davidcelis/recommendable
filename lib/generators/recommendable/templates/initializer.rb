@@ -12,3 +12,7 @@ Recommendable.user_class = "<%= user_class %>"
 
 # Connect to Redis via a UNIX socket instead
 <% unless options.redis_socket %># <% end %>Recommendable.redis = Redis.new(:sock => "<%= options.redis_socket %>")
+
+# Tell Redis which database to use (usually between 0 and 15). The default of 0
+# is most likely okay unless you have another application using that database.
+Recommendable.redis.select "0"

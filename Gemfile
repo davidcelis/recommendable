@@ -8,7 +8,7 @@ gem "resque-loner", "~> 1.2.0"
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
-  gem "mysql2"
+  gem "sqlite3"
   gem "minitest"
   gem "shoulda"
   gem "yard",    "~> 0.6.0"

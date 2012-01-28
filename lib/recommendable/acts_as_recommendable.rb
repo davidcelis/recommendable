@@ -18,6 +18,10 @@ module Recommendable
           include LikeableMethods
           include DislikeableMethods
           
+          def has_been_rated?
+            likes.count + dislikes.count > 0
+          end
+          
           def create_recommendable_sets
             [create_liked_by_set, create_disliked_by_set]
           end

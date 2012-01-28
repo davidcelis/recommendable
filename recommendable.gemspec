@@ -52,38 +52,38 @@ Gem::Specification.new do |s|
     "lib/tasks/recommendable_tasks.rake",
     "recommendable.gemspec",
     "script/rails",
-    "test/dummy/README.rdoc",
-    "test/dummy/Rakefile",
-    "test/dummy/app/assets/javascripts/application.js",
-    "test/dummy/app/assets/stylesheets/application.css",
-    "test/dummy/app/controllers/application_controller.rb",
-    "test/dummy/app/helpers/application_helper.rb",
-    "test/dummy/app/mailers/.gitkeep",
-    "test/dummy/app/models/.gitkeep",
-    "test/dummy/app/views/layouts/application.html.erb",
-    "test/dummy/config.ru",
-    "test/dummy/config/application.rb",
-    "test/dummy/config/boot.rb",
-    "test/dummy/config/database.yml",
-    "test/dummy/config/environment.rb",
-    "test/dummy/config/environments/development.rb",
-    "test/dummy/config/environments/production.rb",
-    "test/dummy/config/environments/test.rb",
-    "test/dummy/config/initializers/backtrace_silencers.rb",
-    "test/dummy/config/initializers/inflections.rb",
-    "test/dummy/config/initializers/mime_types.rb",
-    "test/dummy/config/initializers/secret_token.rb",
-    "test/dummy/config/initializers/session_store.rb",
-    "test/dummy/config/initializers/wrap_parameters.rb",
-    "test/dummy/config/locales/en.yml",
-    "test/dummy/config/routes.rb",
-    "test/dummy/lib/assets/.gitkeep",
-    "test/dummy/log/.gitkeep",
-    "test/dummy/public/404.html",
-    "test/dummy/public/422.html",
-    "test/dummy/public/500.html",
-    "test/dummy/public/favicon.ico",
-    "test/dummy/script/rails",
+    "spec/dummy/README.rdoc",
+    "spec/dummy/Rakefile",
+    "spec/dummy/app/assets/javascripts/application.js",
+    "spec/dummy/app/assets/stylesheets/application.css",
+    "spec/dummy/app/controllers/application_controller.rb",
+    "spec/dummy/app/helpers/application_helper.rb",
+    "spec/dummy/app/mailers/.gitkeep",
+    "spec/dummy/app/models/.gitkeep",
+    "spec/dummy/app/views/layouts/application.html.erb",
+    "spec/dummy/config.ru",
+    "spec/dummy/config/application.rb",
+    "spec/dummy/config/boot.rb",
+    "spec/dummy/config/database.yml",
+    "spec/dummy/config/environment.rb",
+    "spec/dummy/config/environments/development.rb",
+    "spec/dummy/config/environments/production.rb",
+    "spec/dummy/config/environments/test.rb",
+    "spec/dummy/config/initializers/backtrace_silencers.rb",
+    "spec/dummy/config/initializers/inflections.rb",
+    "spec/dummy/config/initializers/mime_types.rb",
+    "spec/dummy/config/initializers/secret_token.rb",
+    "spec/dummy/config/initializers/session_store.rb",
+    "spec/dummy/config/initializers/wrap_parameters.rb",
+    "spec/dummy/config/locales/en.yml",
+    "spec/dummy/config/routes.rb",
+    "spec/dummy/lib/assets/.gitkeep",
+    "spec/dummy/log/.gitkeep",
+    "spec/dummy/public/404.html",
+    "spec/dummy/public/422.html",
+    "spec/dummy/public/500.html",
+    "spec/dummy/public/favicon.ico",
+    "spec/dummy/script/rails",
     "test/integration/navigation_test.rb",
     "test/recommendable_test.rb",
     "test/test_helper.rb"
@@ -102,8 +102,8 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<redis>, ["~> 2.2.0"])
       s.add_runtime_dependency(%q<resque>, ["~> 1.19.0"])
       s.add_runtime_dependency(%q<resque-loner>, ["~> 1.2.0"])
-      s.add_development_dependency(%q<mysql2>, [">= 0"])
       s.add_development_dependency(%q<minitest>, [">= 0"])
+      s.add_development_dependency(%q<minitest-rails>, [">= 0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<yard>, ["~> 0.6.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
@@ -114,8 +114,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<redis>, ["~> 2.2.0"])
       s.add_dependency(%q<resque>, ["~> 1.19.0"])
       s.add_dependency(%q<resque-loner>, ["~> 1.2.0"])
-      s.add_dependency(%q<mysql2>, [">= 0"])
       s.add_dependency(%q<minitest>, [">= 0"])
+      s.add_dependency(%q<minitest-rails>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<yard>, ["~> 0.6.0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
@@ -127,8 +127,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<redis>, ["~> 2.2.0"])
     s.add_dependency(%q<resque>, ["~> 1.19.0"])
     s.add_dependency(%q<resque-loner>, ["~> 1.2.0"])
-    s.add_dependency(%q<mysql2>, [">= 0"])
     s.add_dependency(%q<minitest>, [">= 0"])
+    s.add_dependency(%q<minitest-rails>, [">= 0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<yard>, ["~> 0.6.0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
