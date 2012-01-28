@@ -10,7 +10,7 @@ Yes, Redis is required. Scroll to the end of the README for more info on that.
 Why Likes and Dislikes?
 -----------------------
 
-[This is why.][0].
+[This is why][0]!
 
 Binary voting habits are most certainly not an odd phenomenon. People tend to
 vote in only two different ways. Some folks give either 1 star or 5 stars. Some
@@ -156,7 +156,7 @@ user.unlike Movie.find_by_title('Avatar')
 #=> true
 user.liked_records
 #=> []
-``` ruby
+```
 
 You can use `undislike` and `unignore` in the same fashion. So, as far as the Likes
 and Dislikes go, do you think that's enough? Because I didn't.
