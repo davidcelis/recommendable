@@ -217,7 +217,7 @@ the documentation.
 A note on Redis
 ---------------
 
-Recommendable currently depends on {Redis}[http://redis.io/]. It will install 
+Recommendable currently depends on [Redis][http://redis.io/]. It will install 
 the redis-rb gem as a dependency, but you must install Redis and run it
 yourself. Also note that your Redis database must be persistent. Recommendable
 will use Redis to permanently store sorted sets to quickly access recommendations.
@@ -294,15 +294,15 @@ Once you've made your great commits:
 
 Links
 -----
-Code: `git clone git://github.com/davidcelis/recommendable.git`
-Home: <http://github.com/davidcelis/recommendable>
-Bugs: <http://github.com/davidcelis/recommendable/issues>
-Gems: <http://rubygems.org/gems/recommendable>
+* Code: `git clone git://github.com/davidcelis/recommendable.git`
+* Home: <http://github.com/davidcelis/recommendable>
+* Bugs: <http://github.com/davidcelis/recommendable/issues>
+* Gems: <http://rubygems.org/gems/recommendable>
 
 Copyright
 ---------
 
-Copyright (c) 2012 David Celis. See LICENSE.txt for
+Copyright © 2012 David Celis. See LICENSE.txt for
 further details.
 
 [0]: http://youtube-global.blogspot.com/2009/09/five-stars-dominate-ratings.html
