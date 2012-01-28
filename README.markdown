@@ -168,7 +168,7 @@ friend.like awesome_movie
 #=> true
 awesome_movie.liked_by
 #=> [#<User id: 1, username: 'davidcelis'>, #<User id: 2, username: 'joeblow'>]
-Movie.find_by_title('Star Wars: Episode I - The Phantom Menace).disliked_by
+Movie.find_by_title('Star Wars: Episode I - The Phantom Menace').disliked_by
 #=> [#<User id: 1, username: 'davidcelis'>]
 ```
 
