@@ -1,14 +1,14 @@
 = recommendable
 
 Recommendable is a Rails Engine to add Like/Dislike functionality to your 
-application and uses redis to generate recommendations quickly through 
-collaborative filtering. Your users' tastes are compared with one another and 
-used to give them great recommendations! Yes, redis is required. Scroll to the
-end of the README for more info on that.
+application. It uses Redis to generate recommendations quickly through a
+collaborative filtering algorithm that I modified myself. Your users' tastes
+are compared with one another and used to give them great recommendations!
+Yes, Redis is required. Scroll to the end of the README for more info on that.
 
 == Why Likes and Dislikes?
 
-Why not? {This is why}[http://youtube-global.blogspot.com/2009/09/five-stars-dominate-ratings.html].
+{This is why}[http://youtube-global.blogspot.com/2009/09/five-stars-dominate-ratings.html].
 
 Binary voting habits are most certainly not an odd phenomenon. People tend to
 vote in only two different ways. Some folks give either 1 star or 5 stars. Some
@@ -187,12 +187,12 @@ the documentation.
 
 == A note on Redis
 
-Recommendable currently depends on {redis}[http://redis.io/]. It will install 
-the redis-rb gem as a dependency, but you must install redis and run it
-yourself. Also note that your redis database must be persistent. Recommendable
+Recommendable currently depends on {Redis}[http://redis.io/]. It will install 
+the redis-rb gem as a dependency, but you must install Redis and run it
+yourself. Also note that your Redis database must be persistent. Recommendable
 will use Redis to permanently store sorted sets to quickly access recommendations.
-Please take care with your redis database! Fortunately, if you do lose your
-redis database, there's hope (more on that later).
+Please take care with your Redis database! Fortunately, if you do lose your
+Redis database, there's hope (more on that later).
 
 == Installing Redis
 
