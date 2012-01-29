@@ -271,10 +271,10 @@ If a catastrophe occurs and your Redis database is either destroyed or rendered
 unusable in some other way, there is hope. You can run the following from your
 application's console (assuming your user class is User):
 
-  User.all.each do |user|
-    user.update_similarities
-    user.update_recommendations
-  end
+    User.all.each do |user|
+      user.update_similarities
+      user.update_recommendations
+    end
 
 But please try not to have to do this manually!
 
