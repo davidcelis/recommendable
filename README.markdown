@@ -134,7 +134,7 @@ weird_movie_nobody_wants_to_watch = Movie.create(:title => 'Cool World', :year =
 current_user.ignore weird_movie_nobody_wants_to_watch
 #=> true
 current_user.ignored_records
-#=> [#<Movie id: 4, name: 'Cool World', year: 1998>]
+#=> [#<Movie name: 'Cool World', year: 1998>]
 current_user.ignored_records_for(Show)
 #=> []
 ```
@@ -167,9 +167,9 @@ awesome_movie = Movie.find_by_title('2001: A Space Odyssey')
 friend.like awesome_movie
 #=> true
 awesome_movie.liked_by
-#=> [#<User id: 1, username: 'davidcelis'>, #<User id: 2, username: 'joeblow'>]
+#=> [#<User username: 'davidcelis'>, #<User username: 'joeblow'>]
 Movie.find_by_title('Star Wars: Episode I - The Phantom Menace').disliked_by
-#=> [#<User id: 1, username: 'davidcelis'>]
+#=> [#<User username: 'davidcelis'>]
 ```
 
 Recommendations
