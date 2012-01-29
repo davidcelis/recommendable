@@ -1,10 +1,11 @@
 === TODO
 
-* Ensure correct privacy levels for methods
-* Write some fucking tests you poor excuse for a TDD
+* Ensure correct privacy levels for methods. How can I do this and keep using
+  the methods from outside of the class?
 * A good README
 
 === Next update
 
-* Allow the option of common_likes_with and common_dislikes_with to return the actual objects so users get more use out of this
+* Allow the option of common_likes_with and common_dislikes_with to return the
+  actual objects so users get more use out of this
 * Allow the option NOT to queue up on like/dislike/ignore?
