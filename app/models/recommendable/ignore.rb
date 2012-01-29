@@ -4,6 +4,6 @@ module Recommendable
     belongs_to :ignoreable, :polymorphic => :true
     
     validates :user_id, :uniqueness => { :scope => [:ignoreable_id, :ignoreable_type],
-                                         :message => "has already liked this item" }
+                                         :message => "has already ignored this item" }
   end
 end
