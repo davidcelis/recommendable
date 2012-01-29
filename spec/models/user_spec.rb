@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 class UserSpec < MiniTest::Spec
+  # User and Bully are skeleton classes defined in the dummy application for
+  # the sole purpose of running these tests. They're in spec/dummy/models/ but
+  # really, there's nothing there of note.
+  
   describe User do
     describe "that does not act_as_recommendable" do
       before :each do
