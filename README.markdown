@@ -296,6 +296,7 @@ Links
 -----
 * Code: `git clone git://github.com/davidcelis/recommendable.git`
 * Home: <http://github.com/davidcelis/recommendable>
+* Docs: <http://rubydoc.info/gems/recommendable/0.1.0/frames>
 * Bugs: <http://github.com/davidcelis/recommendable/issues>
 * Gems: <http://rubygems.org/gems/recommendable>
 
