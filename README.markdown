@@ -108,9 +108,9 @@ current_user.dislikes? other_movie
 current_user.like other_movie
 #=> true
 current_user.liked_records
-#=> [#<Movie id: 1, name: '2001: A Space Odyssey', year: 1968>, #<Movie id: 3, name: 'Back to the Future', :year => 1985>]
+#=> [#<Movie name: '2001: A Space Odyssey', year: 1968>, #<Movie name: 'Back to the Future', :year => 1985>]
 current_user.disliked_records
-#=> [#<Movie id: 2, name: 'Star Wars: Episode I - The Phantom Menace', year: 1999>]
+#=> [#<Movie name: 'Star Wars: Episode I - The Phantom Menace', year: 1999>]
 ```
 
 Because you are allowed to declare multiple models as recommendable, you may
@@ -119,7 +119,7 @@ models.
 
 ``` ruby
 current_user.liked_records_for(Movie)
-#=> [#<Movie id: 1, name: '2001: A Space Odyssey', year: 1968>, #<Movie id: 3, name: 'Back to the Future', :year => 1985>]
+#=> [#<Movie name: '2001: A Space Odyssey', year: 1968>, #<Movie name: 'Back to the Future', :year => 1985>]
 current_user.disliked_records_for(Show)
 #=> []
 ```
