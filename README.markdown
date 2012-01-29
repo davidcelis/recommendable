@@ -217,7 +217,7 @@ the documentation.
 A note on Redis
 ---------------
 
-Recommendable currently depends on [Redis][http://redis.io/]. It will install 
+Recommendable currently depends on [Redis](http://redis.io/). It will install 
 the redis-rb gem as a dependency, but you must install Redis and run it
 yourself. Also note that your Redis database must be persistent. Recommendable
 will use Redis to permanently store sorted sets to quickly access recommendations.
