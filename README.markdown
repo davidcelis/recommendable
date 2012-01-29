@@ -217,7 +217,7 @@ the documentation.
 A note on Redis
 ---------------
 
-Recommendable currently depends on [Redis][http://redis.io/]. It will install 
+Recommendable currently depends on [Redis](http://redis.io/). It will install 
 the redis-rb gem as a dependency, but you must install Redis and run it
 yourself. Also note that your Redis database must be persistent. Recommendable
 will use Redis to permanently store sorted sets to quickly access recommendations.
@@ -271,10 +271,10 @@ If a catastrophe occurs and your Redis database is either destroyed or rendered
 unusable in some other way, there is hope. You can run the following from your
 application's console (assuming your user class is User):
 
-  User.all.each do |user|
-    user.update_similarities
-    user.update_recommendations
-  end
+    User.all.each do |user|
+      user.update_similarities
+      user.update_recommendations
+    end
 
 But please try not to have to do this manually!
 
