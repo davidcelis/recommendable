@@ -5,9 +5,6 @@
 
 === Next update
 
-* Implement a sort of "save for later" option. Hides from recommendations, but
-  accesible through a model and not hidden around the site elsewhere.
-  Recommendable::SavedItem, perhaps?
 * Allow the option of common_likes_with and common_dislikes_with to return the
   actual objects so users get more use out of this
 * Allow the option NOT to queue up on like/dislike/ignore?
