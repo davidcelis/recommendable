@@ -153,6 +153,7 @@ current_user.stash(movie_to_watch_later)
 #=> true
 current_user.stashed
 #=> [#<Movie name: 'The Descendants', year: 2011>]
+```
 
 ### Unliking/Undisliking/Unignoring/Unstashing
 
