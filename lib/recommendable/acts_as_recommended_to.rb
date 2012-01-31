@@ -176,7 +176,7 @@ module Recommendable
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def stash(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
-        return if has_rated?(object)
+        return if has_rated?(object) || has_stashed?(object)
         unignore(object)
         unpredict(object)
         stashed_items.create!(:stashable_id => object.id, :stashable_type => object.class.to_s)

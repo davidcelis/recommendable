@@ -113,7 +113,7 @@ DEPENDENCIES
   bundler (~> 1.0.0)
   jeweler (~> 1.6.4)
   minitest
-  rails (>= 3.1.0)
+  rails (>= 3.0.0)
   rcov
   redis (~> 2.2.0)
   resque (~> 1.19.0)

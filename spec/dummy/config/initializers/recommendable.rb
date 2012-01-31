@@ -12,3 +12,5 @@ Recommendable.redis = Redis.new(:host => "localhost", :port => 6379)
 
 # Connect to Redis via a UNIX socket instead
 # Recommendable.redis = Redis.new(:sock => "")
+
+Recommendable.redis.select("15")
