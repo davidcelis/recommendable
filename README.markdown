@@ -146,6 +146,7 @@ Do what you will with this list of records. The power is yours.
 Your user might want to maintain a list of items to try later but still receive
 new recommendations. For this, you can use Recommendable::StashedItems. Note that
 adding an item to a user's stash will remove it from their list of recommendations.
+Additionally, an item can not be stashed if the user already likes or dislikes it.
 
 ``` ruby
 movie_to_watch_later = Movie.create(:title => 'The Descendants', :year => 2011)
@@ -153,6 +154,13 @@ current_user.stash(movie_to_watch_later)
 #=> true
 current_user.stashed
 #=> [#<Movie name: 'The Descendants', year: 2011>]
+# Later...
+current_user.like(movie_to_watch_later)
+#=> true
+current_user.stash(movie_to_watch_later)
+#=> nil
+current_user.has_stashed?(movie_to_watch_later)
+#=> false
 ```
 
 ### Unliking/Undisliking/Unignoring/Unstashing
