@@ -107,9 +107,9 @@ current_user.dislikes? other_movie
 #=> false
 current_user.like other_movie
 #=> true
-current_user.liked_records
+current_user.liked
 #=> [#<Movie name: '2001: A Space Odyssey', year: 1968>, #<Movie name: 'Back to the Future', :year => 1985>]
-current_user.disliked_records
+current_user.disliked
 #=> [#<Movie name: 'Star Wars: Episode I - The Phantom Menace', year: 1999>]
 ```
 
@@ -118,9 +118,9 @@ wish to return a set of liked or disliked objects for only one of those
 models.
 
 ``` ruby
-current_user.liked_records_for(Movie)
+current_user.liked_for(Movie)
 #=> [#<Movie name: '2001: A Space Odyssey', year: 1968>, #<Movie name: 'Back to the Future', :year => 1985>]
-current_user.disliked_records_for(Show)
+current_user.disliked_for(Show)
 #=> []
 ```
 
@@ -133,15 +133,28 @@ just hide stuff on your website that they couldn't care less about, you can!
 weird_movie_nobody_wants_to_watch = Movie.create(:title => 'Cool World', :year => 1998)
 current_user.ignore weird_movie_nobody_wants_to_watch
 #=> true
-current_user.ignored_records
+current_user.ignored
 #=> [#<Movie name: 'Cool World', year: 1998>]
-current_user.ignored_records_for(Show)
+current_user.ignored_for(Show)
 #=> []
 ```
 
 Do what you will with this list of records. The power is yours.
 
-### Unliking/Undisliking/Unignoring
+### Saving for later
+
+Your user might want to maintain a list of items to try later but still receive
+new recommendations. For this, you can use Recommendable::StashedItems. Note that
+adding an item to a user's stash will remove it from their list of recommendations.
+
+``` ruby
+movie_to_watch_later = Movie.create(:title => 'The Descendants', :year => 2011)
+current_user.stash(movie_to_watch_later)
+#=> true
+current_user.stashed
+#=> [#<Movie name: 'The Descendants', year: 2011>]
+
+### Unliking/Undisliking/Unignoring/Unstashing
 
 Note that liking a movie that has already been disliked (or vice versa) will
 simply destroy the old rating and create a new one. If a user attempts to `like`
@@ -154,11 +167,11 @@ current_user.like Movie.create(:title => 'Avatar', :year => 2009)
 #=> true
 user.unlike Movie.find_by_title('Avatar')
 #=> true
-user.liked_records
+user.liked
 #=> []
 ```
 
-You can use `undislike` and `unignore` in the same fashion. So, as far as the Likes
+You can use `undislike`, `unignore` and `unstash` in the same fashion. So, as far as the Likes
 and Dislikes go, do you think that's enough? Because I didn't.
 
 ``` ruby
