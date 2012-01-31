@@ -1,6 +1,6 @@
 class CreateDislikes < ActiveRecord::Migration
   def up
-    create_table :dislikes, :force => true do |t|
+    create_table :dislikes do |t|
       t.references :user
       t.references :dislikeable, :polymorphic => true
       t.timestamps
