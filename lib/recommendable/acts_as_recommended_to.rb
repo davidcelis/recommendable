@@ -28,7 +28,8 @@ module Recommendable
     module LikeMethods
       # Creates a Recommendable::Like to associate self to a passed object. If
       # self is currently found to have disliked object, the corresponding
-      # Recommendable::Dislike will be destroyed.
+      # Recommendable::Dislike will be destroyed. It will also be removed from
+      # the user's stash or ignores.
       #
       # @param [Object] object the object you want self to like.
       # @return true if object has been liked
@@ -36,7 +37,9 @@ module Recommendable
       def like(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         return if likes?(object)
-        undislike(object) if dislikes?(object)
+        undislike(object)
+        unstash(object)
+        unignore(object)
         unpredict(object)
         likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
@@ -95,7 +98,8 @@ module Recommendable
     module DislikeMethods
       # Creates a Recommendable::Dislike to associate self to a passed object. If
       # self is currently found to have liked object, the corresponding
-      # Recommendable::Like will be destroyed.
+      # Recommendable::Like will be destroyed. It will also be removed from the
+      # user's stash or list of ignores.
       #
       # @param [Object] object the object you want self to dislike.
       # @return true if object has been disliked
@@ -103,7 +107,9 @@ module Recommendable
       def dislike(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         return if dislikes?(object)
-        unlike(object) if likes?(object)
+        unlike(object)
+        unstash(object)
+        unignore(object)
         unpredict(object)
         dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
@@ -163,7 +169,7 @@ module Recommendable
       # Creates a Recommendable::StashedItem to associate self to a passed object.
       # This will remove the item from this user's recommendations.
       # If self is currently found to have liked or disliked the object, nothing
-      # will happen.
+      # will happen. It will, however, be unignored.
       #
       # @param [Object] object the object you want self to stash.
       # @return true if object has been stashed
@@ -171,7 +177,8 @@ module Recommendable
       def stash(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         return if has_rated?(object)
-        unignore(object) if has_ignored?(object)
+        unignore(object)
+        unpredict(object)
         stashed_items.create!(:stashable_id => object.id, :stashable_type => object.class.to_s)
         true
       end
@@ -234,7 +241,9 @@ module Recommendable
       def ignore(object)
         raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
         return if has_ignored?(object)
-        unlike(object) if likes?(object) || undislike(object) if dislikes?(object)
+        unlike(object)
+        undislike(object)
+        unstash(object)
         unpredict(object)
         ignores.create!(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
         true
