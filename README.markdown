@@ -10,13 +10,14 @@ Yes, Redis is required. Scroll to the end of the README for more info on that.
 Why Likes and Dislikes?
 -----------------------
 
-[This is why][0]!
+[I hate five-star rating scales][0].
 
-Binary voting habits are most certainly not an odd phenomenon. People tend to
-vote in only two different ways. Some folks give either 1 star or 5 stars. Some
-people fluctuate between 3 and 4 stars. There are always outliers, but what it
-comes down to is this: a person's binary votes indicate, in general, a dislike
-or like of what they're voting on. I'm just giving the people what they want.
+tl;dr: Binary voting habits are most certainly not an odd phenomenon. People 
+tend to vote in only two different ways. Some folks give either 1 star or 5 
+stars. Some people fluctuate between 3 and 4 stars. There are always outliers, 
+but what it comes down to is this: a person's binary votes indicate, in 
+general, a dislike or like of what they're voting on. I'm just giving the 
+people what they want.
 
 Installation
 ------------
@@ -328,7 +329,7 @@ Copyright
 Copyright © 2012 David Celis. See LICENSE.txt for
 further details.
 
-[0]: http://youtube-global.blogspot.com/2009/09/five-stars-dominate-ratings.html
+[0]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
 [1]: https://github.com/defunkt/resque
 [2]: https://github.com/ezmobius/redis-rb
 [3]: http://wiki.github.com/defunkt/resque/contributing
