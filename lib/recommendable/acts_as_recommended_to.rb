@@ -522,7 +522,6 @@ module Recommendable
           next unless things_can_be_recommended_to?(rater) && self != rater
           
           Recommendable.redis.zadd similarity_set, similarity_with(rater), "#{rater.id}"
-          Recommendable.redis.zadd rater.similarity_set, rater.similarity_with(self), "#{id}"
         end
         
         self.destroy_recommended_to_sets
