@@ -12,11 +12,11 @@ Why Likes and Dislikes?
 
 [I hate five-star rating scales][0].
 
-tl;dr: Binary voting habits are most certainly not an odd phenomenon. People 
-tend to vote in only two different ways. Some folks give either 1 star or 5 
-stars. Some people fluctuate between 3 and 4 stars. There are always outliers, 
-but what it comes down to is this: a person's binary votes indicate, in 
-general, a dislike or like of what they're voting on. I'm just giving the 
+**tl;dr:** Binary voting habits are most certainly not an odd phenomenon. 
+People tend to vote in only two different ways. Some folks give either 1 star 
+or 5 stars. Some people fluctuate between 3 and 4 stars. There are always 
+outliers, but what it comes down to is this: a person's binary votes indicate, 
+in general, a dislike or like of what they're voting on. I'm just giving the 
 people what they want.
 
 Installation
