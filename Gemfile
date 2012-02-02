@@ -11,6 +11,7 @@ group :development do
   gem "sqlite3"
   gem "minitest"
   gem "shoulda"
+  gem "miniskirt"
   gem "yard",    "~> 0.6.0"
   gem "bundler", "~> 1.0.0"
   gem "rcov"

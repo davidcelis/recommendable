@@ -8,8 +8,8 @@ class UserSpec < MiniTest::Spec
   describe User do
     describe "that does not act_as_recommendable" do
       before :each do
-        @user = Bully.create(:username => "somejerk")
-        @movie = Movie.create(:title => "2001: A Space Odyssey", :year => 1968)
+        @user = Factory(:bully)
+        @movie = Factory(:movie)
       end
       
       it "should not be able to rate, ignore, or stash an item, and trying should not be enough to get Redis keys" do
@@ -35,8 +35,12 @@ class UserSpec < MiniTest::Spec
     
     describe "that does act_as_recommendable" do
       before :each do
-        @user = User.create(:username => "dave")
-        @movie = Movie.create(:title => "2001: A Space Odyssey", :year => 1968)
+        @user = Factory(:user)
+        @movie = Factory(:movie)
+      end
+
+      after :each do
+        Recommendable.redis.flushdb
       end
 
       it "should be able to like a recommendable item" do
@@ -155,7 +159,7 @@ class UserSpec < MiniTest::Spec
       end
       
       it "should not be able to rate or ignore an item that is not recommendable. doing so should not be enough to create Redis keys" do
-        @cakephp = PhpFramework.create(:name => "CakePHP")
+        @cakephp = Factory(:php_framework)
         
         proc { @user.like(@cakephp) }.must_raise    Recommendable::RecordNotRecommendableError
         proc { @user.dislike(@cakephp) }.must_raise Recommendable::RecordNotRecommendableError
@@ -206,14 +210,14 @@ class UserSpec < MiniTest::Spec
     
     describe "while getting recommendations" do
       before :each do
-        @dave   =  User.create(:username => "dave")
-        @frank  =  User.create(:username => "frank")
-        @hal    =  User.create(:username => "hal9000")
-        @movie1 = Movie.create(:title => "2001: A Space Odyssey", :year => 1986)
-        @movie2 = Movie.create(:title => "A Clockwork Orange", :year => 1979)
-        @movie3 = Movie.create(:title => "One Flew Over the Cuckoo's Nest", :year => 1975)
-        @movie4 = Movie.create(:title => "The Shining", :year => 1989)
-        @movie5 = Movie.create(:title => "Lolita", :year => 1962)
+        @dave   = Factory(:user)
+        @frank  = Factory(:user)
+        @hal    = Factory(:user)
+        @movie1 = Factory(:movie)
+        @movie2 = Factory(:movie)
+        @movie3 = Factory(:movie)
+        @movie4 = Factory(:movie)
+        @movie5 = Factory(:movie)
       end
       
       after :each do

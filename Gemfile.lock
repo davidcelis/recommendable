@@ -31,13 +31,8 @@ GEM
     arel (3.0.0)
     builder (3.0.0)
     erubis (2.7.0)
-    git (1.2.5)
     hike (1.2.1)
     i18n (0.6.0)
-    jeweler (1.6.4)
-      bundler (~> 1.0)
-      git (>= 1.2.5)
-      rake
     journey (1.0.0)
     json (1.6.5)
     mail (2.4.1)
@@ -45,6 +40,8 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.17.2)
+    miniskirt (1.1.1)
+      activesupport (>= 2.2)
     minitest (2.10.1)
     multi_json (1.0.4)
     polyglot (0.3.3)
@@ -111,7 +108,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.0.0)
-  jeweler (~> 1.6.4)
+  miniskirt
   minitest
   rails (>= 3.0.0)
   rcov
