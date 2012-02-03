@@ -19,6 +19,8 @@ module Recommendable
           include RecommendationMethods
 
           def self.acts_as_recommended_to? ; true ; end
+
+          private :likes, :dislikes, :ignores, :stashed_items
         end
       end
 
@@ -82,6 +84,7 @@ module Recommendable
       #
       # @param [Class, String, Symbol] klass the class for which you would like to return self's likes. Can be the class constant, or a String/Symbol representation of the class name.
       # @note You should not need to use this method. (see {#liked_for})
+      # @private
       def likes_for(klass)
         likes.where(:likeable_type => klassify(klass).to_s)
       end
@@ -96,6 +99,7 @@ module Recommendable
       end
 
       alias_method :liked_records_for, :liked_for
+      private :likes_for
     end
     
     module DislikeMethods
@@ -152,6 +156,7 @@ module Recommendable
       #
       # @param [Class, String, Symbol] klass the class for which you would like to return self's dislikes. Can be the class constant, or a String/Symbol representation of the class name.
       # @note You should not need to use this method. (see {#disliked_for})
+      # @private
       def dislikes_for(klass)
         dislikes.where(:dislikeable_type => klassify(klass).to_s)
       end
@@ -166,6 +171,7 @@ module Recommendable
       end
 
       alias_method :disliked_records_for, :disliked_for
+      private :dislikes_for
     end
 
     module StashMethods
@@ -216,6 +222,7 @@ module Recommendable
       #
       # @param [Class, String, Symbol] klass the class for which you would like to return self's stashed items. Can be the class constant, or a String/Symbol representation of the class name.
       # @note You should not need to use this method. (see {#stashed_for})
+      # @private
       def stash_for(klass)
         stashed_items.where(:stashable_type => klassify(klass).to_s)
       end
@@ -230,6 +237,7 @@ module Recommendable
       end
 
       alias_method :stashed_records_for, :stashed_for
+      private :stash_for
     end
     
     module IgnoreMethods
@@ -282,6 +290,7 @@ module Recommendable
       #
       # @param [Class, String, Symbol] klass the class for which you would like to return self's ignores. Can be the class constant, or a String/Symbol representation of the class name.
       # @note You should not need to use this method. (see {#ignored_for})
+      # @private
       def ignores_for(klass)
         ignores.where(:ignoreable_type => klassify(klass).to_s)
       end
@@ -296,6 +305,7 @@ module Recommendable
       end
 
       alias_method :ignored_records_for, :ignored_for
+      private :ignores_for
     end
     
     module RecommendationMethods
@@ -395,7 +405,7 @@ module Recommendable
       # @param [Object] object the object to fetch the probability for
       # @return [Float] the likelihood of self liking the passed object
       def probability_of_liking(object)
-        Recommendable.redis.zscore predictions_set_for(object.class), key_for(object)
+        Recommendable.redis.zscore predictions_set_for(object.class), object.redis_key
       end
       
       # Return the negation of the value calculated by {#predict} on self
@@ -418,6 +428,7 @@ module Recommendable
       # @param [Object] rater an ActiveRecord object declared to `act_as_recommendable_to`
       # @return [Float] the numeric similarity between self and rater
       # @note The returned value relies on which user the method is called on. current_user.similarity_with(rater) will not equal rater.similarity_with(current_user) unless their sets of likes and dislikes are identical. current_user.similarity_with(rater) will return 1.0 even if rater has several likes/dislikes that `current_user` does not.
+      # @private
       def similarity_with(rater)
         return unless rater.can_rate?
 
@@ -437,6 +448,7 @@ module Recommendable
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersection to a single recommendable type. By default, all recomendable types are considered
       # @return [Array] An array of strings from Redis in the form of "#{likeable_type}:#{id}"
+      # @private
       def common_likes_with(rater, options = {})
         defaults = { :class => nil }
         options = defaults.merge(options)
@@ -457,6 +469,7 @@ module Recommendable
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersection to a single recommendable type. By default, all recomendable types are considered
       # @return [Array] An array of strings from Redis in the form of #{dislikeable_type}:#{id}"
+      # @private
       def common_dislikes_with(rater, options = {})
         defaults = { :class => nil }
         options = defaults.merge(options)
@@ -479,6 +492,7 @@ module Recommendable
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersections to a single recommendable type. By default, all recomendable types are considered
       # @return [Array] An array of strings from Redis in the form of #{recommendable_type}:#{id}"
+      # @private
       def disagreements_with(rater, options = {})
         defaults = { :class => nil }
         options = defaults.merge(options)
@@ -503,6 +517,7 @@ module Recommendable
       #
       # @param [Object] object the object to check the likeliness of liking
       # @return [Float] the probability that self will like object
+      # @private
       def predict(object)
         liked_by, disliked_by = object.create_recommendable_sets
         rated_by = Recommendable.redis.scard(liked_by) + Recommendable.redis.scard(disliked_by)
@@ -522,7 +537,7 @@ module Recommendable
       # Used internally to update the similarity values between self and all
       # other users. This is called in the Resque job to refresh recommendations.
       #
-      # @note Do not call this method directly. Seriously, don't do it.
+      # @private
       def update_similarities
         return unless has_rated_anything?
         self.create_recommended_to_sets
@@ -539,7 +554,7 @@ module Recommendable
       # recommendable types. This is called in the Resque job to refresh
       # recommendations.
       #
-      # @note Do not call this method directly. Seriously, don't do it.
+      # @private
       def update_recommendations
         Recommendable.recommendable_classes.each do |klass|
           update_recommendations_for(klass)
@@ -550,35 +565,43 @@ module Recommendable
       # recommendable type. Convenience method for {#update_recommendations}
       #
       # @param [Class] klass the recommendable type to update predictions for
-      # @note Do not call this method directly. Seriously, don't do it.
+      # @private
       def update_recommendations_for(klass)
         klass.find_each do |object|
           next if has_rated?(object) || !object.has_been_rated? || has_ignored?(object) || has_stashed?(object)
           prediction = predict(object)
-          Recommendable.redis.zadd(predictions_set_for(object.class), prediction, key_for(object)) if prediction
+          Recommendable.redis.zadd(predictions_set_for(object.class), prediction, object.redis_key) if prediction
         end
       end
 
+      # @private
       def likes_set_for(klass)
         "#{self.class}:#{id}:likes:#{klass}"
       end
       
+      # @private
       def dislikes_set_for(klass)
         "#{self.class}:#{id}:dislikes:#{klass}"
       end
       
+      # @private
       def similarity_set
         "#{self.class}:#{id}:similarities"
       end
       
+      # @private
       def predictions_set_for(klass)
         "#{self.class}:#{id}:predictions:#{klass}"
       end
       
+      # @private
       def unpredict(object)
         Recommendable.redis.zrem predictions_set_for(object.class), "#{object.class}:#{object.id}"
       end
       
+      # Used for setup purposes. Creates and populates sets in redis containing
+      # self's likes and dislikes.
+      # @private
       def create_recommended_to_sets
         Recommendable.recommendable_classes.each do |klass|
           likes_for(klass).each {|like| Recommendable.redis.sadd likes_set_for(klass), like.likeable_id }
@@ -586,16 +609,26 @@ module Recommendable
         end
       end
       
+      # Used for teardown purposes. Destroys the redis sets containing self's
+      # likes and dislikes, as they are only used during the process of
+      # updating recommendations and similarity values.
+      # @private
       def destroy_recommended_to_sets
         Recommendable.recommendable_classes.each do |klass|
           Recommendable.redis.del likes_set_for(klass)
           Recommendable.redis.del dislikes_set_for(klass)
         end
       end
-    end
-    
-    def klassify(klass)
-      (klass.is_a?(String) || klass.is_a?(Symbol)) ? klass.to_s.camelize.constantize : klass
+
+      private :likes_set_for, :dislikes_set_for, :similarity_set,
+              :predictions_set_for, :unpredict, :create_recommended_to_sets,
+              :destroy_recommended_to_sets, :update_recommendations_for,
+              :update_recommendations, :update_similarities, :similarity_with,
+              :predict, :common_likes_with, :common_dislikes_with, :disagreements_with
     end
   end
+end
+
+def klassify(klass)
+  (klass.is_a?(String) || klass.is_a?(Symbol)) ? klass.to_s.camelize.constantize : klass
 end
