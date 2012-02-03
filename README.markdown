@@ -1,5 +1,4 @@
-recommendable
-=============
+= recommendable {<img src="http://travis-ci.org/davidcelis/recommendable.png" />}[http://travis-ci.org/davidcelis/recommendable]
 
 Recommendable is a Rails Engine to add Like/Dislike functionality to your 
 application. It uses Redis to generate recommendations quickly through a
