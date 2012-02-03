@@ -1,10 +1,6 @@
-=== TODO
+= TODO
 
-* Ensure correct privacy levels for methods. How can I do this and keep using
-  the methods from outside of the class?
+== Next update
 
-=== Next update
-
-* Allow the option of common_likes_with and common_dislikes_with to return the
-  actual objects so users get more use out of this
+* Make public methods to return likes/dislikes that are common between two users
 * Allow the option NOT to queue up on like/dislike/ignore?
