@@ -231,8 +231,8 @@ class UserSpec < MiniTest::Spec
         @dave.like(@movie1)
         @frank.like(@movie1)
         @frank.like(@movie2)
-        @dave.update_similarities
-        @dave.update_recommendations
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
         
         @dave.similar_raters.must_include @frank
         @dave.recommendations_for(Movie).must_include @movie2
@@ -247,8 +247,8 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie2)
         
         # hal should be more similar to dave than frank
-        @dave.update_similarities
-        @dave.update_recommendations
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
         
         @dave.similar_raters.must_equal [@hal, @frank]
       end
@@ -262,8 +262,8 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
         
-        @dave.update_similarities
-        @dave.update_recommendations
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
         
         @dave.recommendations.must_equal [@movie4, @movie3]
       end
@@ -277,8 +277,8 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
         
-        @dave.update_similarities
-        @dave.update_recommendations
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
         
         @dave.recommendations.wont_include @movie1
         @dave.recommendations.wont_include @movie2
@@ -294,8 +294,8 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
         
-        @dave.update_similarities
-        @dave.update_recommendations
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
         
         @dave.recommendations.wont_include @movie4
       end
@@ -310,8 +310,8 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
         
-        @dave.update_similarities
-        @dave.update_recommendations
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
         
         @dave.recommendations.wont_include @movie4
       end

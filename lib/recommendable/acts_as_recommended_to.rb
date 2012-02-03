@@ -519,7 +519,7 @@ module Recommendable
       # @return [Float] the probability that self will like object
       # @private
       def predict(object)
-        liked_by, disliked_by = object.create_recommendable_sets
+        liked_by, disliked_by = object.send :create_recommendable_sets
         rated_by = Recommendable.redis.scard(liked_by) + Recommendable.redis.scard(disliked_by)
         sum = 0.0
         prediction = 0.0
@@ -529,7 +529,7 @@ module Recommendable
       
         prediction = sum / rated_by.to_f
         
-        object.destroy_recommendable_sets
+        object.send :destroy_recommendable_sets
         
         return prediction
       end
@@ -540,14 +540,14 @@ module Recommendable
       # @private
       def update_similarities
         return unless has_rated_anything?
-        self.create_recommended_to_sets
+        create_recommended_to_sets
         
         Recommendable.user_class.find_each do |rater|
           next if self == rater
           Recommendable.redis.zadd similarity_set, similarity_with(rater), "#{rater.id}"
         end
         
-        self.destroy_recommended_to_sets
+        destroy_recommended_to_sets
       end
       
       # Used internally to update self's prediction values across all
@@ -620,11 +620,13 @@ module Recommendable
         end
       end
 
-      private :likes_set_for, :dislikes_set_for, :similarity_set,
-              :predictions_set_for, :unpredict, :create_recommended_to_sets,
-              :destroy_recommended_to_sets, :update_recommendations_for,
-              :update_recommendations, :update_similarities, :similarity_with,
-              :predict, :common_likes_with, :common_dislikes_with, :disagreements_with
+      protected :likes_set_for, :dislikes_set_for, :create_recommended_to_sets,
+                :destroy_recommended_to_sets
+
+      private :similarity_set, :unpredict, :predictions_set_for,
+              :update_recommendations_for, :update_recommendations,
+              :update_similarities, :similarity_with, :predict,
+              :common_likes_with, :common_dislikes_with, :disagreements_with
     end
   end
 end

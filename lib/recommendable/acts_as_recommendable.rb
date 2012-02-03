@@ -26,21 +26,21 @@ module Recommendable
           # Used for setup purposes. Calls convenience methods to create sets
           # in redis of users that both like and dislike this object.
           # @return [Array] an array containing the liked_by set and the disliked_by set
-          # @protected
+          # @private
           def create_recommendable_sets
             [create_liked_by_set, create_disliked_by_set]
           end
           
           # Used for teardown purposes. Destroys the sets in redis created by
           # {#create_recommendable_sets}
-          # @protected
+          # @private
           def destroy_recommendable_sets
             Recommendable.redis.del "#{self.class}:#{id}:liked_by"
             Recommendable.redis.del "#{self.class}:#{id}:disliked_by"
           end
 
-          protected :create_recommendable_sets, :destroy_recommendable_sets
-          private :likes, :dislikes, :ignores, :stashes
+          private :likes, :dislikes, :ignores, :stashes,
+                  :create_recommendable_sets, :destroy_recommendable_sets
         end
       end
 
