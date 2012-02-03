@@ -4,10 +4,6 @@ module Recommendable
   module ActsAsRecommendedTo
     extend ActiveSupport::Concern
     
-    def things_can_be_recommended_to?(user)
-      user.respond_to?(:like) || user.respond_to?(:dislike)
-    end
-    
     module ClassMethods
       def acts_as_recommended_to
         class_eval do
@@ -21,9 +17,16 @@ module Recommendable
           include StashMethods
           include IgnoreMethods
           include RecommendationMethods
+
+          def self.acts_as_recommended_to? ; true ; end
         end
       end
+
+      def acts_as_recommended_to? ; false ; end
     end
+
+    # Instance method.
+    def can_rate? ; self.class.acts_as_recommended_to? ; end
 
     module LikeMethods
       # Creates a Recommendable::Like to associate self to a passed object. If
@@ -35,7 +38,7 @@ module Recommendable
       # @return true if object has been liked
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def like(object)
-        raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        raise RecordNotRecommendableError unless object.recommendable?
         return if likes?(object)
         undislike(object)
         unstash(object)
@@ -105,7 +108,7 @@ module Recommendable
       # @return true if object has been disliked
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def dislike(object)
-        raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        raise RecordNotRecommendableError unless object.recommendable?
         return if dislikes?(object)
         unlike(object)
         unstash(object)
@@ -175,7 +178,7 @@ module Recommendable
       # @return true if object has been stashed
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def stash(object)
-        raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        raise RecordNotRecommendableError unless object.recommendable?
         return if has_rated?(object) || has_stashed?(object)
         unignore(object)
         unpredict(object)
@@ -239,7 +242,7 @@ module Recommendable
       # @return true if object has been ignored
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def ignore(object)
-        raise RecordNotRecommendableError unless Recommendable.recommendable_classes.include?(object.class)
+        raise RecordNotRecommendableError unless object.recommendable?
         return if has_ignored?(object)
         unlike(object)
         undislike(object)
@@ -296,6 +299,10 @@ module Recommendable
     end
     
     module RecommendationMethods
+      def self.acts_as_recommended_to? ; true ; end
+
+      def can_receive_recommendations? ; self.class.acts_as_recommended_to? ; end
+
       # Checks to see if self has already liked or disliked a passed object.
       # 
       # @param [Object] object the object you want to check
@@ -388,7 +395,7 @@ module Recommendable
       # @param [Object] object the object to fetch the probability for
       # @return [Float] the likelihood of self liking the passed object
       def probability_of_liking(object)
-        Recommendable.redis.zscore predictions_set_for(object.class), "#{object.class}:#{object.id}"
+        Recommendable.redis.zscore predictions_set_for(object.class), key_for(object)
       end
       
       # Return the negation of the value calculated by {#predict} on self
@@ -412,6 +419,8 @@ module Recommendable
       # @return [Float] the numeric similarity between self and rater
       # @note The returned value relies on which user the method is called on. current_user.similarity_with(rater) will not equal rater.similarity_with(current_user) unless their sets of likes and dislikes are identical. current_user.similarity_with(rater) will return 1.0 even if rater has several likes/dislikes that `current_user` does not.
       def similarity_with(rater)
+        return unless rater.can_rate?
+
         rater.create_recommended_to_sets
         agreements = common_likes_with(rater).size + common_dislikes_with(rater).size
         disagreements = disagreements_with(rater).size
@@ -519,8 +528,7 @@ module Recommendable
         self.create_recommended_to_sets
         
         Recommendable.user_class.find_each do |rater|
-          next unless things_can_be_recommended_to?(rater) && self != rater
-          
+          next if self == rater
           Recommendable.redis.zadd similarity_set, similarity_with(rater), "#{rater.id}"
         end
         
@@ -545,38 +553,31 @@ module Recommendable
       # @note Do not call this method directly. Seriously, don't do it.
       def update_recommendations_for(klass)
         klass.find_each do |object|
-          unless has_rated?(object) || !object.has_been_rated? || has_ignored?(object) || has_stashed?(object)
-            prediction = predict(object)
-            Recommendable.redis.zadd(predictions_set_for(object.class), prediction, "#{object.class}:#{object.id}") if prediction
-          end
+          next if has_rated?(object) || !object.has_been_rated? || has_ignored?(object) || has_stashed?(object)
+          prediction = predict(object)
+          Recommendable.redis.zadd(predictions_set_for(object.class), prediction, key_for(object)) if prediction
         end
       end
-      
-      
+
       def likes_set_for(klass)
         "#{self.class}:#{id}:likes:#{klass}"
       end
-      
       
       def dislikes_set_for(klass)
         "#{self.class}:#{id}:dislikes:#{klass}"
       end
       
-      
       def similarity_set
         "#{self.class}:#{id}:similarities"
       end
-      
       
       def predictions_set_for(klass)
         "#{self.class}:#{id}:predictions:#{klass}"
       end
       
-      
       def unpredict(object)
         Recommendable.redis.zrem predictions_set_for(object.class), "#{object.class}:#{object.id}"
       end
-      
       
       def create_recommended_to_sets
         Recommendable.recommendable_classes.each do |klass|
@@ -585,7 +586,6 @@ module Recommendable
         end
       end
       
-      
       def destroy_recommended_to_sets
         Recommendable.recommendable_classes.each do |klass|
           Recommendable.redis.del likes_set_for(klass)
@@ -593,8 +593,6 @@ module Recommendable
         end
       end
     end
-    
-    private
     
     def klassify(klass)
       (klass.is_a?(String) || klass.is_a?(Symbol)) ? klass.to_s.camelize.constantize : klass

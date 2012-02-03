@@ -1,9 +1,7 @@
 module Recommendable
   module ActsAsRecommendable
-    def self.included(base)
-      base.extend ClassMethods
-    end
-    
+    extend ActiveSupport::Concern
+
     module ClassMethods
       def acts_as_recommendable
         class_eval do
@@ -19,6 +17,8 @@ module Recommendable
           include LikeableMethods
           include DislikeableMethods
           
+          def self.acts_as_recommendable? ; true ; end
+
           def has_been_rated?
             likes.count + dislikes.count > 0
           end
@@ -33,7 +33,12 @@ module Recommendable
           end
         end
       end
+
+      def acts_as_recommendable? ; false ; end
     end
+
+    # Instance methods.
+    def recommendable? ; self.class.acts_as_recommendable? ; end
     
     module LikeableMethods
       def create_liked_by_set
