@@ -339,7 +339,7 @@ module Recommendable
         defaults = { :count => 10 }
         options = defaults.merge(options)
         
-        rater_ids = Recommendable.redis.zrevrange(similarity_set, 0, options[:count] - 1).map!(&:to_i)
+        rater_ids = Recommendable.redis.zrevrange(similarity_set, 0, options[:count] - 1).map(&:to_i)
         raters = Recommendable.user_class.where("ID IN (?)", rater_ids)
         
         # The query loses the ordering, so...
@@ -358,10 +358,11 @@ module Recommendable
       def recommendations(options = {})
         defaults = { :count => 10 }
         options = defaults.merge options
+        return [] if likes.count + dislikes.count == 0
 
         unioned_predictions = "#{self.class}:#{id}:predictions"
         Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map {|klass| predictions_set_for(klass)}
-        return [] if likes.count + dislikes.count == 0 || Recommendable.redis.zcard(unioned_predictions) == 0
+        return [] if Recommendable.redis.zcard(unioned_predictions) == 0
         
         recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, options[:count]).map do |object|
           klass, id = object.split(":")
@@ -430,10 +431,9 @@ module Recommendable
       # @note The returned value relies on which user the method is called on. current_user.similarity_with(rater) will not equal rater.similarity_with(current_user) unless their sets of likes and dislikes are identical. current_user.similarity_with(rater) will return 1.0 even if rater has several likes/dislikes that `current_user` does not.
       # @private
       def similarity_with(rater)
-        return unless rater.can_rate?
-
         rater.create_recommended_to_sets
-        agreements = common_likes_with(rater).size + common_dislikes_with(rater).size
+        agreements = common_likes_with(rater, :return_records => false).size
+        agreements += common_dislikes_with(rater, :return_records => false).size
         disagreements = disagreements_with(rater).size
         
         similarity = (agreements - disagreements).to_f / (likes.count + dislikes.count)
@@ -447,17 +447,25 @@ module Recommendable
       # @param [Object] rater the person whose set of likes you wish to intersect with that of self
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersection to a single recommendable type. By default, all recomendable types are considered
-      # @return [Array] An array of strings from Redis in the form of "#{likeable_type}:#{id}"
-      # @private
+      # @option options [true, false] :return_records (true) Return the actual Model instances
+      # @return [Array] An array of IDs, or strings from Redis in the form of "#{likeable_type}:#{id}" if options[:class] is set
       def common_likes_with(rater, options = {})
-        defaults = { :class => nil }
+        defaults = { :class => nil,
+                     :return_records => true }
         options = defaults.merge(options)
         
         if options[:class]
-          Recommendable.redis.sinter likes_set_for(options[:class]), rater.likes_set_for(options[:class])
+          in_common = Recommendable.redis.sinter likes_set_for(options[:class]), rater.likes_set_for(options[:class])
+          klassify(options[:class]).find in_common if options[:return_records]
         else
-          Recommendable.recommendable_classes.map do |klass|
-            Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass)).map {|id| "#{klass}:#{id}"}
+          Recommendable.recommendable_classes.flat_map do |klass|
+            in_common = Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass))
+
+            if options[:return_records]
+              klassify(klass).find in_common if options[:return_records]
+            else
+              in_common.map {|id| "#{klassify(klass)}:#{id}"}
+            end
           end
         end
       end
@@ -468,17 +476,25 @@ module Recommendable
       # @param [Object] rater the person whose set of dislikes you wish to intersect with that of self
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersection to a single recommendable type. By default, all recomendable types are considered
-      # @return [Array] An array of strings from Redis in the form of #{dislikeable_type}:#{id}"
-      # @private
+      # @option options [true, false] :return_records (true) Return the actual Model instances
+      # @return [Array] An array of IDs, or strings from Redis in the form of #{dislikeable_type}:#{id}" if options[:class] is set
       def common_dislikes_with(rater, options = {})
-        defaults = { :class => nil }
+        defaults = { :class => nil,
+                     :return_records => true }
         options = defaults.merge(options)
         
         if options[:class]
-          Recommendable.redis.sinter dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])
+          in_common = Recommendable.redis.sinter dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])
+          klassify(options[:class]).find in_common if options[:return_records]
         else
-          Recommendable.recommendable_classes.map do |klass|
-            Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass)).map {|id| "#{klass}:#{id}"}
+          Recommendable.recommendable_classes.flat_map do |klass|
+            in_common = Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass))
+
+            if options[:return_records]
+              klassify(klass).find in_common if options[:return_records]
+            else
+              in_common.map {|id| "#{klassify(klass)}:#{id}"}
+            end
           end
         end
       end
@@ -491,19 +507,27 @@ module Recommendable
       # @param [Object] rater the person whose sets you wish to intersect with those of self
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersections to a single recommendable type. By default, all recomendable types are considered
-      # @return [Array] An array of strings from Redis in the form of #{recommendable_type}:#{id}"
-      # @private
+      # @option options [true, false] :return_records (true) Return the actual Model instances
+      # @return [Array] An array of IDs, or strings from Redis in the form of #{recommendable_type}:#{id}" if options[:class] is set
       def disagreements_with(rater, options = {})
-        defaults = { :class => nil }
+        defaults = { :class => nil,
+                     :return_records => true }
         options = defaults.merge(options)
         
         if options[:class]
-          Recommendable.redis.sinter(likes_set_for(options[:class]), rater.likes_set_for(options[:class])).size +
-          Recommendable.redis.sinter(dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])).size
+          disagreements =  Recommendable.redis.sinter(likes_set_for(options[:class]), rater.likes_set_for(options[:class]))
+          disagreements += Recommendable.redis.sinter(dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class]))
+          klassify(options[:class]).find disagreements if options[:return_records]
         else
-          Recommendable.recommendable_classes.inject(0) do |sum, klass|
-            sum += Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass)).size
-            sum += Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass)).size
+          Recommendable.recommendable_classes.flat_map do |klass|
+            disagreements = Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass))
+            disagreements += Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass))
+
+            if options[:return_records]
+              klassify(klass).find disagreements
+            else
+              disagreements.map {|id| "#{klassify(klass)}:#{id}"}
+            end
           end
         end
       end
@@ -521,13 +545,13 @@ module Recommendable
       def predict(object)
         liked_by, disliked_by = object.send :create_recommendable_sets
         rated_by = Recommendable.redis.scard(liked_by) + Recommendable.redis.scard(disliked_by)
-        sum = 0.0
+        similarity_sum = 0.0
         prediction = 0.0
       
-        Recommendable.redis.smembers(liked_by).inject(sum) {|sum, r| sum += Recommendable.redis.zscore(similarity_set, r).to_f }
-        Recommendable.redis.smembers(disliked_by).inject(sum) {|sum, r| sum -= Recommendable.redis.zscore(similarity_set, r).to_f }
+        Recommendable.redis.smembers(liked_by).inject(similarity_sum) {|sum, r| sum += Recommendable.redis.zscore(similarity_set, r).to_f }
+        Recommendable.redis.smembers(disliked_by).inject(similarity_sum) {|sum, r| sum -= Recommendable.redis.zscore(similarity_set, r).to_f }
       
-        prediction = sum / rated_by.to_f
+        prediction = similarity_sum / rated_by.to_f
         
         object.send :destroy_recommendable_sets
         
@@ -543,7 +567,7 @@ module Recommendable
         create_recommended_to_sets
         
         Recommendable.user_class.find_each do |rater|
-          next if self == rater
+          next if self == rater || !rater.can_rate?
           Recommendable.redis.zadd similarity_set, similarity_with(rater), "#{rater.id}"
         end
         
@@ -596,7 +620,7 @@ module Recommendable
       
       # @private
       def unpredict(object)
-        Recommendable.redis.zrem predictions_set_for(object.class), "#{object.class}:#{object.id}"
+        Recommendable.redis.zrem predictions_set_for(object.class), object.redis_key
       end
       
       # Used for setup purposes. Creates and populates sets in redis containing
@@ -625,8 +649,7 @@ module Recommendable
 
       private :similarity_set, :unpredict, :predictions_set_for,
               :update_recommendations_for, :update_recommendations,
-              :update_similarities, :similarity_with, :predict,
-              :common_likes_with, :common_dislikes_with, :disagreements_with
+              :update_similarities, :similarity_with, :predict
     end
   end
 end
