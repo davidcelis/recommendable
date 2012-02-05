@@ -194,6 +194,8 @@ Movie.find_by_title('Star Wars: Episode I - The Phantom Menace').disliked_by
 #=> [#<User username: 'davidcelis'>]
 current_user.common_likes_with(friend)
 #=> [#<Movie title: '2001: A Space Odyssey', year: 1968>]
+current_user.common_likes_with(friend, :class => Show)
+#=> []
 ```
 
 `common_dislikes_with` and `disagreements_with` are available for similar use.
