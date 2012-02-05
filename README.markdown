@@ -174,14 +174,14 @@ ignored records, you can:
 ``` ruby
 current_user.like Movie.create(:title => 'Avatar', :year => 2009)
 #=> true
-user.unlike Movie.find_by_title('Avatar')
+current_user.unlike Movie.find_by_title('Avatar')
 #=> true
-user.liked
+current_user.liked
 #=> []
 ```
 
-You can use `undislike`, `unignore` and `unstash` in the same fashion. So, as far as the Likes
-and Dislikes go, do you think that's enough? Because I didn't.
+You can use `undislike`, `unignore` and `unstash` in the same fashion. So, as 
+far as the Likes and Dislikes go, do you think that's enough? Because I didn't.
 
 ``` ruby
 friend = User.create(:username => 'joeblow')
@@ -192,7 +192,11 @@ awesome_movie.liked_by
 #=> [#<User username: 'davidcelis'>, #<User username: 'joeblow'>]
 Movie.find_by_title('Star Wars: Episode I - The Phantom Menace').disliked_by
 #=> [#<User username: 'davidcelis'>]
+current_user.common_likes_with(friend)
+#=> [#<Movie title: '2001: A Space Odyssey', year: 1968>]
 ```
+
+`common_dislikes_with` and `disagreements_with` are available for similar use.
 
 Recommendations
 ---------------
