@@ -29,7 +29,9 @@ Add the following to your Rails application's `Gemfile`:
 
 After your `bundle install`, you can then run:
 
-    $ rails g recommendable:install (--user-class=User)
+``` bash
+$ rails g recommendable:install (--user-class=User)
+```
 
 After running the installation generator, you should double check
 `config/initializers/recommendable.rb` for options on configuring your Redis
