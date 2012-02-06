@@ -4,7 +4,7 @@ require File.expand_path('lib/recommendable/version')
 Gem::Specification.new do |s|
   s.name = "recommendable"
   s.version = Recommendable::VERSION
-  s.date = "2012-01-28"
+  s.date = Time.now.strftime('%Y-%m-%d')
   
   s.authors = ["David Celis"]
   s.email = "david@davidcelis.com"
