@@ -44,7 +44,9 @@ to wait. In fact, you can run multiple resque workers if you wish.
 
 Assuming you have `redis-server` running...
 
-    $ QUEUE=recommendable rake environment resque:work
+``` bash
+$ QUEUE=recommendable rake environment resque:work
+```
 
 You can run this command multiple times if you wish to start more than one
 worker. This is the standard rake task for starting a Resque worker so, for
