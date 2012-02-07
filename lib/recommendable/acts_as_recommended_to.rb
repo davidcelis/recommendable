@@ -42,10 +42,7 @@ module Recommendable
       def like(object)
         raise RecordNotRecommendableError unless object.recommendable?
         return if likes?(object)
-        undislike(object)
-        unstash(object)
-        unignore(object)
-        unpredict(object)
+        completely_unrecommend(object)
         likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
         true
@@ -114,10 +111,7 @@ module Recommendable
       def dislike(object)
         raise RecordNotRecommendableError unless object.recommendable?
         return if dislikes?(object)
-        unlike(object)
-        unstash(object)
-        unignore(object)
-        unpredict(object)
+        completely_unrecommend(object)
         dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
         Resque.enqueue RecommendationRefresher, self.id
         true
@@ -252,10 +246,7 @@ module Recommendable
       def ignore(object)
         raise RecordNotRecommendableError unless object.recommendable?
         return if has_ignored?(object)
-        unlike(object)
-        undislike(object)
-        unstash(object)
-        unpredict(object)
+        completely_unrecommend(object)
         ignores.create!(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
         true
       end
@@ -309,10 +300,6 @@ module Recommendable
     end
     
     module RecommendationMethods
-      def self.acts_as_recommended_to? ; true ; end
-
-      def can_receive_recommendations? ; self.class.acts_as_recommended_to? ; end
-
       # Checks to see if self has already liked or disliked a passed object.
       # 
       # @param [Object] object the object you want to check
@@ -362,15 +349,13 @@ module Recommendable
 
         unioned_predictions = "#{self.class}:#{id}:predictions"
         Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map {|klass| predictions_set_for(klass)}
-        return [] if Recommendable.redis.zcard(unioned_predictions) == 0
         
         recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, options[:count]).map do |object|
           klass, id = object.split(":")
           klass.constantize.find(id)
         end
         
-        Recommendable.redis.del unioned_predictions
-        return recommendations
+        Recommendable.redis.del(unioned_predictions) and return recommendations
       end
       
       # Get a list of recommendations for self on a single recommendable type.
@@ -385,16 +370,16 @@ module Recommendable
         defaults = { :count => 10 }
         options = defaults.merge options
         
-        recommendations = []
-        return recommendations if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(klass)) == 0
+        return [] if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(klass)) == 0
       
+        recommendations = []
         i = 0
         until recommendations.size == options[:count]
           prediction = Recommendable.redis.zrevrange(predictions_set_for(klass), i, i).first
           return recommendations unless prediction # User might not have enough recommendations to return
           
           object = klassify(klass).find(prediction.split(":")[1])
-          recommendations << object unless has_ignored?(object)
+          recommendations << object
           i += 1
         end
       
@@ -414,7 +399,7 @@ module Recommendable
       #
       # @param [Object] object the object to fetch the probability for
       # @return [Float] the likelihood of self disliking the passed object
-      # @see #probability of liking
+      # @see {#probability_of_liking}
       def probability_of_disliking(object)
         -probability_of_liking(object)
       end
@@ -434,7 +419,7 @@ module Recommendable
         rater.create_recommended_to_sets
         agreements = common_likes_with(rater, :return_records => false).size
         agreements += common_dislikes_with(rater, :return_records => false).size
-        disagreements = disagreements_with(rater).size
+        disagreements = disagreements_with(rater, :return_records => false).size
         
         similarity = (agreements - disagreements).to_f / (likes.count + dislikes.count)
         rater.destroy_recommended_to_sets
@@ -462,7 +447,7 @@ module Recommendable
             in_common = Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass))
 
             if options[:return_records]
-              klassify(klass).find in_common if options[:return_records]
+              klassify(klass).find in_common
             else
               in_common.map {|id| "#{klassify(klass)}:#{id}"}
             end
@@ -491,7 +476,7 @@ module Recommendable
             in_common = Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass))
 
             if options[:return_records]
-              klassify(klass).find in_common if options[:return_records]
+              klassify(klass).find in_common
             else
               in_common.map {|id| "#{klassify(klass)}:#{id}"}
             end
@@ -642,6 +627,21 @@ module Recommendable
           Recommendable.redis.del likes_set_for(klass)
           Recommendable.redis.del dislikes_set_for(klass)
         end
+      end
+
+      # Used internally during liking/disliking/stashing/ignoring objects. This
+      # will prep an object to be liked, disliked, etc. by making sure that self
+      # doesn't already have this item in their list of likes, dislikes, stashed
+      # items or ignored items.
+      #
+      # param [Object] object the object to destroy Recommendable models for
+      # @private
+      def completely_unrecommend(object)
+        unlike(object)
+        undislike(object)
+        unstash(object)
+        unignore(object)
+        unpredict(object)
       end
 
       protected :likes_set_for, :dislikes_set_for, :create_recommended_to_sets,
