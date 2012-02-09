@@ -1,5 +1,5 @@
 = TODO
 
-== Next update
-
+* Recalculate similarity values ONLY for users that have liked/disliked the item
+  that self just liked/disliked
 * Allow the option NOT to queue up on like/dislike/ignore?

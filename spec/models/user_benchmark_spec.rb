@@ -35,8 +35,8 @@ class UserBenchmarkSpec < MiniTest::Unit::TestCase
           @users.sample.send(@actions.sample, m)
         end
   
-        @user.update_similarities
-        @user.update_recommendations
+        @user.send :update_similarities
+        @user.send :update_recommendations
         Recommendable.redis.flushdb
 
         User.delete_all

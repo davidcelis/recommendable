@@ -22,6 +22,19 @@ module Recommendable
           def has_been_rated?
             likes.count + dislikes.count > 0
           end
+
+          # Returns an array of users that have liked or disliked this item.
+          # @return [Array] an array of users
+          def rated_by
+            liked_by + disliked_by
+          end
+          
+          # Returns an array of IDs of users that have liked or disliked this item.
+          # @return [Array] an array of user IDs
+          # @private
+          def rates_by
+            likes.map(&:user_id) + dislikes.map(&:user_id)
+          end
           
           # Used for setup purposes. Calls convenience methods to create sets
           # in redis of users that both like and dislike this object.
@@ -39,7 +52,7 @@ module Recommendable
             Recommendable.redis.del "#{self.class}:#{id}:disliked_by"
           end
 
-          private :likes, :dislikes, :ignores, :stashes,
+          private :likes, :dislikes, :ignores, :stashes, :rates_by,
                   :create_recommendable_sets, :destroy_recommendable_sets
         end
       end
