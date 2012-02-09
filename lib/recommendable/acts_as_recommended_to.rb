@@ -550,8 +550,7 @@ module Recommendable
       def update_similarities(rater_ids = nil)
         return unless has_rated_anything?
         create_recommended_to_sets
-        rater_ids ||= Recommendable.user_class.select(:id)
-        rater_ids.map!(&:id)
+        rater_ids ||= Recommendable.user_class.select(:id).map!(&:id)
         
         Recommendable.user_class.find(rater_ids).each do |rater|
           next if self == rater || !rater.can_rate?
