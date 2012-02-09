@@ -1,8 +1,14 @@
 Changelog
 =========
 
-0.1.2 (current version)
+0.1.3 (current version)
 -----------------------
+
+* Improvements to speed of similarity calculations.
+* Added an instance method to items that act_as_recommendable, `rated_by`. This returns an array of users that like or dislike the item.
+
+0.1.2
+-----
 
 * Fix an issue that could cause similarity values between users to be incorrect.
 * `User#common_likes_with` and `User#common_dislikes_with` now return the actual Model instances by default. Accordingly, these methods are no longer private.
