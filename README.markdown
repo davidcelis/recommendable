@@ -1,8 +1,8 @@
 # recommendable [![Build Status](https://secure.travis-ci.org/davidcelis/recommendable.png)](http://travis-ci.org/davidcelis/recommendable)
 
 Recommendable is a Rails Engine to add Like/Dislike functionality to your 
-application. It uses Redis to generate recommendations quickly through a
-collaborative filtering algorithm that I modified myself. Your users' tastes
+application. It uses Redis to generate recommendations quickly through [a
+collaborative filtering algorithm that I modified myself][6]. Your users' tastes
 are compared with one another and used to give them great recommendations!
 Yes, Redis is required. Scroll to the end of the README for more info on that.
 
@@ -344,3 +344,4 @@ further details.
 [3]: http://wiki.github.com/defunkt/resque/contributing
 [4]: http://help.github.com/forking/
 [5]: http://help.github.com/pull-requests/
+[6]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
