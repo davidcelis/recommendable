@@ -17,9 +17,10 @@ module Recommendable
           include LikeableMethods
           include DislikeableMethods
           
-          def self.acts_as_recommendable? ; true ; end
+          def self.acts_as_recommendable?() true end
 
-          def has_been_rated?
+
+          def been_rated?
             likes.count + dislikes.count > 0
           end
 
@@ -28,13 +29,8 @@ module Recommendable
           def rated_by
             liked_by + disliked_by
           end
-          
-          # Returns an array of IDs of users that have liked or disliked this item.
-          # @return [Array] an array of user IDs
-          # @private
-          def rates_by
-            likes.map(&:user_id) + dislikes.map(&:user_id)
-          end
+
+          private
           
           # Used for setup purposes. Calls convenience methods to create sets
           # in redis of users that both like and dislike this object.
@@ -52,22 +48,30 @@ module Recommendable
             Recommendable.redis.del "#{self.class}:#{id}:disliked_by"
           end
 
-          private :likes, :dislikes, :ignores, :stashes, :rates_by,
-                  :create_recommendable_sets, :destroy_recommendable_sets
+          # Returns an array of IDs of users that have liked or disliked this item.
+          # @return [Array] an array of user IDs
+          # @private
+          def rates_by
+            likes.map(&:user_id) + dislikes.map(&:user_id)
+          end
+
+          private :likes, :dislikes, :ignores, :stashes
         end
       end
 
-      def acts_as_recommendable? ; false ; end
+      def acts_as_recommendable?() false end
     end
 
     # Instance methods.
-    def recommendable? ; self.class.acts_as_recommendable? ; end
+    def recommendable?() self.class.acts_as_recommendable? end
 
-    def redis_key ; "#{self.class}:#{id}" ; end
+    def redis_key() "#{self.class}:#{id}" end
 
     protected :redis_key
     
     module LikeableMethods
+      private
+
       # Used for setup purposes. Creates a set in redis containing users that
       # have liked this object.
       # @private
@@ -77,11 +81,11 @@ module Recommendable
         liked_by.each {|rater| Recommendable.redis.sadd set, rater.id}
         return set
       end
-
-      private :create_liked_by_set
     end
     
     module DislikeableMethods
+      private
+
       # Used for setup purposes. Creates a set in redis containing users that
       # have disliked this object.
       # @private
@@ -91,8 +95,6 @@ module Recommendable
         disliked_by.each {|rater| Recommendable.redis.sadd set, rater.id}
         return set
       end
-
-      private :create_disliked_by_set
     end
   end
 end

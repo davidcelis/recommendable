@@ -7,11 +7,7 @@ require 'recommendable/version'
 
 module Recommendable
   mattr_accessor :redis, :user_class
-  mattr_writer :user_class, :recommendable_classes
-  
-  def self.user_class
-    @@user_class.camelize.constantize
-  end
+  mattr_writer :recommendable_classes
   
   def self.recommendable_classes
     @@recommendable_classes ||= []

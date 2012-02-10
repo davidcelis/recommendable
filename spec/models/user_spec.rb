@@ -64,14 +64,14 @@ class UserSpec < MiniTest::Spec
       it "should not be ignoring an item after liking it" do
         @user.ignore(@movie)
         @user.like(@movie).must_equal true
-        @user.has_ignored?(@movie).must_equal false
+        @user.ignored?(@movie).must_equal false
         @user.likes?(@movie).must_equal true
       end
 
       it "should not have an item stashed after liking it" do
         @user.stash(@movie)
         @user.like(@movie).must_equal true
-        @user.has_stashed?(@movie).must_equal false
+        @user.stashed?(@movie).must_equal false
         @user.likes?(@movie).must_equal true
       end
 
@@ -97,14 +97,14 @@ class UserSpec < MiniTest::Spec
       it "should not be ignoring an item after disliking it" do
         @user.ignore(@movie)
         @user.dislike(@movie).must_equal true
-        @user.has_ignored?(@movie).must_equal false
+        @user.ignored?(@movie).must_equal false
         @user.dislikes?(@movie).must_equal true
       end
 
       it "should not have an item stashed after disliking it" do
         @user.stash(@movie)
         @user.dislike(@movie).must_equal true
-        @user.has_stashed?(@movie).must_equal false
+        @user.stashed?(@movie).must_equal false
         @user.dislikes?(@movie).must_equal true
       end
 
@@ -116,21 +116,21 @@ class UserSpec < MiniTest::Spec
         @user.like(@movie)
         @user.ignore(@movie).must_equal true
         @user.likes?(@movie).must_equal false
-        @user.has_ignored?(@movie).must_equal true
+        @user.ignored?(@movie).must_equal true
       end
 
       it "should not dislike an item after ignoring it" do
         @user.dislike(@movie)
         @user.ignore(@movie).must_equal true
         @user.dislikes?(@movie).must_equal false
-        @user.has_ignored?(@movie).must_equal true
+        @user.ignored?(@movie).must_equal true
       end
 
       it "should not have an item stashed after ignoring it" do
         @user.stash(@movie)
         @user.ignore(@movie).must_equal true
-        @user.has_stashed?(@movie).must_equal false
-        @user.has_ignored?(@movie).must_equal true
+        @user.stashed?(@movie).must_equal false
+        @user.ignored?(@movie).must_equal true
       end
 
       it "should be able to stash a recommendable item" do
@@ -141,21 +141,21 @@ class UserSpec < MiniTest::Spec
         @user.like(@movie)
         @user.stash(@movie).must_be_nil
         @user.likes?(@movie).must_equal true
-        @user.has_stashed?(@movie).must_equal false
+        @user.stashed?(@movie).must_equal false
       end
 
       it "should not stash a disliked item" do
         @user.dislike(@movie)
         @user.stash(@movie).must_be_nil
         @user.dislikes?(@movie).must_equal true
-        @user.has_stashed?(@movie).must_equal false
+        @user.stashed?(@movie).must_equal false
       end
 
       it "should not have an item ignored after stashing it" do
         @user.ignore(@movie)
         @user.stash(@movie).must_equal true
-        @user.has_ignored?(@movie).must_equal false
-        @user.has_stashed?(@movie).must_equal true
+        @user.ignored?(@movie).must_equal false
+        @user.stashed?(@movie).must_equal true
       end
       
       it "should not be able to rate or ignore an item that is not recommendable. doing so should not be enough to create Redis keys" do
