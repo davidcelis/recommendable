@@ -30,7 +30,7 @@ Add the following to your Rails application's `Gemfile`:
 After your `bundle install`, you can then run:
 
 ``` bash
-$ rails g recommendable:install (--user-class=User)
+$ rails g recommendable:install
 ```
 
 After running the installation generator, you should double check
@@ -59,29 +59,13 @@ In your Rails model that represents your application's user:
 
 ``` ruby
 class User < ActiveRecord::Base
-  acts_as_recommended_to
+  recommends :movies, :shows, :other_things
   
   # ...
 end
 ```
 
-Then, from any Rails model you wish your `user` to be able to `like` or `dislike`:
-
-``` ruby
-class Movie < ActiveRecord::Base
-  acts_as_recommendable
-  
-  # ...
-end
-
-class Show < ActiveRecord::Base
-  acts_as_recommendable
-  
-  # ...
-end
-````
-
-And that's it!
+Just pass in a list of classes and that's it!
 
 ### Liking/Disliking
 
@@ -122,7 +106,7 @@ wish to return a set of liked or disliked objects for only one of those
 models.
 
 ``` ruby
-current_user.liked_for(Movie)
+current_user.liked_for(Movie) # or "movie", or :movie
 #=> [#<Movie name: '2001: A Space Odyssey', year: 1968>, #<Movie name: 'Back to the Future', :year => 1985>]
 current_user.disliked_for(Show)
 #=> []
@@ -163,7 +147,7 @@ current_user.like(movie_to_watch_later)
 #=> true
 current_user.stash(movie_to_watch_later)
 #=> nil
-current_user.has_stashed?(movie_to_watch_later)
+current_user.stashed?(movie_to_watch_later)
 #=> false
 ```
 
