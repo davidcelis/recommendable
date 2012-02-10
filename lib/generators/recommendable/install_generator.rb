@@ -3,7 +3,6 @@ require 'rails/generators'
 module Recommendable
   module Generators
     class InstallGenerator < Rails::Generators::Base
-      argument     :user_model,   :type => :string,  :default => "User",            :desc => "Your user model that will be liking and disliking objects."
       argument     :redis_host,   :type => :string,  :default => "localhost",       :desc => "The hostname your redis server is running on."
       argument     :redis_port,   :type => :string,  :default => "6379",            :desc => "The port your redis server is running on."
       class_option :redis_socket, :type => :string,                                 :desc => "Indicates the UNIX socket your redis server is running on (if it is)."
@@ -35,12 +34,6 @@ module Recommendable
       
       def finished
         puts "Done! Recommendable has been successfully installed. Please configure it in config/intializers/recommendable.rb"
-      end
-      
-      private
-      
-      def user_class
-        user_model.camelize
       end
     end
   end
