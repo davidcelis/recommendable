@@ -1,6 +1,6 @@
 module Recommendable
   class Ignore < ActiveRecord::Base
-    set_table_name 'recommendable_ignores'
+    self.table_name = 'recommendable_ignores'
 
     belongs_to :user, :class_name => Recommendable.user_class.to_s
     belongs_to :ignoreable, :polymorphic => :true

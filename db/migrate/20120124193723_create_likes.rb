@@ -6,12 +6,12 @@ class CreateLikes < ActiveRecord::Migration
       t.timestamps
     end
     
-    add_index :likes, :likeable_id
-    add_index :likes, :likeable_type
-    add_index :likes, [:user_id, :likeable_id, :likeable_type], :unique => true, :name => "user_like_constraint"
+    add_index :recommendable_likes, :likeable_id
+    add_index :recommendable_likes, :likeable_type
+    add_index :recommendable_likes, [:user_id, :likeable_id, :likeable_type], :unique => true, :name => "user_like_constraint"
   end
 
   def down
-    drop_table :likes
+    drop_table :recommendable_likes
   end
 end
