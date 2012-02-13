@@ -1,5 +1,7 @@
 module Recommendable
   class StashedItem < ActiveRecord::Base
+    set_table_name 'recommendable_stashed_items'
+
     belongs_to :user, :class_name => Recommendable.user_class.to_s
     belongs_to :stashable, :polymorphic => :true
     

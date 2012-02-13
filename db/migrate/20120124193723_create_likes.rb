@@ -1,6 +1,6 @@
 class CreateLikes < ActiveRecord::Migration
   def up
-    create_table :likes do |t|
+    create_table :recommendable_likes do |t|
       t.references :user
       t.references :likeable, :polymorphic => true
       t.timestamps

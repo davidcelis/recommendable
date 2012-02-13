@@ -1,5 +1,7 @@
 module Recommendable
   class Dislike < ActiveRecord::Base
+    set_table_name 'recommendable_dislikes'
+
     belongs_to :user, :class_name => Recommendable.user_class.to_s
     belongs_to :dislikeable, :polymorphic => :true
     

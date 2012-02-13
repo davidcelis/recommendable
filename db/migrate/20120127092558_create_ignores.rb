@@ -1,6 +1,6 @@
 class CreateIgnores < ActiveRecord::Migration
   def up
-    create_table :ignores do |t|
+    create_table :recommendable_ignores do |t|
       t.references :user
       t.references :ignoreable, :polymorphic => true
       t.timestamps

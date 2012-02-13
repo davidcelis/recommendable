@@ -1,6 +1,6 @@
 class CreateStashedItems < ActiveRecord::Migration
   def up
-    create_table :stashed_items do |t|
+    create_table :recommendable_stashed_items do |t|
       t.references :user
       t.references :stashable, :polymorphic => true
       t.timestamps
