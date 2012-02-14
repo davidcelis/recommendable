@@ -1,8 +1,37 @@
 Changelog
 =========
 
-0.1.4 (current version)
+0.1.5 (current version)
 -----------------------
+* Major bugfix: similarity values were, incorrectly, being calculated as 0.0 for every user pair. Sorry!
+* The tables for all models are now all prepended with "recommendable_" to avoid possible collision. If upgrading from a previous version, please do the following:
+
+``` bash
+$ rails g migration RenameRecommendableTables
+```
+
+And paste this into your new migration:
+
+``` ruby
+class RenameRecommendableTables < ActiveRecord::Migration
+  def up
+    rename_table :likes,         :recommendable_likes
+    rename_table :dislikes,      :recommendable_dislikes
+    rename_table :ignores,       :recommendable_ignores
+    rename_table :stashed_items, :recommendable_stashed_items
+  end
+
+  def down
+    rename_table :recommendable_likes,         :likes
+    rename_table :recommendable_dislikes,      :dislikes
+    rename_table :recommendable_ignores,       :ignores
+    rename_table :recommendable_stashed_items, :stashed_items
+  end
+end
+```
+
+0.1.4
+-----
 * `acts_as_recommendable` is no longer needed in your models
 * Instead of declaring `acts_as_recommended_to` in your User class, please use `recommends` instead, passing in a list of your recommendable models as a list of symbols (e.g. `recommends :movies, :books`)
 * Your initializer should no longer declare the user class. This is no longer necessary and is deprecated.
