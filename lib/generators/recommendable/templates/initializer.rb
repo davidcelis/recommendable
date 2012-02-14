@@ -12,4 +12,4 @@ require "resque-loner"
 
 # Tell Redis which database to use (usually between 0 and 15). The default of 0
 # is most likely okay unless you have another application using that database.
-Recommendable.redis.select "0"
+# Recommendable.redis.select "0"

@@ -109,7 +109,7 @@ DEPENDENCIES
   bundler (~> 1.0.0)
   miniskirt
   minitest
-  rails (>= 3.0.0)
+  rails (>= 3.1.0)
   redis (~> 2.2.0)
   resque (~> 1.19.0)
   resque-loner (~> 1.2.0)
