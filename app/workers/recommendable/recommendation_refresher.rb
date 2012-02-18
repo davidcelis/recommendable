@@ -3,10 +3,9 @@ module Recommendable
     include Resque::Plugins::UniqueJob
     @queue = :recommendable
     
-    def self.perform(user_id, other_ids)
+    def self.perform(user_id)
       user = Recommendable.user_class.find(user_id)
-      return if other_ids.empty?
-      user.send :update_similarities, other_ids
+      user.send :update_similarities
       user.send :update_recommendations
     end
   end

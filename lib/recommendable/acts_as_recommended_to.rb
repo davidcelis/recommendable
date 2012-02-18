@@ -44,7 +44,7 @@ module Recommendable
         return if likes?(object)
         completely_unrecommend(object)
         likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
-        Resque.enqueue RecommendationRefresher, self.id, object.send(:rates_by)
+        Resque.enqueue RecommendationRefresher, self.id
         true
       end
       
@@ -62,7 +62,7 @@ module Recommendable
       # @return true if object is unliked, nil if nothing happened
       def unlike(object)
         if likes.where(:likeable_id => object.id, :likeable_type => object.class.to_s).first.try(:destroy)
-          Resque.enqueue RecommendationRefresher, self.id, object.send(:rates_by)
+          Resque.enqueue RecommendationRefresher, self.id
           true
         end
       end
@@ -110,7 +110,7 @@ module Recommendable
         return if dislikes?(object)
         completely_unrecommend(object)
         dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
-        Resque.enqueue RecommendationRefresher, self.id, object.send(:rates_by)
+        Resque.enqueue RecommendationRefresher, self.id
         true
       end
       
@@ -128,7 +128,7 @@ module Recommendable
       # @return true if object is removed from self's dislikes, nil if nothing happened
       def undislike(object)
         if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s).first.try(:destroy)
-          Resque.enqueue RecommendationRefresher, self.id, object.send(:rates_by)
+          Resque.enqueue RecommendationRefresher, self.id
           true
         end
       end
@@ -620,13 +620,12 @@ module Recommendable
       # other users. This is called in the Resque job to refresh recommendations.
       #
       # @private
-      def update_similarities(rater_ids = nil)
+      def update_similarities
         return unless rated_anything?
         create_recommended_to_sets
-        rater_ids ||= Recommendable.user_class.select(:id).map!(&:id)
         
-        Recommendable.user_class.find(rater_ids).each do |rater|
-          next if self == rater
+        Recommendable.user_class.find_each do |rater|
+          next if self == rater || !rater.rated_anything?
           Recommendable.redis.zadd similarity_set, similarity_with(rater), rater.id
         end
         
