@@ -399,7 +399,7 @@ module Recommendable
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersection to a single recommendable type. By default, all recomendable types are considered
       # @option options [true, false] :return_records (true) Return the actual Model instances
-      # @return [Array] An array of IDs, or strings from Redis in the form of "#{likeable_type}:#{id}" if options[:class] is set
+      # @return [Array] Typically, an array of ActiveRecord objects (unless :return_records is false)
       def common_likes_with(rater, options = {})
         defaults = { :class => nil,
                      :return_records => true }
@@ -432,7 +432,7 @@ module Recommendable
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersection to a single recommendable type. By default, all recomendable types are considered
       # @option options [true, false] :return_records (true) Return the actual Model instances
-      # @return [Array] An array of IDs, or strings from Redis in the form of #{dislikeable_type}:#{id}" if options[:class] is set
+      # @return [Array] Typically, an array of ActiveRecord objects (unless :return_records is false)
       def common_dislikes_with(rater, options = {})
         defaults = { :class => nil,
                      :return_records => true }
@@ -467,7 +467,7 @@ module Recommendable
       # @param [Hash] options the options for this intersection
       # @option options [Class, String, Symbol] :class ('nil') Restrict the intersections to a single recommendable type. By default, all recomendable types are considered
       # @option options [true, false] :return_records (true) Return the actual Model instances
-      # @return [Array] An array of IDs, or strings from Redis in the form of #{recommendable_type}:#{id}" if options[:class] is set
+      # @return [Array] Typically, an array of ActiveRecord objects (unless :return_records is false)
       def disagreements_with(rater, options = {})
         defaults = { :class => nil,
                      :return_records => true }
