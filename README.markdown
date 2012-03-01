@@ -24,7 +24,7 @@ Installation
 Add the following to your Rails application's `Gemfile`:
 
 ``` ruby
-  gem "recommendable"
+  gem "recommendable", :git => "git://github.com/davidcelis/recommendable"
 ```
 
 After your `bundle install`, you can then run:
