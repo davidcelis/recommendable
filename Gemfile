@@ -13,5 +13,5 @@ group :development do
   gem "shoulda"
   gem "miniskirt"
   gem "yard",    "~> 0.6.0"
-  gem "bundler", "~> 1.0.0"
+  gem "bundler", "~> 1.1.0"
 end
