@@ -1,6 +1,5 @@
 = TODO
 
-* Use a Rack application?
 * Move dependencies to gemspec instead of Gemfile
 * Support Mongoid (and potentially other ORMs)
 * Allow the option NOT to queue up on like/dislike/ignore?
