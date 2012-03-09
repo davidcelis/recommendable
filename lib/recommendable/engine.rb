@@ -1,5 +1,6 @@
 module Recommendable
   class Engine < ::Rails::Engine
+    isolate_namespace Recommendable
     engine_name "recommendable"
     
     class << self
