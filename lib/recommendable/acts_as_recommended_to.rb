@@ -14,10 +14,10 @@ module Recommendable
         class_eval do
           Recommendable.user_class = self
           
-          has_many :likes, :class_name => "Recommendable::Like", :dependent => :destroy
-          has_many :dislikes, :class_name => "Recommendable::Dislike", :dependent => :destroy
-          has_many :ignores, :class_name => "Recommendable::Ignore", :dependent => :destroy
-          has_many :stashed_items, :class_name => "Recommendable::StashedItem", :dependent => :destroy
+          has_many :likes, :class_name => "Recommendable::Like", :dependent => :destroy, :foreign_key => :user_id
+          has_many :dislikes, :class_name => "Recommendable::Dislike", :dependent => :destroy, :foreign_key => :user_id
+          has_many :ignores, :class_name => "Recommendable::Ignore", :dependent => :destroy, :foreign_key => :user_id
+          has_many :stashed_items, :class_name => "Recommendable::StashedItem", :dependent => :destroy, :foreign_key => :user_id
           
           include LikeMethods
           include DislikeMethods
