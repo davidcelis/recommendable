@@ -9,10 +9,10 @@ module Recommendable
           
           has_many :likes, :as => :likeable, :dependent => :destroy, :class_name => "Recommendable::Like"
           has_many :dislikes, :as => :dislikeable, :dependent => :destroy, :class_name => "Recommendable::Dislike"
-          has_many :liked_by, :through => :likes, :source => :user
-          has_many :disliked_by, :through => :dislikes, :source => :user
           has_many :ignores, :as => :ignoreable, :dependent => :destroy, :class_name => "Recommendable::Ignore"
           has_many :stashes, :as => :stashable, :dependent => :destroy, :class_name => "Recommendable::StashedItem"
+          has_many :liked_by, :through => :likes, :source => :user
+          has_many :disliked_by, :through => :dislikes, :source => :user
           
           include LikeableMethods
           include DislikeableMethods

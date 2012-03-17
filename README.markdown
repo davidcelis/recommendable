@@ -1,4 +1,6 @@
-![Recommendable](http://i.imgur.com/xD8ve.png "Recommendable") [![Build Status](https://secure.travis-ci.org/davidcelis/recommendable.png)](http://travis-ci.org/davidcelis/recommendable)
+![Recommendable](http://i.imgur.com/xD8ve.png "Recommendable")
+
+[![Build Status](https://secure.travis-ci.org/davidcelis/recommendable.png)](http://travis-ci.org/davidcelis/recommendable)
 
 Recommendable is a Rails Engine to add Like/Dislike functionality to your 
 application. It uses Redis to generate recommendations quickly through [a
