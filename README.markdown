@@ -67,7 +67,9 @@ class User < ActiveRecord::Base
 end
 ```
 
-Just pass in a list of classes and that's it!
+Just pass in a list of classes and that's it! You can declare any model in 
+your app to receive recommendations; it does not have to be `User`. As long as 
+only one model calls the `recommends` method, you're fine!
 
 ### Liking/Disliking
 
