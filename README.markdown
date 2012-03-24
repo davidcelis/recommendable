@@ -108,9 +108,9 @@ wish to return a set of liked or disliked objects for only one of those
 models.
 
 ``` ruby
-current_user.liked_for(Movie) # or "movie", or :movie
+current_user.liked_movies
 #=> [#<Movie name: '2001: A Space Odyssey', year: 1968>, #<Movie name: 'Back to the Future', :year => 1985>]
-current_user.disliked_for(Show)
+current_user.disliked_shows
 #=> []
 ```
 
@@ -125,7 +125,7 @@ current_user.ignore weird_movie_nobody_wants_to_watch
 #=> true
 current_user.ignored
 #=> [#<Movie name: 'Cool World', year: 1998>]
-current_user.ignored_for(Show)
+current_user.ignored_shows
 #=> []
 ```
 
@@ -142,7 +142,7 @@ Additionally, an item can not be stashed if the user already likes or dislikes i
 movie_to_watch_later = Movie.create(:title => 'The Descendants', :year => 2011)
 current_user.stash(movie_to_watch_later)
 #=> true
-current_user.stashed
+current_user.stashed_movies
 #=> [#<Movie name: 'The Descendants', year: 2011>]
 # Later...
 current_user.like(movie_to_watch_later)
