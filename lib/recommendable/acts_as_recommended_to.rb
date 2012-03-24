@@ -25,6 +25,44 @@ module Recommendable
           include IgnoreMethods
           include RecommendationMethods
 
+          # def method_missing(method, *args, &block)
+          #   if method.to_s =~ /recommended_(.+)/
+          #     self.send "#{action}_for", $1.classify.constantize, args
+          #   else
+          #     if method.to_s =~ /(liked|disliked|ignored|stashed)_(.+)/
+          #       self.send "#{$1}_for", $2.classify.constantize
+          #     else
+          #       super
+          #     end
+          #   end
+          # end
+
+          def method_missing(method, *args, &block)
+            if method.to_s =~ /(liked|disliked|ignored|stashed|recommended)_(.+)/
+              begin
+                super unless $2.classify.constantize.acts_as_recommendable?
+
+                self.send "#{$1}_for", $2.classify.constantize
+              rescue NameError
+                super
+              end
+            else
+              super
+            end
+          end
+
+          def respond_to?(method)
+            if method.to_s =~ /(liked|disliked|ignored|stashed|recommended)_(.+)/
+              begin
+                $2.classify.constantize.acts_as_recommendable?
+              rescue NameError
+                false
+              end
+            else
+              super
+            end
+          end
+
           private :likes, :dislikes, :ignores, :stashed_items
         end
       end
@@ -41,9 +79,9 @@ module Recommendable
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def like(object)
         raise RecordNotRecommendableError unless object.recommendable?
-        return if likes?(object)
-        completely_unrecommend(object)
-        likes.create!(:likeable_id => object.id, :likeable_type => object.class.to_s)
+        return if likes? object
+        completely_unrecommend object
+        likes.create! :likeable_id => object.id, :likeable_type => object.class.to_s
         Resque.enqueue RecommendationRefresher, self.id
         true
       end
@@ -53,7 +91,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self likes object, false if not
       def likes?(object)
-        likes.exists?(:likeable_id => object.id, :likeable_type => object.class.to_s)
+        likes.exists? :likeable_id => object.id, :likeable_type => object.class.to_s
       end
       
       # Destroys a Recommendable::Like currently associating self with object
@@ -71,8 +109,10 @@ module Recommendable
       
       # @return [Array] an array of ActiveRecord objects that self has liked
       def liked
-        likes.map {|like| like.likeable}
+        Recommendable.recommendable_classes.flat_map { |klass| liked_for klass }
       end
+
+      private
 
       # Get a list of records belonging to a passed class that self currently
       # likes.
@@ -80,10 +120,8 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has liked belonging to klass
       def liked_for(klass)
-        klass.to_s.classify.constantize.find likes_for(klass).map(&:likeable_id)
+        likes.where(:likeable_type => klass).includes(:likeable).map(&:likeable)
       end
-
-      private
 
       # Get a list of Recommendable::Likes with a `#likeable_type` of the passed
       # class.
@@ -92,7 +130,7 @@ module Recommendable
       # @note You should not need to use this method. (see {#liked_for})
       # @private
       def likes_for(klass)
-        likes.where(:likeable_type => klass.to_s.classify)
+        likes.where :likeable_type => klass.to_s.classify
       end
     end
     
@@ -107,9 +145,9 @@ module Recommendable
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def dislike(object)
         raise RecordNotRecommendableError unless object.recommendable?
-        return if dislikes?(object)
-        completely_unrecommend(object)
-        dislikes.create!(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s)
+        return if dislikes? object
+        completely_unrecommend object
+        dislikes.create! :dislikeable_id => object.id, :dislikeable_type => object.class.to_s
         Resque.enqueue RecommendationRefresher, self.id
         true
       end
@@ -137,8 +175,10 @@ module Recommendable
       
       # @return [Array] an array of ActiveRecord objects that self has disliked
       def disliked
-        dislikes.map {|dislike| dislike.dislikeable}
+        Recommendable.recommendable_classes.flat_map { |klass| disliked_for(klass) }
       end
+
+      private
 
       # Get a list of records belonging to a passed class that self currently
       # dislikes.
@@ -146,10 +186,8 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has disliked belonging to klass
       def disliked_for(klass)
-        klass.to_s.classify.constantize.find dislikes_for(klass).map(&:dislikeable_id)
+        dislikes.where(:dislikeable_type => klass).includes(:dislikeable).map(&:dislikeable)
       end
-
-      private
       
       # Get a list of Recommendable::Dislikes with a `#dislikeable_type` of the
       # passed class.
@@ -158,7 +196,7 @@ module Recommendable
       # @note You should not need to use this method. (see {#disliked_for})
       # @private
       def dislikes_for(klass)
-        dislikes.where(:dislikeable_type => klass.to_s.classify)
+        dislikes.where :dislikeable_type => klass.to_s.classify
       end
     end
 
@@ -174,9 +212,9 @@ module Recommendable
       def stash(object)
         raise RecordNotRecommendableError unless object.recommendable?
         return if rated?(object) || stashed?(object)
-        unignore(object)
-        unpredict(object)
-        stashed_items.create!(:stashable_id => object.id, :stashable_type => object.class.to_s)
+        unignore object
+        unpredict object
+        stashed_items.create! :stashable_id => object.id, :stashable_type => object.class.to_s
         true
       end
       
@@ -185,7 +223,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self has stashed object, false if not
       def stashed?(object)
-        stashed_items.exists?(:stashable_id => object.id, :stashable_type => object.class.to_s)
+        stashed_items.exists? :stashable_id => object.id, :stashable_type => object.class.to_s
       end
       
       # Destroys a Recommendable::StashedItem currently associating self with object
@@ -200,8 +238,10 @@ module Recommendable
       #
       # @return [Array] an array of ActiveRecord objects that self has stashed
       def stashed
-        stashed_items.map {|item| item.stashable}
+        Recommendable.recommendable_classes.flat_map { |klass| stashed_for klass }
       end
+
+      private
 
       # Get a list of records belonging to a passed class that self currently
       # has stashed away for later.
@@ -209,19 +249,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has stashed belonging to klass
       def stashed_for(klass)
-        klass.to_s.classify.constantize.find stash_for(klass).map(&:stashable_id)
-      end
-
-      private
-
-      # Get a list of Recommendable::StashedItems with a stashable_type of the
-      # passed class.
-      #
-      # @param [Class, String, Symbol] klass the class for which you would like to return self's stashed items. Can be the class constant, or a String/Symbol representation of the class name.
-      # @note You should not need to use this method. (see {#stashed_for})
-      # @private
-      def stash_for(klass)
-        stashed_items.where(:stashable_type => klass.to_s.classify)
+        stashed_items.where(:stashable_type => klass).includes(:stashable).map(&:stashable)
       end
     end
     
@@ -236,9 +264,9 @@ module Recommendable
       # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def ignore(object)
         raise RecordNotRecommendableError unless object.recommendable?
-        return if ignored?(object)
-        completely_unrecommend(object)
-        ignores.create!(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
+        return if ignored? object
+        completely_unrecommend object
+        ignores.create! :ignoreable_id => object.id, :ignoreable_type => object.class.to_s
         true
       end
       
@@ -247,7 +275,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self has ignored object, false if not
       def ignored?(object)
-        ignores.exists?(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s)
+        ignores.exists? :ignoreable_id => object.id, :ignoreable_type => object.class.to_s
       end
       
       # Destroys a Recommendable::Ignore currently associating self with object
@@ -262,8 +290,10 @@ module Recommendable
       
       # @return [Array] an array of ActiveRecord objects that self has ignored
       def ignored
-        ignores.map {|ignore| ignore.ignoreable}
+        Recommendable.recommendable_classes.flat_map { |klass| ignored_for klass }
       end
+
+      private
 
       # Get a list of records belonging to a passed class that self is 
       # currently ignoring.
@@ -271,19 +301,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has ignored belonging to klass
       def ignored_for(klass)
-        klass.to_s.classify.constantize.find ignores_for(klass).map(&:ignoreable_id)
-      end
-
-      private
-      
-      # Get a list of Recommendable::Ignores with a `#ignoreable_type` of the
-      # passed class.
-      #
-      # @param [Class, String, Symbol] klass the class for which you would like to return self's ignores. Can be the class constant, or a String/Symbol representation of the class name.
-      # @note You should not need to use this method. (see {#ignored_for})
-      # @private
-      def ignores_for(klass)
-        ignores.where(:ignoreable_type => klass.to_s.classify)
+        ignores.where(:ignoreable_type => klass).includes(:ignoreable).map(&:ignoreable)
       end
     end
     
@@ -312,10 +330,10 @@ module Recommendable
       # @return [Array] An array of instances of your user class
       def similar_raters(options = {})
         defaults = { :count => 10 }
-        options = defaults.merge(options)
+        options = defaults.merge options
         
         rater_ids = Recommendable.redis.zrevrange(similarity_set, 0, options[:count] - 1).map(&:to_i)
-        raters = Recommendable.user_class.where("ID IN (?)", rater_ids)
+        raters = Recommendable.user_class.where "ID IN (?)", rater_ids
         
         # The query loses the ordering, so...
         return raters.sort do |x, y|
@@ -331,14 +349,12 @@ module Recommendable
       # @option options [Fixnum] :count (10) the number of recommendations to get
       # @return [Array] an array of ActiveRecord objects that are recommendable
       def recommendations(options = {})
-        defaults = { :count => 10 }
-        options = defaults.merge options
         return [] if likes.count + dislikes.count == 0
 
         unioned_predictions = "#{self.class}:#{id}:predictions"
-        Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map {|klass| predictions_set_for(klass)}
+        Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map { |klass| predictions_set_for(klass) }
         
-        recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, options[:count]).map do |object|
+        recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, 10).map do |object|
           klass, id = object.split(":")
           klass.constantize.find(id)
         end
@@ -346,23 +362,18 @@ module Recommendable
         Recommendable.redis.del(unioned_predictions) and return recommendations
       end
       
-      # Get a list of recommendations for self on a single recommendable type.
+      # Get a list of 10 recommendations for self on a single recommendable type.
       # Recommendations are returned in a descending order with the first index
       # being the object that self has been found most likely to enjoy.
       #
       # @param [Class, String, Symbol] klass the class to receive recommendations for. Can be the class constant, or a String/Symbol representation of the class name.
-      # @param [Hash] options the options for returning this list
-      # @option options [Fixnum] :count (10) the number of recommendations to get
       # @return [Array] an array of ActiveRecord objects that are recommendable
-      def recommendations_for(klass, options = {})
-        defaults = { :count => 10 }
-        options = defaults.merge options
-        
+      def recommended_for(klass)
         return [] if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(klass)) == 0
       
         recommendations = []
         i = 0
-        until recommendations.size == options[:count]
+        until recommendations.size == 10
           prediction = Recommendable.redis.zrevrange(predictions_set_for(klass), i, i).first
           return recommendations unless prediction # User might not have enough recommendations to return
           
