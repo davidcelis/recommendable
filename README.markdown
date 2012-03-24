@@ -200,7 +200,7 @@ these like so:
 ``` ruby
 current_user.recommendations
 #=> [#<Movie highly_recommended>, #<Show somewhat_recommended>, #<Movie meh>]
-current_user.recommendations_for(Show)
+current_user.recommended_shows
 #=> [#<Show somewhat_recommended>]
 ```
 

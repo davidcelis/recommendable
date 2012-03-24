@@ -235,7 +235,7 @@ class UserSpec < MiniTest::Spec
         @dave.send :update_recommendations
         
         @dave.similar_raters.must_include @frank
-        @dave.recommendations_for(Movie).must_include @movie2
+        @dave.recommended_movies.must_include @movie2
       end
       
       it "should order similar users by similarity" do
