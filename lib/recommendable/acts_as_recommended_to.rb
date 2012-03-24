@@ -25,18 +25,6 @@ module Recommendable
           include IgnoreMethods
           include RecommendationMethods
 
-          # def method_missing(method, *args, &block)
-          #   if method.to_s =~ /recommended_(.+)/
-          #     self.send "#{action}_for", $1.classify.constantize, args
-          #   else
-          #     if method.to_s =~ /(liked|disliked|ignored|stashed)_(.+)/
-          #       self.send "#{$1}_for", $2.classify.constantize
-          #     else
-          #       super
-          #     end
-          #   end
-          # end
-
           def method_missing(method, *args, &block)
             if method.to_s =~ /(liked|disliked|ignored|stashed|recommended)_(.+)/
               begin
