@@ -1,6 +1,7 @@
 module Recommendable
   class Ignore < ActiveRecord::Base
     self.table_name = 'recommendable_ignores'
+    attr_accessible :user_id, :ignoreable_id, :ignoreable_type
 
     belongs_to :user, :class_name => Recommendable.user_class.to_s, :foreign_key => :user_id
     belongs_to :ignoreable, :polymorphic => true
