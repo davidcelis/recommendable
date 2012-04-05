@@ -70,6 +70,7 @@ module Recommendable
         return if likes? object
         completely_unrecommend object
         likes.create! :likeable_id => object.id, :likeable_type => object.class.to_s
+        object.send :update_score
         Resque.enqueue RecommendationRefresher, self.id
         true
       end
@@ -88,6 +89,7 @@ module Recommendable
       # @return true if object is unliked, nil if nothing happened
       def unlike(object)
         if likes.where(:likeable_id => object.id, :likeable_type => object.class.to_s).first.try(:destroy)
+          object.send :update_score
           Resque.enqueue RecommendationRefresher, self.id
           true
         end
@@ -136,6 +138,7 @@ module Recommendable
         return if dislikes? object
         completely_unrecommend object
         dislikes.create! :dislikeable_id => object.id, :dislikeable_type => object.class.to_s
+        object.send :update_score
         Resque.enqueue RecommendationRefresher, self.id
         true
       end
@@ -154,6 +157,7 @@ module Recommendable
       # @return true if object is removed from self's dislikes, nil if nothing happened
       def undislike(object)
         if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s).first.try(:destroy)
+          object.send :update_score
           Resque.enqueue RecommendationRefresher, self.id
           true
         end
@@ -321,7 +325,7 @@ module Recommendable
         options = defaults.merge options
         
         rater_ids = Recommendable.redis.zrevrange(similarity_set, 0, options[:count] - 1).map(&:to_i)
-        raters = Recommendable.user_class.where "ID IN (?)", rater_ids
+        raters = Recommendable.user_class.find rater_ids
         
         # The query loses the ordering, so...
         return raters.sort do |x, y|
