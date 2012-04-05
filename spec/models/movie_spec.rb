@@ -2,6 +2,26 @@ require 'spec_helper'
 
 class MovieSpec < MiniTest::Spec
   describe Movie do
+    describe "before_destroy filters" do
+      before :each do
+        Recommendable.redis.flushdb
+
+        @user1 = Factory(:user)
+
+        @movie1 = Factory(:movie)
+        @movie2 = Factory(:movie)
+      end
+
+      it "should be removed from scores" do
+        @user1.like @movie1
+        @user1.like @movie2
+
+        @movie2.destroy
+
+        Movie.top(2).wont_include @movie2
+      end
+    end
+
     describe ".top" do
       before :each do
         Recommendable.redis.flushdb
