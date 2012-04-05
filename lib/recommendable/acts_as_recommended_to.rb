@@ -642,13 +642,13 @@ module Recommendable
         Recommendable.redis.del similarity_set
 
         Recommendable.user_class.find_each do |user|
-          Recommendable.redis.zrem user.similarity_set, self.id
+          Recommendable.redis.zrem user.send(:similarity_set), self.id
         end
 
         true
       end
 
-      def remove_from_recommendations
+      def remove_recommendations
         Recommendable.recommendable_classes.each do |klass|
           Recommendable.redis.del predictions_set_for(klass)
         end

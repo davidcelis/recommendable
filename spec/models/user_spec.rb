@@ -6,6 +6,34 @@ class UserSpec < MiniTest::Spec
   # really, there's nothing there of note.
   
   describe User do
+    describe "before_destroy filters" do
+      before :each do
+        Recommendable.redis.flushdb
+        @user1 = Factory(:user)
+        @user2 = Factory(:user)
+        @movie1 = Factory(:movie)
+        @movie2 = Factory(:movie)
+      end
+
+      it "should no longer be involved in similarities or predictions" do
+        @user1.like @movie1
+        @user1.like @movie2
+        @user2.like @movie1
+
+        @user1.send :update_similarities
+        @user2.send :update_similarities
+        @user2.send :update_recommendations
+
+        similarity_set = @user2.send :similarity_set
+        predictions_set = @user2.send :predictions_set_for, Movie
+        @user2.destroy
+
+        @user1.similar_raters.wont_include @user2 
+        Recommendable.redis.get(similarity_set).must_be_nil
+        Recommendable.redis.get(predictions_set).must_be_nil
+      end
+    end
+
     describe "that does not act_as_recommendable" do
       before :each do
         @user = Factory(:bully)
