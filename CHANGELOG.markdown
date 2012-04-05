@@ -1,8 +1,27 @@
 Changelog
 =========
 
-0.1.5 (current version)
+0.1.6 (current version)
 -----------------------
+* Dynamic finders for your User class:
+
+`current_user.liked_movies`
+`current_user.disliked_shows`
+`current_user.recommended_movies`
+
+* Implement sorting of recommendable models:
+
+``` ruby
+>> Movie.top(5)
+=> [#<Movie id: 14>, #<Movie id: 15>, #<Movie id: 13>, #<Movie id: 12>, #<Movie id: 11>]
+>> Movie.top
+=> #<Movie id: 14>
+```
+
+* Bugfix: users/recommendable objects will now be removed from Redis upon being destroyed
+
+0.1.5
+-----
 * Major bugfix: similarity values were, incorrectly, being calculated as 0.0 for every user pair. Sorry!
 * The tables for all models are now all prepended with "recommendable_" to avoid possible collision. If upgrading from a previous version, please do the following:
 
