@@ -25,6 +25,9 @@ module Recommendable
           include IgnoreMethods
           include RecommendationMethods
 
+          before_destroy :remove_from_similarities
+          before_destroy :remove_recommendations
+
           def method_missing(method, *args, &block)
             if method.to_s =~ /(liked|disliked|ignored|stashed|recommended)_(.+)/
               begin
@@ -633,6 +636,24 @@ module Recommendable
         end
         
         destroy_recommended_to_sets
+      end
+
+      def remove_from_similarities
+        Recommendable.redis.del similarity_set
+
+        Recommendable.user_class.find_each do |user|
+          Recommendable.redis.zrem user.similarity_set, self.id
+        end
+
+        true
+      end
+
+      def remove_from_recommendations
+        Recommendable.recommendable_classes.each do |klass|
+          Recommendable.redis.del predictions_set_for(klass)
+        end
+
+        true
       end
       
       # @private
