@@ -254,6 +254,36 @@ class UserSpec < MiniTest::Spec
         Recommendable.redis.del "User:#{@frank.id}:similarities"
         Recommendable.redis.del "User:#{@frank.id}:predictions:Movie"
       end
+
+      it "should have common likes with a friend" do
+        @dave.like @movie1
+        @dave.like @movie2
+        @dave.like @movie4
+
+        @frank.like @movie2
+        @frank.like @movie3
+        @frank.like @movie4
+
+        @dave.liked_movies_in_common_with(@frank).must_include @movie2
+        @dave.liked_movies_in_common_with(@frank).must_include @movie4
+        @dave.liked_movies_in_common_with(@frank).wont_include @movie1
+        @dave.liked_movies_in_common_with(@frank).wont_include @movie3
+      end
+
+      it "should have common dislikes with a friend" do
+        @dave.dislike @movie1
+        @dave.dislike @movie3
+        @dave.like    @movie4
+
+        @frank.dislike @movie2
+        @frank.dislike @movie3
+        @frank.dislike @movie4
+
+        @dave.disliked_movies_in_common_with(@frank).wont_include @movie2
+        @dave.disliked_movies_in_common_with(@frank).wont_include @movie4
+        @dave.disliked_movies_in_common_with(@frank).wont_include @movie1
+        @dave.disliked_movies_in_common_with(@frank).must_include @movie3
+      end
       
       it "should get populated sorted sets for similarities and recommendations" do
         @dave.like(@movie1)

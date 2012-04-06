@@ -13,7 +13,7 @@ require "resque-loner"
 # Resque also needs a connection to Redis. If you are currently initializing
 # Resque somewhere else, leave this commented out. Otherwise, let it use the
 # same Redis connection as Recommendable. If redis is running on localhost:6379,
-# You can leave this commented out.
+# you can leave this commented out.
 # Resque.redis = Recommendable.redis
 
 # Tell Redis which database to use (usually between 0 and 15). The default of 0

@@ -31,10 +31,10 @@ module Recommendable
             liked_by + disliked_by
           end
 
-          def self.top(count=1)
+          def self.top count = 1
             ids = Recommendable.redis.zrevrange(self.score_set, 0, count - 1).map(&:to_i)
 
-            items = self.find(ids)
+            items = self.find ids
 
             return items.sort do |x, y|
               ids.index(x.id) <=> ids.index(y.id)
@@ -49,7 +49,7 @@ module Recommendable
             z = 1.96
             n = likes.count + dislikes.count
 
-            phat = 1.0 * likes.count / n.to_f
+            phat = likes.count / n.to_f
             score = (phat + z*z/(2*n) - z * Math.sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n)
 
             Recommendable.redis.zadd self.class.score_set, score, self.id
