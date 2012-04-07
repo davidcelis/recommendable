@@ -50,7 +50,7 @@ module Recommendable
             end
           end
 
-          def respond_to? method
+          def respond_to? method, include_private = false
             if method.to_s =~ /^(liked|disliked|ignored|stashed|recommended)_(.+)$/ || \
                method.to_s =~ /^common_(liked|disliked)_(.+)_with$/
               begin
