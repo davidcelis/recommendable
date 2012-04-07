@@ -33,7 +33,7 @@ module Recommendable
               begin
                 super unless $2.classify.constantize.acts_as_recommendable?
                 
-                self.send "common_#{$1}_with", *args, { :class => $2.classify.constantize }
+                self.send "#{$1}_in_common_with", *args, { :class => $2.classify.constantize }
               rescue NameError
                 super
               end
