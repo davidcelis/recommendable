@@ -345,7 +345,7 @@ module Recommendable
         end
       end
 
-      def common_liked_with rater, options = {}
+      def liked_in_common_with rater, options = {}
         options.merge!({ :return_records => true })
         create_recommended_to_sets and rater.create_recommended_to_sets
         liked = common_likes_with rater, options
@@ -353,7 +353,7 @@ module Recommendable
         return liked
       end
 
-      def common_disliked_with rater, options = {}
+      def disliked_in_common_with rater, options = {}
         options.merge!({ :return_records => true })
         create_recommended_to_sets and rater.create_recommended_to_sets
         disliked = common_dislikes_with rater, options
@@ -431,6 +431,8 @@ module Recommendable
         -probability_of_liking(object)
       end
       
+      protected
+
       # Makes a call to Redis and intersects the sets of likes belonging to self
       # and rater.
       #
@@ -539,8 +541,6 @@ module Recommendable
         unignore object
         unpredict object
       end
-
-      protected
 
       # @private
       def likes_set_for klass
