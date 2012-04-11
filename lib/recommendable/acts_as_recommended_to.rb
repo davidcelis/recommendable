@@ -83,7 +83,7 @@ module Recommendable
         completely_unrecommend object
         likes.create! :likeable_id => object.id, :likeable_type => object.class.to_s
         object.send :update_score
-        Resque.enqueue RecommendationRefresher, self.id
+        Recommendable.enqueue self.id
         true
       end
       
@@ -102,7 +102,7 @@ module Recommendable
       def unlike object
         if likes.where(:likeable_id => object.id, :likeable_type => object.class.to_s).first.try(:destroy)
           object.send :update_score
-          Resque.enqueue RecommendationRefresher, self.id
+          Recommendable.enqueue self.id
           true
         end
       end
@@ -151,7 +151,7 @@ module Recommendable
         completely_unrecommend object
         dislikes.create! :dislikeable_id => object.id, :dislikeable_type => object.class.to_s
         object.send :update_score
-        Resque.enqueue RecommendationRefresher, self.id
+        Recommendable.enqueue self.id
         true
       end
       
@@ -170,7 +170,7 @@ module Recommendable
       def undislike object
         if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s).first.try(:destroy)
           object.send :update_score
-          Resque.enqueue RecommendationRefresher, self.id
+          Recommendable.enqueue self.id
           true
         end
       end

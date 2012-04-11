@@ -12,4 +12,8 @@ module Recommendable
   def self.recommendable_classes
     @@recommendable_classes ||= []
   end
+
+  def self.enqueue(user_id)
+    Resque.enqueue RecommendationRefresher, user_id
+  end
 end
