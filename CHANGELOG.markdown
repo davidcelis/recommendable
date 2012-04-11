@@ -1,13 +1,8 @@
 Changelog
 =========
 
-0.1.7 (current version)
+0.1.6 (current version)
 -----------------------
-* Recommendable now uses [Sidekiq](https://github.com/mperham/sidekiq) in lieu of [Resque](https://github.com/defunkt/resque). Please check the README for updated usage on having recommendations generate.
-* Fix a nasty bug that was causing `UninitializedConstant` errors to be thrown from the Resque worker for people using SQLite or PostgreSQL.
-
-0.1.6
------
 * Dynamic finders for your User class:
 
 `current_user.liked_movies`

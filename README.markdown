@@ -17,13 +17,14 @@ After bundling, run the installation generator:
 $ rails g recommendable:install
 ```
 
-Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a queue to have their recommendation updated. To have your queue processed as jobs come in, run Sidekiq:
+Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a Resque queue to have their recommendation updated. Start up resque like so:
 
 ``` bash
-$ bundle exec sidekiq -q recommendable
+$ QUEUE=recommendable rake environment resque:work
 ```
 
-For more information on sidekiq, head over to [mperham][sidekiq].
+You can run this command multiple times if you wish to start more than one
+worker. For more options on this task, head over to [defunkt/resque][resque].
 
 Usage
 -----
@@ -47,7 +48,7 @@ Installing Redis
 
 Recommendable requires Redis to deliver recommendations. The collaborative filtering logic is based almost entirely on set math, and Redis is blazing fast for this. _NOTE: Your redis database MUST be persistent._
 
-### Mac OS X
+### Homebrew
 
 For Mac OS X users, homebrew is by far the easiest way to install Redis.
 
@@ -55,17 +56,25 @@ For Mac OS X users, homebrew is by far the easiest way to install Redis.
 $ brew install redis
 ```
 
-### Linux
+### Via Resque
 
-For Linux users, you can install Redis via apt-get.
+Resque (which is also a dependency of recommendable) includes Rake tasks that
+will install and run Redis for you:
 
 ``` bash
-$ sudo apt-get install redis-server
+$ git clone git://github.com/defunkt/resque.git
+$ cd resque
+$ rake redis:install dtach:install
+$ rake redis:start
 ```
+
+Redis will now be running on localhost:6379. After a second, you can hit `ctrl-\` to detach and keep Redis running in the background.
 
 Contributing to recommendable
 -----------------------------
  
+Read the [Contributing][contributing] wiki page first. 
+
 Once you've made your great commits:
 
 1. [Fork][forking] recommendable
@@ -90,7 +99,8 @@ Copyright © 2012 David Celis. See LICENSE.txt for
 further details.
 
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
-[sidekiq]: https://github.com/mperham/sidekiq
+[resque]: https://github.com/defunkt/resque
+[contributing]: http://wiki.github.com/defunkt/resque/contributing
 [forking]: http://help.github.com/forking/
 [pull requests]: http://help.github.com/pull-requests/
 [collaborative filtering]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
