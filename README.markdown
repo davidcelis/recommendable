@@ -72,8 +72,6 @@ Redis will now be running on localhost:6379. After a second, you can hit `ctrl-\
 
 Contributing to recommendable
 -----------------------------
- 
-Read the [Contributing][contributing] wiki page first. 
 
 Once you've made your great commits:
 
@@ -100,7 +98,6 @@ further details.
 
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
 [resque]: https://github.com/defunkt/resque
-[contributing]: http://wiki.github.com/defunkt/resque/contributing
 [forking]: http://help.github.com/forking/
 [pull requests]: http://help.github.com/pull-requests/
 [collaborative filtering]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
