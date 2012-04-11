@@ -26,7 +26,6 @@ Gem::Specification.new do |s|
   
   s.add_dependency "rails", ">= 3.0.0"
   s.add_dependency "redis", "~> 2.2.0"
-  s.add_dependency "resque", ">= 1.19.0"
-  s.add_dependency "resque-loner", "~> 1.2.0"
+  s.add_dependency "sidekiq", "~> 1.0.0"
 end
 
