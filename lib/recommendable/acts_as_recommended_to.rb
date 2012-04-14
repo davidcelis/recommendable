@@ -122,7 +122,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has liked belonging to klass
       def liked_for klass
-        likes.where(:likeable_type => klass).includes(:likeable).map(&:likeable)
+        likes.where(:likeable_type => klass.to_s.classify).includes(:likeable).map(&:likeable)
       end
 
       # Get a list of Recommendable::Likes with a `#likeable_type` of the passed
@@ -190,7 +190,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has disliked belonging to klass
       def disliked_for klass
-        dislikes.where(:dislikeable_type => klass).includes(:dislikeable).map(&:dislikeable)
+        dislikes.where(:dislikeable_type => klass.to_s.classify).includes(:dislikeable).map(&:dislikeable)
       end
       
       # Get a list of Recommendable::Dislikes with a `#dislikeable_type` of the
@@ -253,7 +253,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has stashed belonging to klass
       def stashed_for klass
-        stashed_items.where(:stashable_type => klass).includes(:stashable).map(&:stashable)
+        stashed_items.where(:stashable_type => klass.to_s.classify).includes(:stashable).map(&:stashable)
       end
     end
     
@@ -305,7 +305,7 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has ignored belonging to klass
       def ignored_for klass
-        ignores.where(:ignoreable_type => klass).includes(:ignoreable).map(&:ignoreable)
+        ignores.where(:ignoreable_type => klass.to_s.classify).includes(:ignoreable).map(&:ignoreable)
       end
     end
     
