@@ -1,8 +1,27 @@
 Changelog
 =========
 
-0.1.6 (current version)
+0.1.9 (current version)
 -----------------------
+* Fix an issue with recommendable models implemented via STI 
+* Fix a library-wide typo of "ignoreable" to "ignorable"
+  * This will require a change in your database. Please, via a migration:
+  ```
+  rename_column :recommendable_ignores, :ignoreable_id, :ignorable_id
+  rename_column :recommendable_ignores, :ignoreable_type, :ignorable_type
+  ```
+
+0.1.8
+-----
+* Revert changes made in 0.1.7 due to licensing
+
+0.1.7
+-----
+* Yanked and no longer available.
+* Attempted switch from Resque to Sidekiq
+
+0.1.6
+-----
 * Dynamic finders for your User class:
 
 `current_user.liked_movies`
