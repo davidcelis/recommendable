@@ -2,6 +2,7 @@ require 'active_support/concern'
 
 module Recommendable
   module ActsAsRecommendedTo
+    include Recommendable::Helpers
     extend ActiveSupport::Concern
     
     module ClassMethods
@@ -81,7 +82,7 @@ module Recommendable
         raise RecordNotRecommendableError unless object.recommendable?
         return if likes? object
         completely_unrecommend object
-        likes.create! :likeable_id => object.id, :likeable_type => object.class.to_s
+        likes.create! :likeable_id => object.id, :likeable_type => object.class
         object.send :update_score
         Recommendable.enqueue self.id
         true
@@ -92,7 +93,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self likes object, false if not
       def likes? object
-        likes.exists? :likeable_id => object.id, :likeable_type => object.class.to_s
+        likes.exists? :likeable_id => object.id, :likeable_type => object.class.base_class.to_s
       end
       
       # Destroys a Recommendable::Like currently associating self with object
@@ -100,7 +101,7 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's likes
       # @return true if object is unliked, nil if nothing happened
       def unlike object
-        if likes.where(:likeable_id => object.id, :likeable_type => object.class.to_s).first.try(:destroy)
+        if likes.where(:likeable_id => object.id, :likeable_type => object.class.base_class.to_s).first.try(:destroy)
           object.send :update_score
           Recommendable.enqueue self.id
           true
@@ -122,7 +123,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has liked belonging to klass
       def liked_for klass
-        likes.where(:likeable_type => klass).includes(:likeable).map(&:likeable)
+        liked = if klass.sti?
+          likes.joins manual_join(klass, 'like')
+        else
+          likes.where(:likeable_type => klass).includes(:likeable)
+        end
+
+        liked.map(&:likeable)
       end
 
       # Get a list of Recommendable::Likes with a `#likeable_type` of the passed
@@ -132,7 +139,11 @@ module Recommendable
       # @note You should not need to use this method. (see {#liked_for})
       # @private
       def likes_for klass
-        likes.where :likeable_type => klass.to_s.classify
+        if klass.sti?
+          likes.joins manual_join(klass, 'like')
+        else
+          likes.where(:likeable_type => klass.to_s)
+        end
       end
     end
     
@@ -149,7 +160,7 @@ module Recommendable
         raise RecordNotRecommendableError unless object.recommendable?
         return if dislikes? object
         completely_unrecommend object
-        dislikes.create! :dislikeable_id => object.id, :dislikeable_type => object.class.to_s
+        dislikes.create! :dislikeable_id => object.id, :dislikeable_type => object.class
         object.send :update_score
         Recommendable.enqueue self.id
         true
@@ -160,7 +171,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self dislikes object, false if not
       def dislikes? object
-        dislikes.exists? :dislikeable_id => object.id, :dislikeable_type => object.class.to_s
+        dislikes.exists? :dislikeable_id => object.id, :dislikeable_type => object.class.base_class.to_s
       end
       
       # Destroys a Recommendable::Dislike currently associating self with object
@@ -168,7 +179,7 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's dislikes
       # @return true if object is removed from self's dislikes, nil if nothing happened
       def undislike object
-        if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.to_s).first.try(:destroy)
+        if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.base_class.to_s).first.try(:destroy)
           object.send :update_score
           Recommendable.enqueue self.id
           true
@@ -190,7 +201,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has disliked belonging to klass
       def disliked_for klass
-        dislikes.where(:dislikeable_type => klass).includes(:dislikeable).map(&:dislikeable)
+        disliked = if klass.sti?
+          dislikes.joins manual_join(klass, 'dislike')
+        else
+          dislikes.where(:dislikeable_type => klass).includes(:dislikeable)
+        end
+
+        disliked.map(&:dislikeable)
       end
       
       # Get a list of Recommendable::Dislikes with a `#dislikeable_type` of the
@@ -200,7 +217,11 @@ module Recommendable
       # @note You should not need to use this method. (see {#disliked_for})
       # @private
       def dislikes_for klass
-        dislikes.where :dislikeable_type => klass.to_s.classify
+        if klass.sti?
+          dislikes.joins manual_join(klass, 'dislike')
+        else
+          dislikes.where(:dislikeable_type => klass.to_s)
+        end
       end
     end
 
@@ -218,7 +239,7 @@ module Recommendable
         return if rated?(object) || stashed?(object)
         unignore object
         unpredict object
-        stashed_items.create! :stashable_id => object.id, :stashable_type => object.class.to_s
+        stashed_items.create! :stashable_id => object.id, :stashable_type => object.class
         true
       end
       
@@ -227,7 +248,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self has stashed object, false if not
       def stashed? object
-        stashed_items.exists? :stashable_id => object.id, :stashable_type => object.class.to_s
+        stashed_items.exists? :stashable_id => object.id, :stashable_type => object.class.base_class.to_s
       end
       
       # Destroys a Recommendable::StashedItem currently associating self with object
@@ -235,7 +256,7 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's stash
       # @return true if object is stashed, nil if nothing happened
       def unstash object
-        true if stashed_items.where(:stashable_id => object.id, :stashable_type => object.class.to_s).first.try(:destroy)
+        true if stashed_items.where(:stashable_id => object.id, :stashable_type => object.class.base_class.to_s).first.try(:destroy)
       end
       
       # Get a list of records that self has currently stashed for later
@@ -253,7 +274,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has stashed belonging to klass
       def stashed_for klass
-        stashed_items.where(:stashable_type => klass).includes(:stashable).map(&:stashable)
+        liked = if klass.sti?
+          stashes.joins manual_join(klass, 'stash')
+        else
+          stashes.where(:stashable_type => klass).includes(:stashable)
+        end
+
+        stashed.map(&:stashable)
       end
     end
     
@@ -270,7 +297,7 @@ module Recommendable
         raise RecordNotRecommendableError unless object.recommendable?
         return if ignored? object
         completely_unrecommend object
-        ignores.create! :ignoreable_id => object.id, :ignoreable_type => object.class.to_s
+        ignores.create! :ignoreable_id => object.id, :ignoreable_type => object.class
         true
       end
       
@@ -279,7 +306,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self has ignored object, false if not
       def ignored? object
-        ignores.exists? :ignoreable_id => object.id, :ignoreable_type => object.class.to_s
+        ignores.exists? :ignoreable_id => object.id, :ignoreable_type => object.class.base_class.to_s
       end
       
       # Destroys a Recommendable::Ignore currently associating self with object
@@ -287,7 +314,7 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's ignores
       # @return true if object is removed from self's ignores, nil if nothing happened
       def unignore object
-        true if ignores.where(:ignoreable_id => object.id, :ignoreable_type => object.class.to_s).first.try(:destroy)
+        true if ignores.where(:ignoreable_id => object.id, :ignoreable_type => object.class.base_class.to_s).first.try(:destroy)
       end
       
       # Get a list of records that self is currently ignoring
@@ -305,7 +332,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has ignored belonging to klass
       def ignored_for klass
-        ignores.where(:ignoreable_type => klass).includes(:ignoreable).map(&:ignoreable)
+        ignored = if klass.sti?
+          ignores.joins manual_join(klass, 'ignore')
+        else
+          ignores.where(:ignoreable_type => klass).includes(:ignoreable)
+        end
+
+        ignored.map(&:ignoreable)
       end
     end
     
@@ -397,7 +430,8 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class to receive recommendations for. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that are recommendable
       def recommended_for klass
-        return [] if likes_for(klass).count + dislikes_for(klass).count == 0 || Recommendable.redis.zcard(predictions_set_for(klass)) == 0
+        return [] if likes_for(klass.base_class).count + dislikes_for(klass.base_class).count == 0 || \
+                     Recommendable.redis.zcard(predictions_set_for(klass)) == 0
       
         recommendations = []
         i = 0

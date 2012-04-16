@@ -8,5 +8,9 @@ module Recommendable
     
     validates :user_id, :uniqueness => { :scope => [:dislikeable_id, :dislikeable_type],
                                          :message => "has already disliked this item" }
+
+    def dislikeable_type=(sType)
+      super sType.to_s.classify.constantize.base_class.to_s
+    end
   end
 end

@@ -8,5 +8,8 @@ module Recommendable
     
     validates :user_id, :uniqueness => { :scope => [:stashable_id, :stashable_type],
                                          :message => "has already stashed this item" }
+    def stashable_type=(sType)
+      super sType.to_s.classify.constantize.base_class.to_s
+    end
   end
 end

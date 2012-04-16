@@ -8,5 +8,9 @@ module Recommendable
     
     validates :user_id, :uniqueness => { :scope => [:likeable_id, :likeable_type],
                                          :message => "has already liked this item" }
+
+    def likeable_type=(sType)
+      super sType.to_s.classify.constantize.base_class.to_s
+    end
   end
 end

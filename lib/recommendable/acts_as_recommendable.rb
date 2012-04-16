@@ -7,12 +7,19 @@ module Recommendable
         class_eval do
           Recommendable.recommendable_classes << self
           
-          has_many :likes, :as => :likeable, :dependent => :destroy, :class_name => "Recommendable::Like"
-          has_many :dislikes, :as => :dislikeable, :dependent => :destroy, :class_name => "Recommendable::Dislike"
-          has_many :ignores, :as => :ignoreable, :dependent => :destroy, :class_name => "Recommendable::Ignore"
-          has_many :stashes, :as => :stashable, :dependent => :destroy, :class_name => "Recommendable::StashedItem"
-          has_many :liked_by, :through => :likes, :source => :user, :foreign_key => :user_id, :class_name => Recommendable.user_class.to_s
-          has_many :disliked_by, :through => :dislikes, :source => :user, :foreign_key => :user_id, :class_name => Recommendable.user_class.to_s
+          has_many :likes,    :as => :likeable, :dependent => :destroy,
+                              :class_name => "Recommendable::Like"
+          has_many :dislikes, :as => :dislikeable, :dependent => :destroy,
+                              :class_name => "Recommendable::Dislike"
+          has_many :ignores,  :as => :ignoreable, :dependent => :destroy,
+                              :class_name => "Recommendable::Ignore"
+          has_many :stashes,  :as => :stashable, :dependent => :destroy,
+                              :class_name => "Recommendable::StashedItem"
+
+          has_many :liked_by, :through => :likes, :source => :user, :foreign_key => :user_id,
+                              :class_name => Recommendable.user_class.to_s
+          has_many :disliked_by, :through => :dislikes, :source => :user, :foreign_key => :user_id,
+                              :class_name => Recommendable.user_class.to_s
           
           include LikeableMethods
           include DislikeableMethods
@@ -72,8 +79,8 @@ module Recommendable
           # {#create_recommendable_sets}
           # @private
           def destroy_recommendable_sets
-            Recommendable.redis.del "#{self.class}:#{id}:liked_by"
-            Recommendable.redis.del "#{self.class}:#{id}:disliked_by"
+            Recommendable.redis.del "#{self.class.base_class}:#{id}:liked_by"
+            Recommendable.redis.del "#{self.class.base_class}:#{id}:disliked_by"
           end
 
           # Returns an array of IDs of users that have liked or disliked this item.
@@ -92,12 +99,16 @@ module Recommendable
       end
 
       def acts_as_recommendable?() false end
+
+      def sti?() self.base_class != self end
+
+      private
     end
 
     # Instance methods.
     def recommendable?() self.class.acts_as_recommendable? end
 
-    def redis_key() "#{self.class}:#{id}" end
+    def redis_key() "#{self.class.base_class}:#{id}" end
 
     protected :redis_key
     
