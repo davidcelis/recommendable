@@ -11,7 +11,7 @@ module Recommendable
                               :class_name => "Recommendable::Like"
           has_many :dislikes, :as => :dislikeable, :dependent => :destroy,
                               :class_name => "Recommendable::Dislike"
-          has_many :ignores,  :as => :ignoreable, :dependent => :destroy,
+          has_many :ignores,  :as => :ignorable, :dependent => :destroy,
                               :class_name => "Recommendable::Ignore"
           has_many :stashes,  :as => :stashable, :dependent => :destroy,
                               :class_name => "Recommendable::StashedItem"

@@ -297,7 +297,7 @@ module Recommendable
         raise RecordNotRecommendableError unless object.recommendable?
         return if ignored? object
         completely_unrecommend object
-        ignores.create! :ignoreable_id => object.id, :ignoreable_type => object.class
+        ignores.create! :ignorable_id => object.id, :ignorable_type => object.class
         true
       end
       
@@ -306,7 +306,7 @@ module Recommendable
       # @param [Object] object the object you want to check
       # @return true if self has ignored object, false if not
       def ignored? object
-        ignores.exists? :ignoreable_id => object.id, :ignoreable_type => object.class.base_class.to_s
+        ignores.exists? :ignorable_id => object.id, :ignorable_type => object.class.base_class.to_s
       end
       
       # Destroys a Recommendable::Ignore currently associating self with object
@@ -314,7 +314,7 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's ignores
       # @return true if object is removed from self's ignores, nil if nothing happened
       def unignore object
-        true if ignores.where(:ignoreable_id => object.id, :ignoreable_type => object.class.base_class.to_s).first.try(:destroy)
+        true if ignores.where(:ignorable_id => object.id, :ignorable_type => object.class.base_class.to_s).first.try(:destroy)
       end
       
       # Get a list of records that self is currently ignoring
@@ -335,10 +335,10 @@ module Recommendable
         ignored = if klass.sti?
           ignores.joins manual_join(klass, 'ignore')
         else
-          ignores.where(:ignoreable_type => klass).includes(:ignoreable)
+          ignores.where(:ignorable_type => klass).includes(:ignorable)
         end
 
-        ignored.map(&:ignoreable)
+        ignored.map(&:ignorable)
       end
     end
     

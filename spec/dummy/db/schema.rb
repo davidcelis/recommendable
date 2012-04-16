@@ -46,15 +46,15 @@ ActiveRecord::Schema.define(:version => 20120131195416) do
 
   create_table "recommendable_ignores", :force => true do |t|
     t.integer  "user_id"
-    t.integer  "ignoreable_id"
-    t.string   "ignoreable_type"
+    t.integer  "ignorable_id"
+    t.string   "ignorable_type"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
   end
 
-  add_index "recommendable_ignores", ["ignoreable_id"], :name => "index_recommendable_ignores_on_ignoreable_id"
-  add_index "recommendable_ignores", ["ignoreable_type"], :name => "index_recommendable_ignores_on_ignoreable_type"
-  add_index "recommendable_ignores", ["user_id", "ignoreable_id", "ignoreable_type"], :name => "user_ignore_constraint", :unique => true
+  add_index "recommendable_ignores", ["ignorable_id"], :name => "index_recommendable_ignores_on_ignorable_id"
+  add_index "recommendable_ignores", ["ignorable_type"], :name => "index_recommendable_ignores_on_ignorable_type"
+  add_index "recommendable_ignores", ["user_id", "ignorable_id", "ignorable_type"], :name => "user_ignore_constraint", :unique => true
 
   create_table "recommendable_likes", :force => true do |t|
     t.integer  "user_id"
