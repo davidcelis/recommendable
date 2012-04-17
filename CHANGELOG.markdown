@@ -1,17 +1,22 @@
 Changelog
 =========
 
-0.1.9 (current version)
+0.2.0 (current version)
 -----------------------
 * NOTE: This release is NOT backwards compatible. Please migrate your databases:
 
 ```
 rename_column :recommendable_ignores, :ignoreable_id, :ignorable_id
 rename_column :recommendable_ignores, :ignoreable_type, :ignorable_type
+rename_table  :recommendable_stashed_items, :recommendable_stashes
 ```
 
 * Fix an issue with recommendable models implemented via STI 
 * Fix a library-wide typo of "ignoreable" to "ignorable"
+
+0.1.9
+-----
+* Yanked due to breaking bug
 
 0.1.8
 -----
