@@ -277,7 +277,7 @@ module Recommendable
         stashed = if klass.sti?
           stashed_items.joins manual_join(klass, 'stash')
         else
-          stashed_items.where(:stashable_type => klass).includes(:stashable)
+          stashed_items.where(:stashable_type => klass.to_s).includes(:stashable)
         end
 
         stashed.map(&:stashable)
