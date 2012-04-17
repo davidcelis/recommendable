@@ -48,8 +48,8 @@ ActiveRecord::Schema.define(:version => 20120131195416) do
     t.integer  "user_id"
     t.integer  "ignorable_id"
     t.string   "ignorable_type"
-    t.datetime "created_at",      :null => false
-    t.datetime "updated_at",      :null => false
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
   end
 
   add_index "recommendable_ignores", ["ignorable_id"], :name => "index_recommendable_ignores_on_ignorable_id"
