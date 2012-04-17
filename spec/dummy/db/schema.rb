@@ -68,7 +68,7 @@ ActiveRecord::Schema.define(:version => 20120131195416) do
   add_index "recommendable_likes", ["likeable_type"], :name => "index_recommendable_likes_on_likeable_type"
   add_index "recommendable_likes", ["user_id", "likeable_id", "likeable_type"], :name => "user_like_constraint", :unique => true
 
-  create_table "recommendable_stashed_items", :force => true do |t|
+  create_table "recommendable_stashes", :force => true do |t|
     t.integer  "user_id"
     t.integer  "stashable_id"
     t.string   "stashable_type"
@@ -76,9 +76,9 @@ ActiveRecord::Schema.define(:version => 20120131195416) do
     t.datetime "updated_at",     :null => false
   end
 
-  add_index "recommendable_stashed_items", ["stashable_id"], :name => "index_recommendable_stashed_items_on_stashable_id"
-  add_index "recommendable_stashed_items", ["stashable_type"], :name => "index_recommendable_stashed_items_on_stashable_type"
-  add_index "recommendable_stashed_items", ["user_id", "stashable_id", "stashable_type"], :name => "user_stashed_constraint", :unique => true
+  add_index "recommendable_stashes", ["stashable_id"], :name => "index_recommendable_stashes_on_stashable_id"
+  add_index "recommendable_stashes", ["stashable_type"], :name => "index_recommendable_stashes_on_stashable_type"
+  add_index "recommendable_stashes", ["user_id", "stashable_id", "stashable_type"], :name => "user_stashed_constraint", :unique => true
 
   create_table "users", :force => true do |t|
     t.string   "username"

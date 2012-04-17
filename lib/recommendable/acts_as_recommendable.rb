@@ -14,7 +14,7 @@ module Recommendable
           has_many :ignores,  :as => :ignorable, :dependent => :destroy,
                               :class_name => "Recommendable::Ignore"
           has_many :stashes,  :as => :stashable, :dependent => :destroy,
-                              :class_name => "Recommendable::StashedItem"
+                              :class_name => "Recommendable::Stash"
 
           has_many :liked_by, :through => :likes, :source => :user, :foreign_key => :user_id,
                               :class_name => Recommendable.user_class.to_s

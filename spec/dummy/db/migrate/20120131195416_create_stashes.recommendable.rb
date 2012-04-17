@@ -1,3 +1,4 @@
+# This migration comes from recommendable (originally 20120131173909)
 class CreateStashes < ActiveRecord::Migration
   def up
     create_table :recommendable_stashes do |t|
@@ -15,3 +16,4 @@ class CreateStashes < ActiveRecord::Migration
     drop_table :recommendable_stashes
   end
 end
+

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-class StashedItemSpec < MiniTest::Spec
-  describe Recommendable::StashedItem do
+class StashSpec < MiniTest::Spec
+  describe Recommendable::Stash do
     before :each do
       @user = User.create(:username => "dave")
     end
@@ -21,7 +21,7 @@ class StashedItemSpec < MiniTest::Spec
       
       @user.stash(movie).must_equal true
       @user.stash(movie).must_be_nil
-      Recommendable::StashedItem.count.must_equal 1
+      Recommendable::Stash.count.must_equal 1
     end
   end
 end

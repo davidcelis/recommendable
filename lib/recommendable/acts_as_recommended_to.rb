@@ -18,7 +18,7 @@ module Recommendable
           has_many :likes, :class_name => "Recommendable::Like", :dependent => :destroy, :foreign_key => :user_id
           has_many :dislikes, :class_name => "Recommendable::Dislike", :dependent => :destroy, :foreign_key => :user_id
           has_many :ignores, :class_name => "Recommendable::Ignore", :dependent => :destroy, :foreign_key => :user_id
-          has_many :stashed_items, :class_name => "Recommendable::StashedItem", :dependent => :destroy, :foreign_key => :user_id
+          has_many :stashed_items, :class_name => "Recommendable::Stash", :dependent => :destroy, :foreign_key => :user_id
           
           include LikeMethods
           include DislikeMethods
@@ -226,7 +226,7 @@ module Recommendable
     end
 
     module StashMethods
-      # Creates a Recommendable::StashedItem to associate self to a passed object.
+      # Creates a Recommendable::Stash to associate self to a passed object.
       # This will remove the item from this user's recommendations.
       # If self is currently found to have liked or disliked the object, nothing
       # will happen. It will, however, be unignored.
@@ -251,7 +251,7 @@ module Recommendable
         stashed_items.exists? :stashable_id => object.id, :stashable_type => object.class.base_class.to_s
       end
       
-      # Destroys a Recommendable::StashedItem currently associating self with object
+      # Destroys a Recommendable::Stash currently associating self with object
       #
       # @param [Object] object the object you want to remove from self's stash
       # @return true if object is stashed, nil if nothing happened
@@ -274,10 +274,10 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has stashed belonging to klass
       def stashed_for klass
-        liked = if klass.sti?
-          stashes.joins manual_join(klass, 'stash')
+        stashed = if klass.sti?
+          stashed_items.joins manual_join(klass, 'stash')
         else
-          stashes.where(:stashable_type => klass).includes(:stashable)
+          stashed_items.where(:stashable_type => klass).includes(:stashable)
         end
 
         stashed.map(&:stashable)
