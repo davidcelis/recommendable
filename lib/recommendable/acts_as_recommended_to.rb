@@ -126,7 +126,7 @@ module Recommendable
         liked = if klass.sti?
           likes.joins manual_join(klass, 'like')
         else
-          likes.where(:likeable_type => klass).includes(:likeable)
+          likes.where(:likeable_type => klass.to_s).includes(:likeable)
         end
 
         liked.map(&:likeable)
@@ -204,7 +204,7 @@ module Recommendable
         disliked = if klass.sti?
           dislikes.joins manual_join(klass, 'dislike')
         else
-          dislikes.where(:dislikeable_type => klass).includes(:dislikeable)
+          dislikes.where(:dislikeable_type => klass.to_s).includes(:dislikeable)
         end
 
         disliked.map(&:dislikeable)
@@ -335,7 +335,7 @@ module Recommendable
         ignored = if klass.sti?
           ignores.joins manual_join(klass, 'ignore')
         else
-          ignores.where(:ignorable_type => klass).includes(:ignorable)
+          ignores.where(:ignorable_type => klass.to_s).includes(:ignorable)
         end
 
         ignored.map(&:ignorable)
