@@ -100,7 +100,9 @@ module Recommendable
 
       def acts_as_recommendable?() false end
 
-      def sti?() self.base_class != self end
+      def sti?
+        self.base_class != self && self.base_class.table_name == self.table_name
+      end
 
       private
     end
