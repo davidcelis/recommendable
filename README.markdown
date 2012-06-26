@@ -2,6 +2,11 @@
 
 Recommendable is an engine for Rails 3 applications to quickly add the ability for your users to Like/Dislike items and receive recommendations for new items. It uses Redis to store your recommendations and keep them sorted by how good the recommendation is.
 
+Requirements
+------------
+* Ruby 1.9.2 (1.9.x if using from git. May run on 1.8.7, I don't know)
+* Rails 3.x
+
 Installation
 ------------
 

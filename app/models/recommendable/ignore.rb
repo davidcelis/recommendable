@@ -8,6 +8,7 @@ module Recommendable
     
     validates :user_id, :uniqueness => { :scope => [:ignorable_id, :ignorable_type],
                                          :message => "has already ignored this item" }
+    
     def ignorable_type=(sType)
       super sType.to_s.classify.constantize.base_class.to_s
     end
