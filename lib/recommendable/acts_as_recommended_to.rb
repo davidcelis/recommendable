@@ -20,14 +20,18 @@ module Recommendable
           has_many :ignores, :class_name => "Recommendable::Ignore", :dependent => :destroy, :foreign_key => :user_id
           has_many :stashed_items, :class_name => "Recommendable::Stash", :dependent => :destroy, :foreign_key => :user_id
           
+          %w( like dislike ignore stash ).each do |action|
+            class_attribute :"_before_#{action}_callbacks"
+            class_attribute :"_after_#{action}_callbacks"
+          end
+
           include LikeMethods
           include DislikeMethods
           include StashMethods
           include IgnoreMethods
           include RecommendationMethods
 
-          before_destroy :remove_from_similarities
-          before_destroy :remove_recommendations
+          before_destroy :remove_from_similarities, :remove_recommendations
 
           def method_missing method, *args, &block
             if method.to_s =~ /^(liked|disliked)_(.+)_in_common_with$/
@@ -112,7 +116,7 @@ module Recommendable
       
       # @return [Array] an array of ActiveRecord objects that self has liked
       def liked
-        Recommendable.recommendable_classes.flat_map { |klass| liked_for klass }
+        Recommendable.recommendable_classes.map { |klass| liked_for klass }.flatten
       end
 
       private
@@ -190,7 +194,7 @@ module Recommendable
       
       # @return [Array] an array of ActiveRecord objects that self has disliked
       def disliked
-        Recommendable.recommendable_classes.flat_map { |klass| disliked_for klass }
+        Recommendable.recommendable_classes.map { |klass| disliked_for klass }.flatten
       end
 
       private
@@ -263,7 +267,7 @@ module Recommendable
       #
       # @return [Array] an array of ActiveRecord objects that self has stashed
       def stashed
-        Recommendable.recommendable_classes.flat_map { |klass| stashed_for klass }
+        Recommendable.recommendable_classes.map { |klass| stashed_for klass }.flatten
       end
 
       private
@@ -321,7 +325,7 @@ module Recommendable
       
       # @return [Array] an array of ActiveRecord objects that self has ignored
       def ignored
-        Recommendable.recommendable_classes.flat_map { |klass| ignored_for klass }
+        Recommendable.recommendable_classes.map { |klass| ignored_for klass }.flatten
       end
 
       private
@@ -483,7 +487,7 @@ module Recommendable
           in_common = Recommendable.redis.sinter likes_set_for(options[:class]), rater.likes_set_for(options[:class])
           in_common = options[:class].to_s.classify.constantize.find in_common if options[:return_records]
         else
-          in_common = Recommendable.recommendable_classes.flat_map do |klass|
+          in_common = Recommendable.recommendable_classes.map do |klass|
             things = Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass))
 
             if options[:return_records]
@@ -494,7 +498,7 @@ module Recommendable
           end
         end
 
-        in_common
+        in_common.flatten
       end
       
       # Makes a call to Redis and intersects the sets of dislikes belonging to
@@ -513,7 +517,7 @@ module Recommendable
           in_common = Recommendable.redis.sinter dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])
           in_common = options[:class].to_s.classify.constantize.find in_common if options[:return_records]
         else
-          in_common = Recommendable.recommendable_classes.flat_map do |klass|
+          in_common = Recommendable.recommendable_classes.map do |klass|
             things = Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass))
 
             if options[:return_records]
@@ -524,7 +528,7 @@ module Recommendable
           end
         end
 
-        in_common
+        in_common.flatten
       end
       
       # Makes a call to Redis and intersects self's set of likes with rater's
@@ -546,7 +550,7 @@ module Recommendable
           disagreements += Recommendable.redis.sinter(dislikes_set_for(options[:class]), rater.likes_set_for(options[:class]))
           disagreements = options[:class].to_s.classify.constantize.find disagreements if options[:return_records]
         else
-          disagreements = Recommendable.recommendable_classes.flat_map do |klass|
+          disagreements = Recommendable.recommendable_classes.map do |klass|
             things = Recommendable.redis.sinter(likes_set_for(klass), rater.dislikes_set_for(klass))
             things += Recommendable.redis.sinter(dislikes_set_for(klass), rater.likes_set_for(klass))
             
@@ -558,7 +562,7 @@ module Recommendable
           end
         end
 
-        disagreements
+        disagreements.flatten
       end
 
       # Used internally during liking/disliking/stashing/ignoring objects. This
