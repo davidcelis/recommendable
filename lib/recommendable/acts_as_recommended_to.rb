@@ -37,8 +37,8 @@ module Recommendable
             if method.to_s =~ /^(liked|disliked)_(.+)_in_common_with$/
               begin
                 super unless $2.classify.constantize.acts_as_recommendable?
-                
-                self.send "#{$1}_in_common_with", *args, { :class => $2.classify.constantize }
+
+                self.send "#{$1}_in_common_with", [*args], { :class => $2.classify.constantize }
               rescue NameError
                 super
               end
@@ -383,6 +383,7 @@ module Recommendable
       end
 
       def liked_in_common_with rater, options = {}
+        rater = rater.first
         options.merge!({ :return_records => true })
         create_recommended_to_sets and rater.create_recommended_to_sets
         liked = common_likes_with rater, options
@@ -391,6 +392,7 @@ module Recommendable
       end
 
       def disliked_in_common_with rater, options = {}
+        rater = rater.first
         options.merge!({ :return_records => true })
         create_recommended_to_sets and rater.create_recommended_to_sets
         disliked = common_dislikes_with rater, options
