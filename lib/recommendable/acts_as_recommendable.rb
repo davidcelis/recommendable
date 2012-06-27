@@ -24,7 +24,7 @@ module Recommendable
           include LikeableMethods
           include DislikeableMethods
 
-          before_destroy :remove_from_scores
+          before_destroy :remove_from_scores, :remove_from_recommendations
           
           def self.acts_as_recommendable?() true end
 
@@ -65,6 +65,10 @@ module Recommendable
           def remove_from_scores
             Recommendable.redis.zrem self.class.score_set, self.id
             true
+          end
+
+          def remove_from_recommendations
+            Recommendable.user_class.each { |user| user.completely_unrecommend self }
           end
           
           # Used for setup purposes. Calls convenience methods to create sets

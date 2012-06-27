@@ -563,10 +563,7 @@ module Recommendable
       # param [Object] object the object to destroy Recommendable models for
       # @private
       def completely_unrecommend object
-        unlike object
-        undislike object
-        unstash object
-        unignore object
+        unlike object || undislike object || unstash object || unignore object
         unpredict object
       end
 
