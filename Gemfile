@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 # Add dependencies required to use your gem here.
 gem 'rails',        '>= 3.1.0'
-gem 'redis',        '~> 2.2.0'
+gem 'redis',        '>= 2.2.0'
 gem 'resque',       '~> 1.19.0'
 gem 'resque-loner', '~> 1.2.0'
 
