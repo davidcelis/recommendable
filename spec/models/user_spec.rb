@@ -295,6 +295,19 @@ class UserSpec < MiniTest::Spec
         @dave.similar_raters.must_include @frank
         @dave.recommended_movies.must_include @movie2
       end
+
+      it "should return only the number of specified recommendations" do
+        @dave.like(@movie1)
+        @frank.like(@movie1)
+        @frank.like(@movie2)
+        @frank.like(@movie3)
+        @frank.like(@movie4)
+        @dave.send :update_similarities
+        @dave.send :update_recommendations
+
+        @dave.recommendations(2).size.must_equal 2
+        @dave.recommended_movies(1).size.must_equal 1
+      end
       
       it "should order similar users by similarity" do
         @dave.like(@movie1)

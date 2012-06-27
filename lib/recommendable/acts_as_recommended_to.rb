@@ -19,11 +19,6 @@ module Recommendable
           has_many :dislikes, :class_name => "Recommendable::Dislike", :dependent => :destroy, :foreign_key => :user_id
           has_many :ignores, :class_name => "Recommendable::Ignore", :dependent => :destroy, :foreign_key => :user_id
           has_many :stashed_items, :class_name => "Recommendable::Stash", :dependent => :destroy, :foreign_key => :user_id
-          
-          %w( like dislike ignore stash ).each do |action|
-            class_attribute :"_before_#{action}_callbacks"
-            class_attribute :"_after_#{action}_callbacks"
-          end
 
           include LikeMethods
           include DislikeMethods
@@ -42,7 +37,15 @@ module Recommendable
               rescue NameError
                 super
               end
-            elsif method.to_s =~ /^(liked|disliked|ignored|stashed|recommended)_(.+)$/
+            elsif method.to_s =~ /^recommended_(.+)$/
+              begin
+                super unless $1.classify.constantize.acts_as_recommendable?
+
+                self.send :recommended_for, $1.classify.constantize, *args
+              rescue NameError
+                super
+              end
+            elsif method.to_s =~ /^(liked|disliked|ignored|stashed)_(.+)$/
               begin
                 super unless $2.classify.constantize.acts_as_recommendable?
 
@@ -410,16 +413,15 @@ module Recommendable
       # Recommendations are returned in a descending order with the first index
       # being the object that self has been found most likely to enjoy.
       #
-      # @param [Hash] options the options for returning this list
-      # @option options [Fixnum] :count (10) the number of recommendations to get
+      # @param [Fixnum] count the number of recmomendations to return
       # @return [Array] an array of ActiveRecord objects that are recommendable
-      def recommendations options = {}
+      def recommendations count = 10
         return [] if likes.count + dislikes.count == 0
 
         unioned_predictions = "#{self.class}:#{id}:predictions"
         Recommendable.redis.zunionstore unioned_predictions, Recommendable.recommendable_classes.map { |klass| predictions_set_for klass }
         
-        recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, 10).map do |object|
+        recommendations = Recommendable.redis.zrevrange(unioned_predictions, 0, count - 1).map do |object|
           klass, id = object.split(":")
           klass.constantize.find(id)
         end
@@ -427,21 +429,20 @@ module Recommendable
         Recommendable.redis.del(unioned_predictions) and return recommendations
       end
       
-      # Get a list of 10 recommendations for self on a single recommendable type.
+      # Get a list of recommendations for self on a single recommendable type.
       # Recommendations are returned in a descending order with the first index
       # being the object that self has been found most likely to enjoy.
       #
       # @param [Class, String, Symbol] klass the class to receive recommendations for. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that are recommendable
-      def recommended_for klass
+      def recommended_for klass, count = 10
         return [] if likes_for(klass.base_class).count + dislikes_for(klass.base_class).count == 0 || \
                      Recommendable.redis.zcard(predictions_set_for(klass)) == 0
-      
         recommendations = []
-        i = 0
-        until recommendations.size == 10
+
+        (0...count).each do |i|
           prediction = Recommendable.redis.zrevrange(predictions_set_for(klass), i, i).first
-          return recommendations unless prediction # User might not have enough recommendations to return
+          break unless prediction
           
           object = klass.to_s.classify.constantize.find(prediction.split(":")[1])
           recommendations << object
