@@ -37,19 +37,11 @@ module Recommendable
               rescue NameError
                 super
               end
-            elsif method.to_s =~ /^recommended_(.+)$/
-              begin
-                super unless $1.classify.constantize.acts_as_recommendable?
-
-                self.send :recommended_for, $1.classify.constantize, *args
-              rescue NameError
-                super
-              end
-            elsif method.to_s =~ /^(liked|disliked|ignored|stashed)_(.+)$/
+            elsif method.to_s =~ /^(liked|disliked|ignored|stashed|recommended)_(.+)$/
               begin
                 super unless $2.classify.constantize.acts_as_recommendable?
 
-                self.send "#{$1}_for", $2.classify.constantize
+                self.send "#{$1}_for", $2.classify.constantize, *args
               rescue NameError
                 super
               end
@@ -59,8 +51,7 @@ module Recommendable
           end
 
           def respond_to? method, include_private = false
-            if method.to_s =~ /^(liked|disliked|ignored|stashed|recommended)_(.+)$/ || \
-               method.to_s =~ /^common_(liked|disliked)_(.+)_with$/
+            if method.to_s =~ /^(liked|disliked|ignored|stashed|recommended)_(.+)$/ || method.to_s =~ /^common_(liked|disliked)_(.+)_with$/
               begin
                 $2.classify.constantize.acts_as_recommendable?
               rescue NameError
@@ -130,13 +121,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has liked belonging to klass
       def liked_for klass
-        liked = if klass.sti?
-          likes.joins manual_join(klass, 'like')
+        ids = if klass.sti?
+          likes.joins(manual_join(klass, 'like')).map(&:likeable_id)
         else
-          likes.where(:likeable_type => klass.to_s).includes(:likeable)
+          likes.where(:likeable_type => klass.to_s).map(&:likeable_id)
         end
 
-        liked.map(&:likeable)
+        klass.where('ID IN (?)', ids)
       end
 
       # Get a list of Recommendable::Likes with a `#likeable_type` of the passed
@@ -208,13 +199,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has disliked belonging to klass
       def disliked_for klass
-        disliked = if klass.sti?
-          dislikes.joins manual_join(klass, 'dislike')
+        ids = if klass.sti?
+          dislikes.joins(manual_join(klass, 'dislike')).map(&:dislikeable_id)
         else
-          dislikes.where(:dislikeable_type => klass.to_s).includes(:dislikeable)
+          dislikes.where(:dislikeable_type => klass.to_s).map(&:dislikeable_id)
         end
 
-        disliked.map(&:dislikeable)
+        klass.where('ID IN (?)', ids)
       end
       
       # Get a list of Recommendable::Dislikes with a `#dislikeable_type` of the
@@ -281,13 +272,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has stashed belonging to klass
       def stashed_for klass
-        stashed = if klass.sti?
-          stashed_items.joins manual_join(klass, 'stash')
+        ids = if klass.sti?
+          stashed_items.joins(manual_join(klass, 'stash')).map(&:stashable_id)
         else
-          stashed_items.where(:stashable_type => klass.to_s).includes(:stashable)
+          stashed_items.where(:stashable_type => klass.to_s).map(&:stashable_id)
         end
 
-        stashed.map(&:stashable)
+        klass.where('ID IN (?)', ids)
       end
     end
     
@@ -339,13 +330,13 @@ module Recommendable
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
       # @return [Array] an array of ActiveRecord objects that self has ignored belonging to klass
       def ignored_for klass
-        ignored = if klass.sti?
-          ignores.joins manual_join(klass, 'ignore')
+        ids = if klass.sti?
+          ignores.joins(manual_join(klass, 'ignore')).map(&:ignoreable_id)
         else
-          ignores.where(:ignorable_type => klass.to_s).includes(:ignorable)
+          ignores.where(:ignoreable_type => klass.to_s).map(&:ignoreable_id)
         end
 
-        ignored.map(&:ignorable)
+        klass.where('ID IN (?)', ids)
       end
     end
     
