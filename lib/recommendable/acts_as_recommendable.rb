@@ -68,7 +68,9 @@ module Recommendable
           end
 
           def remove_from_recommendations
-            Recommendable.user_class.each { |user| user.completely_unrecommend self }
+            Recommendable.user_class.find_each do |user|
+              user.send :completely_unrecommend, self
+            end
           end
           
           # Used for setup purposes. Calls convenience methods to create sets

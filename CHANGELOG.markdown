@@ -1,8 +1,13 @@
 Changelog
 =========
 
-0.2.0 (current version)
------------------------
+1.0 (current version)
+---------------------
+
+
+
+0.2.0
+-----
 * NOTE: This release is NOT backwards compatible. Please migrate your databases:
 
 ```
