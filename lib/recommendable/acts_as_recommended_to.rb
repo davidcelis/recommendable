@@ -119,7 +119,7 @@ module Recommendable
       # likes.
       #
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
-      # @return [Array] an array of ActiveRecord objects that self has liked belonging to klass
+      # @return [ActiveRecord::Relation] an ActiveRecord::Relation of records that self has liked
       def liked_for klass
         ids = if klass.sti?
           likes.joins(manual_join(klass, 'like')).map(&:likeable_id)
@@ -197,7 +197,7 @@ module Recommendable
       # dislikes.
       #
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
-      # @return [Array] an array of ActiveRecord objects that self has disliked belonging to klass
+      # @return [ActiveRecord::Relation] an ActiveRecord::Relation of records that self has disliked
       def disliked_for klass
         ids = if klass.sti?
           dislikes.joins(manual_join(klass, 'dislike')).map(&:dislikeable_id)
@@ -270,7 +270,7 @@ module Recommendable
       # has stashed away for later.
       #
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
-      # @return [Array] an array of ActiveRecord objects that self has stashed belonging to klass
+      # @return [ActiveRecord::Relation] an ActiveRecord::Relation of records that self has stashed
       def stashed_for klass
         ids = if klass.sti?
           stashed_items.joins(manual_join(klass, 'stash')).map(&:stashable_id)
@@ -328,7 +328,7 @@ module Recommendable
       # currently ignoring.
       #
       # @param [Class, String, Symbol] klass the class of records. Can be the class constant, or a String/Symbol representation of the class name.
-      # @return [Array] an array of ActiveRecord objects that self has ignored belonging to klass
+      # @return [ActiveRecord::Relation] an ActiveRecord::Relation of records that self has ignored
       def ignored_for klass
         ids = if klass.sti?
           ignores.joins(manual_join(klass, 'ignore')).map(&:ignoreable_id)
@@ -425,20 +425,19 @@ module Recommendable
       # being the object that self has been found most likely to enjoy.
       #
       # @param [Class, String, Symbol] klass the class to receive recommendations for. Can be the class constant, or a String/Symbol representation of the class name.
-      # @return [Array] an array of ActiveRecord objects that are recommendable
+      # @return [ActiveRecord::Relation] an ActiveRecord::Relation of recommendations
       def recommended_for klass, count = 10
-        return [] if likes_for(klass.base_class).count + dislikes_for(klass.base_class).count == 0 || \
-                     Recommendable.redis.zcard(predictions_set_for(klass)) == 0
-        recommendations = []
+        return [] if likes_for(klass.base_class).count + dislikes_for(klass.base_class).count == 0 || Recommendable.redis.zcard(predictions_set_for(klass)) == 0
+        ids = []
 
         (0...count).each do |i|
           prediction = Recommendable.redis.zrevrange(predictions_set_for(klass), i, i).first
           break unless prediction
           
-          recommendations << prediction.split(":").last
+          ids << prediction.split(":").last
         end
       
-        return klass.to_s.classify.constantize.find(recommendations)
+        return klass.to_s.classify.constantize.where('ID IN (?)', ids)
       end
       
       # Return the value calculated by {#predict} on self for a passed object.

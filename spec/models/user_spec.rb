@@ -34,7 +34,7 @@ class UserSpec < MiniTest::Spec
       end
     end
 
-    describe "that does not act_as_recommendable" do
+    describe "that does not act_as_recommended_to" do
       before :each do
         @user = Factory(:bully)
         @movie = Factory(:movie)
@@ -186,7 +186,7 @@ class UserSpec < MiniTest::Spec
         @user.stashed?(@movie).must_equal true
       end
       
-      it "should not be able to rate or ignore an item that is not recommendable. doing so should not be enough to create Redis keys" do
+      it "should not be able to rate or ignore an item that is not recommendable." do
         @cakephp = Factory(:php_framework)
         
         proc { @user.like(@cakephp) }.must_raise    Recommendable::RecordNotRecommendableError
@@ -235,6 +235,27 @@ class UserSpec < MiniTest::Spec
         @user.unstash(@movie).must_equal true
       end
     end
+
+    describe "while using finders" do
+      it "should return ActiveRecord::Relations" do
+        @user = Factory(:user)
+        @movie1 = Factory(:movie)
+        @movie2 = Factory(:movie)
+        @movie3 = Factory(:movie)
+        @movie4 = Factory(:movie)
+        @movie5 = Factory(:movie)
+
+        @user.like @movie1
+        @user.like @movie2
+        @user.dislike @movie3
+
+        @user.liked_movies.must_be_instance_of ActiveRecord::Relation
+        @user.liked_movies.where(:title => @movie1.title).must_include @movie1
+        @user.liked_movies.where(:title => @movie2.title).wont_include @movie1
+        @user.liked_movies.limit(1).size.must_equal 1
+        @user.disliked_movies.where(:title => @movie5.title).must_be_empty
+      end
+    end
     
     describe "while getting recommendations" do
       before :each do
@@ -253,6 +274,37 @@ class UserSpec < MiniTest::Spec
         Recommendable.redis.del "User:#{@dave.id}:predictions:Movie"
         Recommendable.redis.del "User:#{@frank.id}:similarities"
         Recommendable.redis.del "User:#{@frank.id}:predictions:Movie"
+      end
+
+      it "should respect passed counts" do
+        @dave.like @movie1
+        @frank.like @movie1
+        @frank.like @movie2
+        @frank.like @movie3
+        @frank.like @movie4
+        @frank.like @movie5
+
+        @dave.send :update_similarities and @dave.send :update_recommendations
+
+        @dave.recommendations.size.must_equal 4
+        @dave.recommendations(2).size.must_equal 2
+      end
+
+      it "should return an ActiveRecord::Relation when using the dynamic finder" do
+        @dave.like @movie1
+        @frank.like @movie1
+        @frank.like @movie2
+        @frank.like @movie3
+        @frank.like @movie4
+        @frank.like @movie5
+
+        @dave.send :update_similarities and @dave.send :update_recommendations
+
+        @dave.recommended_movies.limit(2).size.must_equal 2
+        @dave.recommended_movies.where(:title => @movie3.title).must_include @movie3
+        @dave.recommended_movies.where(:title => @movie3.title).wont_include @movie2
+        @dave.recommended_movies.where(:title => @movie3.title).wont_include @movie4
+        @dave.recommended_movies.where(:title => @movie3.title).wont_include @movie5
       end
 
       it "should have common likes with a friend" do

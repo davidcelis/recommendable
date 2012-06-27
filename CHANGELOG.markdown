@@ -1,10 +1,24 @@
 Changelog
 =========
 
-1.0 (current version)
+1.0.0 (current version)
 ---------------------
+* Dynamic finders now return ActiveRecord::Relations! This means you can chain other ActiveRecord query methods like so:
 
+```ruby
+current_user.recommended_posts.where(:category => "technology")
+current_user.liked_movies.limit(10)
+current_user.stashed_books.where(:author => "Cormac McCarthy")
+current_user.disliked_shows.joins(:cast_members).where('cast_members.name = Kim Kardashian')
+```
 
+* You can now specify a count for `User#recommendations`:
+
+```ruby
+current_user.recommendations(10)
+```
+
+* Bug fixes
 
 0.2.0
 -----

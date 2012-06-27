@@ -20,6 +20,19 @@ class MovieSpec < MiniTest::Spec
 
         Movie.top(2).wont_include @movie2
       end
+
+      it "should be removed from recommendations" do
+        @user2 = Factory(:user)
+        @user1.like @movie1
+        @user2.like @movie1
+        @user2.like @movie2
+
+        @user1.send :update_recommendations
+        @movie2.destroy
+
+        @user2.liked.size.must_equal 1
+        @user1.recommendations.size.must_equal 0
+      end
     end
 
     describe ".top" do
