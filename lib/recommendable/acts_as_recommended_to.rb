@@ -444,12 +444,10 @@ module Recommendable
           prediction = Recommendable.redis.zrevrange(predictions_set_for(klass), i, i).first
           break unless prediction
           
-          object = klass.to_s.classify.constantize.find(prediction.split(":")[1])
-          recommendations << object
-          i += 1
+          recommendations << prediction.split(":").last
         end
       
-        return recommendations
+        return klass.to_s.classify.constantize.find(recommendations)
       end
       
       # Return the value calculated by {#predict} on self for a passed object.
