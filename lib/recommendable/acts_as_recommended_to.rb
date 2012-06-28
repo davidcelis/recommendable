@@ -417,6 +417,8 @@ module Recommendable
           klass.constantize.find(id)
         end
         
+        recommendations = recommendations.first if count == 1
+
         Recommendable.redis.del(unioned_predictions) and return recommendations
       end
       
@@ -474,7 +476,7 @@ module Recommendable
 
         if options[:class]
           in_common = Recommendable.redis.sinter likes_set_for(options[:class]), rater.likes_set_for(options[:class])
-          in_common = options[:class].to_s.classify.constantize.find in_common if options[:return_records]
+          in_common = options[:class].to_s.classify.constantize.where('ID IN (?)', in_common) if options[:return_records]
         else
           in_common = Recommendable.recommendable_classes.map do |klass|
             things = Recommendable.redis.sinter(likes_set_for(klass), rater.likes_set_for(klass))
@@ -485,9 +487,11 @@ module Recommendable
               things.map { |id| "#{klass.to_s.classify}:#{id}" }
             end
           end
+
+          in_common.flatten!
         end
 
-        in_common.flatten
+        return in_common
       end
       
       # Makes a call to Redis and intersects the sets of dislikes belonging to
@@ -504,7 +508,7 @@ module Recommendable
 
         if options[:class]
           in_common = Recommendable.redis.sinter dislikes_set_for(options[:class]), rater.dislikes_set_for(options[:class])
-          in_common = options[:class].to_s.classify.constantize.find in_common if options[:return_records]
+          in_common = options[:class].to_s.classify.constantize.where('ID IN (?)', in_common) if options[:return_records]
         else
           in_common = Recommendable.recommendable_classes.map do |klass|
             things = Recommendable.redis.sinter(dislikes_set_for(klass), rater.dislikes_set_for(klass))
@@ -515,9 +519,11 @@ module Recommendable
               things.map { |id| "#{klass.to_s.classify}:#{id}" }
             end
           end
+
+          in_common.flatten!
         end
 
-        in_common.flatten
+        in_common
       end
       
       # Makes a call to Redis and intersects self's set of likes with rater's
@@ -537,7 +543,7 @@ module Recommendable
         if options[:class]
           disagreements =  Recommendable.redis.sinter(likes_set_for(options[:class]), rater.dislikes_set_for(options[:class]))
           disagreements += Recommendable.redis.sinter(dislikes_set_for(options[:class]), rater.likes_set_for(options[:class]))
-          disagreements = options[:class].to_s.classify.constantize.find disagreements if options[:return_records]
+          disagreements = options[:class].to_s.classify.constantize.where('ID IN (?)', disagreements) if options[:return_records]
         else
           disagreements = Recommendable.recommendable_classes.map do |klass|
             things = Recommendable.redis.sinter(likes_set_for(klass), rater.dislikes_set_for(klass))
@@ -549,9 +555,11 @@ module Recommendable
               things.map { |id| "#{options[:class].to_s.classify}:#{id}" }
             end
           end
+
+          disagreements.flatten!
         end
 
-        disagreements.flatten
+        disagreements
       end
 
       # Used internally during liking/disliking/stashing/ignoring objects. This

@@ -42,10 +42,9 @@ module Recommendable
             ids = Recommendable.redis.zrevrange(self.score_set, 0, count - 1).map(&:to_i)
 
             items = self.find ids
+            return items.first if count == 1
 
-            return items.sort do |x, y|
-              ids.index(x.id) <=> ids.index(y.id)
-            end
+            return items.sort { |x, y| ids.index(x.id) <=> ids.index(y.id) }
           end
 
           private
