@@ -4,7 +4,7 @@ Recommendable is an engine for Rails 3 applications to quickly add the ability f
 
 Requirements
 ------------
-* Ruby 1.9.2 (1.9.x if using from git. May run on 1.8.7, I don't know)
+* Ruby 1.9.x
 * Rails 3.x
 
 Installation
@@ -13,7 +13,7 @@ Installation
 Add the following to your Rails application's `Gemfile`:
 
 ``` ruby
-  gem "recommendable", :git => "git://github.com/davidcelis/recommendable"
+  gem 'recommendable'
 ```
 
 After bundling, run the installation generator:
