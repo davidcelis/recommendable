@@ -5,7 +5,9 @@ Recommendable is an engine for Rails 3 applications to quickly add the ability f
 Requirements
 ------------
 * Ruby 1.9.x
-* Rails 3.x
+* Rails 3.x or 4.x
+
+If running on Rails 4, the built-in queueing system is supported. However, you can bundle either Sidekiq or Resque, and Recommendable will use your bundled queueing system instead. If bundling Resque, you should also include 'resque-loner' in your Gemfile to ensure your users only get queued once.
 
 Installation
 ------------
@@ -22,14 +24,12 @@ After bundling, run the installation generator:
 $ rails g recommendable:install
 ```
 
-Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a Resque queue to have their recommendation updated. Start up resque like so:
+Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a queue to have their recommendations updated. If you're using the basic Rails 4.0 queue, you don't need to do anything explicit. If using either Sidekiq or Resque, start your workers from the command line:
 
 ``` bash
+$ bundle exec sidekiq -q recommendable
 $ QUEUE=recommendable rake environment resque:work
 ```
-
-You can run this command multiple times if you wish to start more than one
-worker. For more options on this task, head over to [defunkt/resque][resque].
 
 Usage
 -----

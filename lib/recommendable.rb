@@ -15,6 +15,17 @@ module Recommendable
   end
 
   def self.enqueue(user_id)
-    Resque.enqueue RecommendationRefresher, user_id
+    if defined? Sidekiq
+      SidekiqWorker.perform_async user_id
+    elsif defined? Resque
+      Resque.enqueue ResqueWorker, user_id
+    elsif defined? Rails::Queueing
+      unless Rails.queue.any? { |w| w.user_id == user_id }
+        Rails.queue.push RailsWorker.new(user_id)
+        Rails.application.queue_consumer.start
+      end
+    else
+      warn "You're running on Rails 3, which has no built-in queueing system. Please bundle either Sidekiq or Resque to automatically refresh recommendations."
+    end
   end
 end

@@ -1,6 +1,6 @@
 module Recommendable
-  class RecommendationRefresher
-    include Resque::Plugins::UniqueJob
+  class ResqueWorker
+    include Resque::Plugins::UniqueJob if defined?(Resque::Plugins::UniqueJob)
     @queue = :recommendable
     
     def self.perform(user_id)
