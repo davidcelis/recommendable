@@ -19,6 +19,8 @@ module Recommendable
       SidekiqWorker.perform_async user_id
     elsif defined? Resque
       Resque.enqueue ResqueWorker, user_id
+    elsif defined? Delayed::Job
+      Delayed::Job.enqueue DelayedJobWorker.new(user_id)
     elsif defined? Rails::Queueing
       unless Rails.queue.any? { |w| w.user_id == user_id }
         Rails.queue.push RailsWorker.new(user_id)
