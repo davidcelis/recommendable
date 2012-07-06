@@ -34,16 +34,15 @@ module Recommendable
                        :before_stash, :after_stash, :before_unstash, :after_unstash,
                        :before_ignore, :after_ignore, :before_unignore, :after_unignore
 
-          before_like { |obj| completely_unrecommend obj }
-          after_like { |obj| enqueue_and_update_score_for obj }
-          after_unlike { |obj| enqueue_and_update_score_for obj }
+          %w(like dislike ignore).each do |action|
+            send "before_#{action}", lambda { |obj| completely_unrecommend obj }
+          end
 
-          before_dislike { |obj| completely_unrecommend obj }
-          after_dislike { |obj| enqueue_and_update_score_for obj }
-          after_undislike { |obj| enqueue_and_update_score_for obj }
+          %w(like unlike dislike undislike).each do |action|
+            send "after_#{action}", lambda { |obj| object.send(:update_score) and Recommendable.enqueue(self.id) }
+          end
           
           before_stash { |obj| unignore(obj) and unpredict(obj) }
-          before_ignore { |obj| completely_unrecommend obj }
 
           def method_missing method, *args, &block
             if method.to_s =~ /^(liked|disliked)_(.+)_in_common_with$/
@@ -757,10 +756,6 @@ module Recommendable
       # @private
       def unpredict object
         Recommendable.redis.zrem predictions_set_for(object.class), object.redis_key
-      end
-
-      def enqueue_and_update_score_for object
-        object.send(:update_score) and Recommendable.enqueue(self.id)
       end
 
       # @private
