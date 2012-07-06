@@ -5,6 +5,7 @@ require 'recommendable/acts_as_recommendable'
 require 'recommendable/exceptions'
 require 'recommendable/railtie' if defined?(Rails)
 require 'recommendable/version'
+require 'hooks'
 
 module Recommendable
   mattr_accessor :redis, :user_class

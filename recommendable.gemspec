@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'minitest'
+  s.add_development_dependency 'miniskirt'
   s.add_development_dependency 'shoulda'
   s.add_development_dependency 'yard', '~> 0.6.0'
   s.add_development_dependency 'bundler'
