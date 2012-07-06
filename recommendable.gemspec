@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.summary = 'Add like-based and/or dislike-based recommendations to your app.'
   s.description = 'Allow a model (typically User) to Like and/or Dislike models in your app. Generate recommendations quickly using redis.'
   
-  s.files = `git ls-files`.split('\n')
+  s.files = `git ls-files`.split("\n")
   s.has_rdoc = 'yard'
   
   s.add_development_dependency 'sqlite3'
