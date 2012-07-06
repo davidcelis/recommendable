@@ -7,7 +7,7 @@ Requirements
 * Ruby 1.9.x
 * Rails 3.x or 4.x
 
-If running on Rails 4, the built-in queueing system is supported. However, you can bundle either Sidekiq or Resque, and Recommendable will use your bundled queueing system instead. If bundling Resque, you should also include 'resque-loner' in your Gemfile to ensure your users only get queued once.
+If running on Rails 4, the built-in queueing system is supported. However, you can bundle either [Sidekiq][sidekiq], [Resque][resque], or [DelayedJob][delayed_job], and Recommendable will use your bundled queueing system instead. If bundling Resque, you should also include ['resque-loner'][resque-loner] in your Gemfile to ensure your users only get queued once (Sidekiq does this by default, and there is no current way to avoid duplicate jobs in DelayedJob).
 
 Installation
 ------------
@@ -24,11 +24,15 @@ After bundling, run the installation generator:
 $ rails g recommendable:install
 ```
 
-Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a queue to have their recommendations updated. If you're using the basic Rails 4.0 queue, you don't need to do anything explicit. If using either Sidekiq or Resque, start your workers from the command line:
+Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a queue to have their recommendations updated. If you're using the basic Rails 4.0 queue, you don't need to do anything explicit. If using Sidekiq, Resque, or DelayedJob, start your workers from the command line:
 
 ``` bash
+# sidekiq
 $ bundle exec sidekiq -q recommendable
+# resque
 $ QUEUE=recommendable rake environment resque:work
+# delayed_job
+$ rake jobs:work
 ```
 
 Usage
@@ -102,7 +106,10 @@ Copyright © 2012 David Celis. See LICENSE.txt for
 further details.
 
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
+[sidekiq]: https://github.com/mperham/sidekiq
+[delayed_job]: https://github.com/tobi/delayed_job
 [resque]: https://github.com/defunkt/resque
+[resque-loner]: https://github.com/jayniz/resque-loner
 [forking]: http://help.github.com/forking/
 [pull requests]: http://help.github.com/pull-requests/
 [collaborative filtering]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
