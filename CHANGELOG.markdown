@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.1.0 (current version)
+1.1.1 (current version)
 -----------------------
 * Support for Sidekiq, Resque, DelayedJob and Rails::Queueing (issue #28)
   * You must manually bundle Sidekiq, Resque, or DelayedJob. Rails::Queueing is available as a fallback for Rails 4.x
