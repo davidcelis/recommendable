@@ -6,8 +6,9 @@ Requirements
 ------------
 * Ruby 1.9.x
 * Rails 3.x or 4.x
+* Sidekiq or Resque (or DelayedJob)
 
-If running on Rails 4, the built-in queueing system is supported. However, you can bundle either [Sidekiq][sidekiq], [Resque][resque], or [DelayedJob][delayed_job], and Recommendable will use your bundled queueing system instead. If bundling Resque, you should also include ['resque-loner'][resque-loner] in your Gemfile to ensure your users only get queued once (Sidekiq does this by default, and there is no current way to avoid duplicate jobs in DelayedJob).
+Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If running on Rails 4, the built-in queueing system is supported. If you bundle [Sidekiq][sidekiq], [Resque][resque], or [DelayedJob][delayed_job], Recommendable will use your bundled queueing system instead. If bundling Resque, you should also include ['resque-loner'][resque-loner] in your Gemfile to ensure your users only get queued once (Sidekiq does this by default, and there is no current way to avoid duplicate jobs in DelayedJob).
 
 Installation
 ------------
