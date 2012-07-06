@@ -1,8 +1,14 @@
 Changelog
 =========
 
-1.0.0 (current version)
----------------------
+1.1.0 (current version)
+-----------------------
+* Support for Sidekiq, Resque, DelayedJob and Rails::Queueing (issue #28)
+  * You must manually bundle Sidekiq, Resque, or DelayedJob. Rails::Queueing is available as a fallback for Rails 4.x
+* Use [apotonick/hooks](https://github.com/apotonick/hooks) to implement callbacks (issue #25). See the [detailed README](http://davidcelis.com/recommendable) for more info on usage.
+
+1.0.0
+-----
 * Dynamic finders now return ActiveRecord::Relations! This means you can chain other ActiveRecord query methods like so:
 
 ```ruby

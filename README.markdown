@@ -58,27 +58,38 @@ Installing Redis
 
 Recommendable requires Redis to deliver recommendations. The collaborative filtering logic is based almost entirely on set math, and Redis is blazing fast for this. _NOTE: Your redis database MUST be persistent._
 
-### Homebrew
+### Mac OS X
 
-For Mac OS X users, homebrew is by far the easiest way to install Redis.
+For Mac OS X users, homebrew is by far the easiest way to install Redis. Make sure to read the caveats after installation!
 
 ``` bash
 $ brew install redis
 ```
 
-### Via Resque
+### Linux
 
-Resque (which is also a dependency of recommendable) includes Rake tasks that
-will install and run Redis for you:
+For Linux users, there is a package on apt-get.
 
 ``` bash
-$ git clone git://github.com/defunkt/resque.git
-$ cd resque
-$ rake redis:install dtach:install
-$ rake redis:start
+$ sudo apt-get install redis-server
+$ redis-server
 ```
 
 Redis will now be running on localhost:6379. After a second, you can hit `ctrl-\` to detach and keep Redis running in the background.
+
+### Redis problems?
+
+Oops, did you kill your Redis database? Not to worry. Likes, Dislikes, Ignores,
+and StashedItems are stored as models in your regular database. As long as these
+still exist, you can regenerate the similarity values and recommendations on the
+fly. But try not to have to do it!
+
+``` ruby
+Users.all.each do |user|
+  user.send :update_similarities
+  user.send :update_recommendations
+end
+```
 
 Contributing to recommendable
 -----------------------------

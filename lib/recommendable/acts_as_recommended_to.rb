@@ -39,7 +39,7 @@ module Recommendable
           end
 
           %w(like unlike dislike undislike).each do |action|
-            send "after_#{action}", lambda { |obj| object.send(:update_score) and Recommendable.enqueue(self.id) }
+            send "after_#{action}", lambda { |obj| obj.send(:update_score) and Recommendable.enqueue(self.id) }
           end
           
           before_stash { |obj| unignore(obj) and unpredict(obj) }
