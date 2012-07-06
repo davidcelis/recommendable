@@ -1,8 +1,10 @@
-GIT
-  remote: git://github.com/davidcelis/hooks
-  revision: a52b3a606968524a1c23b03bee090b6fe9185d1b
+PATH
+  remote: .
   specs:
-    hooks (0.2.0)
+    recommendable (1.1.0)
+      hooks
+      rails (>= 3.0.0)
+      redis (~> 2.2.0)
 
 GEM
   remote: http://rubygems.org/
@@ -38,6 +40,7 @@ GEM
     builder (3.0.0)
     erubis (2.7.0)
     hike (1.2.1)
+    hooks (0.2.0)
     i18n (0.6.0)
     journey (1.0.4)
     json (1.7.3)
@@ -46,8 +49,6 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.19)
-    miniskirt (1.1.1)
-      activesupport (>= 2.2)
     minitest (3.2.0)
     multi_json (1.3.6)
     polyglot (0.3.3)
@@ -87,7 +88,7 @@ GEM
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
     sqlite3 (1.3.6)
-    thor (0.15.3)
+    thor (0.15.4)
     tilt (1.3.3)
     treetop (1.4.10)
       polyglot
@@ -99,12 +100,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (>= 1.0.0)
-  hooks!
-  miniskirt
+  bundler
   minitest
-  rails (>= 3.1.0)
-  redis (>= 2.2.0)
+  recommendable!
   shoulda
   sqlite3
   yard (~> 0.6.0)

@@ -20,8 +20,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest'
   s.add_development_dependency 'shoulda'
   s.add_development_dependency 'yard', '~> 0.6.0'
-  s.add_development_dependency 'bundler', '~> 1.0.0'
-  s.add_development_dependency 'jeweler', '~> 1.6.4'
+  s.add_development_dependency 'bundler'
   
   s.add_dependency 'rails', '>= 3.0.0'
   s.add_dependency 'redis', '~> 2.2.0'
