@@ -25,8 +25,25 @@ module Recommendable
           include StashMethods
           include IgnoreMethods
           include RecommendationMethods
+          include Hooks
 
           before_destroy :remove_from_similarities, :remove_recommendations
+
+          define_hooks :before_like, :after_like, :before_unlike, :after_unlike,
+                       :before_dislike, :after_dislike, :before_undislike, :after_undislike,
+                       :before_stash, :after_stash, :before_unstash, :after_unstash,
+                       :before_ignore, :after_ignore, :before_unignore, :after_unignore
+
+          before_like { |obj| completely_unrecommend obj }
+          after_like { |obj| enqueue_and_update_score_for obj }
+          after_unlike { |obj| enqueue_and_update_score_for obj }
+
+          before_dislike { |obj| completely_unrecommend obj }
+          after_dislike { |obj| enqueue_and_update_score_for obj }
+          after_undislike { |obj| enqueue_and_update_score_for obj }
+          
+          before_stash { |obj| unignore(obj) and unpredict(obj) }
+          before_ignore { |obj| completely_unrecommend obj }
 
           def method_missing method, *args, &block
             if method.to_s =~ /^(liked|disliked)_(.+)_in_common_with$/
@@ -75,14 +92,15 @@ module Recommendable
       #
       # @param [Object] object the object you want self to like.
       # @return true if object has been liked
-      # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
+      # @raise [UnrecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def like object
-        raise RecordNotRecommendableError unless object.recommendable?
+        raise UnrecommendableError unless object.recommendable?
         return if likes? object
-        completely_unrecommend object
+
+        run_hook :before_like, object
         likes.create! :likeable_id => object.id, :likeable_type => object.class
-        object.send :update_score
-        Recommendable.enqueue self.id
+        run_hook :after_like, object
+
         true
       end
       
@@ -99,9 +117,11 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's likes
       # @return true if object is unliked, nil if nothing happened
       def unlike object
-        if likes.where(:likeable_id => object.id, :likeable_type => object.class.base_class.to_s).first.try(:destroy)
-          object.send :update_score
-          Recommendable.enqueue self.id
+        like = likes.where(:likeable_id => object.id, :likeable_type => object.class.base_class.to_s)
+        if like.exists?
+          run_hook :before_unlike, object
+          like.first.destroy
+          run_hook :after_unlike, object
           true
         end
       end
@@ -153,14 +173,15 @@ module Recommendable
       #
       # @param [Object] object the object you want self to dislike.
       # @return true if object has been disliked
-      # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
+      # @raise [UnrecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def dislike object
-        raise RecordNotRecommendableError unless object.recommendable?
+        raise UnrecommendableError unless object.recommendable?
         return if dislikes? object
-        completely_unrecommend object
+        
+        run_hook :before_dislike, object
         dislikes.create! :dislikeable_id => object.id, :dislikeable_type => object.class
-        object.send :update_score
-        Recommendable.enqueue self.id
+        run_hook :after_dislike, object
+
         true
       end
       
@@ -177,9 +198,11 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's dislikes
       # @return true if object is removed from self's dislikes, nil if nothing happened
       def undislike object
-        if dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.base_class.to_s).first.try(:destroy)
-          object.send :update_score
-          Recommendable.enqueue self.id
+        dislike = dislikes.where(:dislikeable_id => object.id, :dislikeable_type => object.class.base_class.to_s)
+        if dislike.exists?
+          run_hook :before_undislike, object
+          dislike.first.destroy
+          run_hook :after_undislike, object
           true
         end
       end
@@ -231,13 +254,15 @@ module Recommendable
       #
       # @param [Object] object the object you want self to stash.
       # @return true if object has been stashed
-      # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
+      # @raise [UnrecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def stash object
-        raise RecordNotRecommendableError unless object.recommendable?
+        raise UnrecommendableError unless object.recommendable?
         return if rated?(object) || stashed?(object)
-        unignore object
-        unpredict object
+
+        run_hook :before_stash, object
         stashed_items.create! :stashable_id => object.id, :stashable_type => object.class
+        run_hook :after_stash, object
+
         true
       end
       
@@ -254,7 +279,13 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's stash
       # @return true if object is stashed, nil if nothing happened
       def unstash object
-        true if stashed_items.where(:stashable_id => object.id, :stashable_type => object.class.base_class.to_s).first.try(:destroy)
+        stash = stashed_items.where(:stashable_id => object.id, :stashable_type => object.class.base_class.to_s)
+        if stash.exists?
+          run_hook :before_unstash, object
+          stash.first.destroy
+          run_hook :after_unstash, object
+          true
+        end
       end
       
       # Get a list of records that self has currently stashed for later
@@ -290,12 +321,15 @@ module Recommendable
       #
       # @param [Object] object the object you want self to ignore.
       # @return true if object has been ignored
-      # @raise [RecordNotRecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
+      # @raise [UnrecommendableError] if you have not declared the passed object's model to `act_as_recommendable`
       def ignore object
-        raise RecordNotRecommendableError unless object.recommendable?
+        raise UnrecommendableError unless object.recommendable?
         return if ignored? object
-        completely_unrecommend object
+        
+        run_hook :before_ignore, object
         ignores.create! :ignorable_id => object.id, :ignorable_type => object.class
+        run_hook :after_ignore, object
+
         true
       end
       
@@ -312,7 +346,13 @@ module Recommendable
       # @param [Object] object the object you want to remove from self's ignores
       # @return true if object is removed from self's ignores, nil if nothing happened
       def unignore object
-        true if ignores.where(:ignorable_id => object.id, :ignorable_type => object.class.base_class.to_s).first.try(:destroy)
+        ignore = ignores.where(:ignorable_id => object.id, :ignorable_type => object.class.base_class.to_s)
+        if ignore.exists?
+          run_hook :before_unignore, object
+          ignore.first.destroy
+          run_hook :after_unignore, object
+          true
+        end
       end
       
       # Get a list of records that self is currently ignoring
@@ -694,6 +734,7 @@ module Recommendable
         destroy_recommended_to_sets
       end
 
+      # @private
       def remove_from_similarities
         Recommendable.redis.del similarity_set
 
@@ -704,6 +745,7 @@ module Recommendable
         true
       end
 
+      # @private
       def remove_recommendations
         Recommendable.recommendable_classes.each do |klass|
           Recommendable.redis.del predictions_set_for(klass)
@@ -715,6 +757,10 @@ module Recommendable
       # @private
       def unpredict object
         Recommendable.redis.zrem predictions_set_for(object.class), object.redis_key
+      end
+
+      def enqueue_and_update_score_for object
+        object.send(:update_score) and Recommendable.enqueue(self.id)
       end
 
       # @private

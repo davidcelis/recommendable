@@ -4,6 +4,7 @@ gem 'rails',        '>= 3.1.0'
 gem 'redis',        '>= 2.2.0'
 gem 'resque',       '~> 1.19.0'
 gem 'resque-loner', '~> 1.2.0'
+gem 'hooks', :git => "git://github.com/davidcelis/hooks"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.

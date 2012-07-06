@@ -1,4 +1,4 @@
 module Recommendable
-  class RecordNotRecommendableError < StandardError
+  class UnrecommendableError < StandardError
   end
 end

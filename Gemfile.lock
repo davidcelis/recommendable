@@ -1,3 +1,9 @@
+GIT
+  remote: git://github.com/davidcelis/hooks
+  revision: a52b3a606968524a1c23b03bee090b6fe9185d1b
+  specs:
+    hooks (0.2.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -111,6 +117,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (>= 1.0.0)
+  hooks!
   miniskirt
   minitest
   rails (>= 3.1.0)

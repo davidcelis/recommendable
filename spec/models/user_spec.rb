@@ -189,10 +189,10 @@ class UserSpec < MiniTest::Spec
       it "should not be able to rate or ignore an item that is not recommendable." do
         @cakephp = Factory(:php_framework)
         
-        proc { @user.like(@cakephp) }.must_raise    Recommendable::RecordNotRecommendableError
-        proc { @user.dislike(@cakephp) }.must_raise Recommendable::RecordNotRecommendableError
-        proc { @user.ignore(@cakephp) }.must_raise  Recommendable::RecordNotRecommendableError
-        proc { @user.stash(@cakephp) }.must_raise  Recommendable::RecordNotRecommendableError
+        proc { @user.like(@cakephp) }.must_raise    Recommendable::UnrecommendableError
+        proc { @user.dislike(@cakephp) }.must_raise Recommendable::UnrecommendableError
+        proc { @user.ignore(@cakephp) }.must_raise  Recommendable::UnrecommendableError
+        proc { @user.stash(@cakephp) }.must_raise  Recommendable::UnrecommendableError
         
         proc { @cakephp.liked_by }.must_raise    NoMethodError
         proc { @cakephp.disliked_by }.must_raise NoMethodError

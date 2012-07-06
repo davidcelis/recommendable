@@ -8,7 +8,7 @@ class IgnoreSpec < MiniTest::Spec
     
     it "should not be created for an object that does not act_as_recommendedable" do
       web2py = PhpFramework.create(:name => "web2py")
-      proc { @user.ignore(web2py) }.must_raise Recommendable::RecordNotRecommendableError
+      proc { @user.ignore(web2py) }.must_raise Recommendable::UnrecommendableError
     end
     
     it "should be created for an object that does act_as_recommendable" do
