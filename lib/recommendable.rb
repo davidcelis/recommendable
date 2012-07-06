@@ -29,7 +29,3 @@ module Recommendable
     end
   end
 end
-
-unless defined?(Sidekiq) || defined?(Resque) || defined?(Delayed::Job) || defined?(Rails::Queueing)
-  warn "recommendable - You're running on Rails 3, which has no built-in queueing system. Please bundle Sidekiq, Resque, or DelayedJob to automatically refresh recommendations."
-end
