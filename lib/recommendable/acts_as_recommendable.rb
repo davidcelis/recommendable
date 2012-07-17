@@ -59,6 +59,7 @@ module Recommendable
             score = (phat + z*z/(2*n) - z * Math.sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n)
 
             Recommendable.redis.zadd self.class.score_set, score, self.id
+            true
           end
 
           def remove_from_scores
