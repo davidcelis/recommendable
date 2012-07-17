@@ -1,8 +1,12 @@
 Changelog
 =========
 
-1.1.1 (current version)
+1.1.2 (Current version)
 -----------------------
+* Fix #38, a problem with enqueueing users based on updating the score of a recommendable record
+
+1.1.1
+-----
 * Support for Sidekiq, Resque, DelayedJob and Rails::Queueing (issue #28)
   * You must manually bundle Sidekiq, Resque, or DelayedJob. Rails::Queueing is available as a fallback for Rails 4.x
 * Use [apotonick/hooks](https://github.com/apotonick/hooks) to implement callbacks (issue #25). See the [detailed README](http://davidcelis.com/recommendable) for more info on usage.
