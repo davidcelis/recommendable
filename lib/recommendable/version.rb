@@ -1,3 +1,7 @@
 module Recommendable
-  VERSION = '1.1.2'
+  MAJOR = 1
+  MINOR = 1
+  PATCH = 3
+
+  VERSION = [MAJOR, MINOR, PATCH].join '.'
 end
