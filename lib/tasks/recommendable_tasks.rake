@@ -1,1 +1,1 @@
-require 'resque/tasks'
+require 'resque/tasks' if defined?(Resque)
