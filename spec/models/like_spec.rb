@@ -24,5 +24,19 @@ class LikeSpec < MiniTest::Spec
       @user.like(movie).must_be_nil
       Recommendable::Like.count.must_equal 1
     end
+
+    it "should cache the number of likes" do
+      movie = Movie.create(:title => "2001: A Space Odyssey", :year => 1968)
+      @user2 = User.create(:username => "frank")
+
+      @user.like(movie)
+      movie.like_count.must_equal 1
+
+      @user2.like(movie)
+      movie.like_count.must_equal 2
+
+      @user.unlike(movie)
+      movie.like_count.must_equal 1
+    end
   end
 end

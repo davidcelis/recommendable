@@ -121,7 +121,19 @@ module Recommendable
     protected :redis_key
     
     module LikeableMethods
+      # Retrieve the number of likes this object has received. Cached in Redis.
+      # @return [Fixnum] the number of times this object has been liked
+      def like_count
+        Recommendable.redis.get("#{redis_key}:like_count").to_i
+      end
+
       private
+
+      # Updates the cache for how many times this object has been liked.
+      # @private
+      def update_like_count
+        Recommendable.redis.set "#{redis_key}:like_count", liked_by.count
+      end
 
       # Used for setup purposes. Creates a set in redis containing users that
       # have liked this object.
@@ -135,7 +147,19 @@ module Recommendable
     end
     
     module DislikeableMethods
+      # Retrieve the number of dislikes this object has received. Cached in Redis.
+      # @return [Fixnum] the number of times this object has been disliked
+      def dislike_count
+        Recommendable.redis.get("#{redis_key}:dislike_count").to_i
+      end
+
       private
+
+      # Updates the cache for how many times this object has been disliked.
+      # @private
+      def update_dislike_count
+        Recommendable.redis.set "#{redis_key}:dislike_count", disliked_by.count
+      end
 
       # Used for setup purposes. Creates a set in redis containing users that
       # have disliked this object.

@@ -23,5 +23,19 @@ class DislikeSpec < MiniTest::Spec
       @user.dislike(movie).must_be_nil
       Recommendable::Dislike.count.must_equal 1
     end
+
+    it "should cache the number of dislikes" do
+      movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
+      @user2 = User.create(:username => "frank")
+
+      @user.dislike(movie)
+      movie.dislike_count.must_equal 1
+
+      @user2.dislike(movie)
+      movie.dislike_count.must_equal 2
+
+      @user.undislike(movie)
+      movie.dislike_count.must_equal 1
+    end
   end
 end
