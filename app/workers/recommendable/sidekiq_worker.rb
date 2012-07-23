@@ -2,7 +2,7 @@ module Recommendable
   if defined?(Sidekiq)
     class SidekiqWorker
       include ::Sidekiq::Worker
-      sidekiq_options :queue => :recommendable
+      sidekiq_options :queue => :recommendable, :unique => true
       
       def perform(user_id)
         user = Recommendable.user_class.find(user_id)
