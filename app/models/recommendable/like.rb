@@ -7,7 +7,7 @@ module Recommendable
     belongs_to :likeable, :polymorphic => true, :foreign_key => :likeable_id
     
     validates :user_id, :uniqueness => { :scope => [:likeable_id, :likeable_type],
-                                         :message => "has already liked this item" }
+                                         :message => "has already liked this item" },
                         :presence => true
     validates_presence_of :likeable_id
     validates_presence_of :likeable_type
