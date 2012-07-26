@@ -7,7 +7,10 @@ module Recommendable
     belongs_to :stashable, :polymorphic => :true
     
     validates :user_id, :uniqueness => { :scope => [:stashable_id, :stashable_type],
-                                         :message => "has already stashed this item" }
+                                         :message => "has already stashed this item" },
+                        :presence => true
+    validates_presence_of :stashable_id
+    validates_presence_of :stashable_type
     
     def stashable_type=(sType)
       super sType.to_s.classify.constantize.base_class.to_s

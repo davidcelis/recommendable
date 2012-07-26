@@ -7,7 +7,10 @@ module Recommendable
     belongs_to :ignorable, :polymorphic => true
     
     validates :user_id, :uniqueness => { :scope => [:ignorable_id, :ignorable_type],
-                                         :message => "has already ignored this item" }
+                                         :message => "has already ignored this item" },
+                        :presence => true
+    validates_presence_of :ignorable_id
+    validates_presence_of :ignorable_type
     
     def ignorable_type=(sType)
       super sType.to_s.classify.constantize.base_class.to_s

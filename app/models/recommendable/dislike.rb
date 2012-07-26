@@ -7,7 +7,10 @@ module Recommendable
     belongs_to :dislikeable, :polymorphic => true
     
     validates :user_id, :uniqueness => { :scope => [:dislikeable_id, :dislikeable_type],
-                                         :message => "has already disliked this item" }
+                                         :message => "has already disliked this item" },
+                        :presence => true
+    validates_presence_of :dislikeable_id
+    validates_presence_of :dislikeable_type
 
     def dislikeable_type=(sType)
       super sType.to_s.classify.constantize.base_class.to_s
