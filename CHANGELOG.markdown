@@ -1,8 +1,22 @@
 Changelog
 =========
 
-1.1.2 (Current version)
+1.1.5 (Current version)
 -----------------------
+* Fix #47, a problem where models could not recommend themselves
+
+1.1.4
+-----
+* Fix #41, a problem where Resque rake tasks were required regardless of whether or not it was bundled
+* Fix #46 by adding UniqueJob middleware for Sidekiq.
+* Added caches for an item's number of likes and dislikes received
+
+1.1.3
+-----
+* Update Redis.
+
+1.1.2
+-----
 * Fix #38, a problem with enqueueing users based on updating the score of a recommendable record
 
 1.1.1

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    recommendable (1.1.4)
+    recommendable (1.1.5)
       hooks
       rails (>= 3.0.0)
       redis (>= 2.2.0)
