@@ -25,6 +25,6 @@ Gem::Specification.new do |s|
   
   s.add_dependency 'rails', '>= 3.0.0'
   s.add_dependency 'redis', '>= 2.2.0'
-  s.add_dependency 'hooks'
+  s.add_dependency 'hooks', '>= 0.2.1'
 end
 
