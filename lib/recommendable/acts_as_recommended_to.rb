@@ -29,23 +29,10 @@ module Recommendable
 
           before_destroy :remove_from_similarities, :remove_recommendations
 
-          # This is just until apotonick merges my change into his published gem. I promise.
-          define_hook :before_like
-          define_hook :after_like
-          define_hook :before_unlike
-          define_hook :after_unlike
-          define_hook :before_dislike
-          define_hook :after_dislike
-          define_hook :before_undislike
-          define_hook :after_undislike
-          define_hook :before_stash
-          define_hook :after_stash
-          define_hook :before_unstash
-          define_hook :after_unstash
-          define_hook :before_ignore
-          define_hook :after_ignore
-          define_hook :before_unignore
-          define_hook :after_unignore
+          define_hooks :before_like, :after_like, :before_unlike, :after_unlike,
+                       :before_dislike, :after_dislike, :before_undislike, :after_undislike,
+                       :before_stash, :after_stash, :before_unstash, :after_unstash,
+                       :before_ignore, :after_ignore, :before_unignore, :after_unignore
 
           %w(like dislike ignore).each do |action|
             send "before_#{action}", lambda { |obj| completely_unrecommend obj }
