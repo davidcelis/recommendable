@@ -1,8 +1,12 @@
 Changelog
 =========
 
-1.1.5 (Current version)
+1.1.6 (Current version)
 -----------------------
+* Minor code cleanup for my benefit
+
+1.1.5
+-----
 * Fix #47, a problem where models could not recommend themselves
 
 1.1.4
