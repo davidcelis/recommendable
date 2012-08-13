@@ -44,7 +44,7 @@ module Recommendable
             items = self.find ids
             return items.first if count == 1
 
-            return items.sort { |x, y| ids.index(x.id) <=> ids.index(y.id) }
+            return items.sort_by { |item| ids.index(item.id) }
           end
 
           private

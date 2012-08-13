@@ -414,9 +414,7 @@ module Recommendable
         raters = Recommendable.user_class.find rater_ids
         
         # The query loses the ordering, so...
-        return raters.sort do |x, y|
-          rater_ids.index(x.id) <=> rater_ids.index(y.id)
-        end
+        return raters.sort_by { |rater| rater_ids.index(rater.id) }
       end
 
       def liked_in_common_with rater, options = {}
