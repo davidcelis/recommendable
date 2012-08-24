@@ -91,6 +91,12 @@ Users.all.each do |user|
 end
 ```
 
+Why not stars?
+--------------
+I'll let Randall Munroe of [XKCD](http://xkcd.com/) take this one for me:
+
+[![I got lost and wandered into the world's creepiest cemetery, where the headstones just had names and star ratings. Freaked me out. When I got home I tried to leave the cemetery a bad review on Yelp, but as my hand hovered over the 'one star' button I felt this distant chill ...](http://imgs.xkcd.com/comics/star_ratings.png)](http://xkcd.com/1098/)
+
 Contributing to recommendable
 -----------------------------
 
