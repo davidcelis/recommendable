@@ -1,8 +1,12 @@
 Changelog
 =========
 
-1.1.6 (Current version)
+1.1.7 (Current version)
 -----------------------
+* Fix #50, a method that was forgotten to time during the ignoreable => ignorable typo update
+
+1.1.6
+-----
 * Minor code cleanup for my benefit
 
 1.1.5
