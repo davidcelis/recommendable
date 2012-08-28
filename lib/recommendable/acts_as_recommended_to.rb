@@ -374,9 +374,9 @@ module Recommendable
       # @return [ActiveRecord::Relation] an ActiveRecord::Relation of records that self has ignored
       def ignored_for klass
         ids = if klass.sti?
-          ignores.joins(manual_join(klass, 'ignore')).map(&:ignoreable_id)
+          ignores.joins(manual_join(klass, 'ignore')).map(&:ignorable_id)
         else
-          ignores.where(:ignoreable_type => klass.to_s).map(&:ignoreable_id)
+          ignores.where(:ignorable_type => klass.to_s).map(&:ignorable_id)
         end
 
         klass.where('ID IN (?)', ids)
