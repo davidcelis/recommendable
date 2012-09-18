@@ -85,7 +85,7 @@ still exist, you can regenerate the similarity values and recommendations on the
 fly. But try not to have to do it!
 
 ``` ruby
-Users.all.each do |user|
+User.all.each do |user|
   user.send :update_similarities
   user.send :update_recommendations
 end
