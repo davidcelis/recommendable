@@ -7,7 +7,7 @@ class UserBenchmarkSpec < MiniTest::Unit::TestCase
       @actions = [:like, :dislike]
 
       puts "\n"
-      
+
       assert_performance_exponential do |n|
         @user = Factory(:user)
         @users = []
@@ -22,19 +22,19 @@ class UserBenchmarkSpec < MiniTest::Unit::TestCase
           @movies << Factory(:movie)
           @movies << Factory(:movie)
         end
-  
+
         # Main user randomly likes/dislikes 1/4 of the movies
         @movies.sample(n/4).each do |m|
           @user.send(@actions.sample, m)
         end
-  
+
         # Other users randomly like/dislike some movies
         @movies.sample(n/2).each do |m|
           @users.sample.send(@actions.sample, m)
           @users.sample.send(@actions.sample, m)
           @users.sample.send(@actions.sample, m)
         end
-  
+
         @user.send :update_similarities
         @user.send :update_recommendations
         Recommendable.redis.flushdb

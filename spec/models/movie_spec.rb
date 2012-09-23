@@ -77,6 +77,6 @@ class MovieSpec < MiniTest::Spec
         top_movies[3].must_equal @movie2
         top_movies[4].must_equal @movie1
       end
-    end    
+    end
   end
 end

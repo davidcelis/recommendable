@@ -5,7 +5,7 @@ module Recommendable
 
     belongs_to :user, :class_name => Recommendable.user_class.to_s, :foreign_key => :user_id
     belongs_to :likeable, :polymorphic => true, :foreign_key => :likeable_id
-    
+
     validates :user_id, :uniqueness => { :scope => [:likeable_id, :likeable_type],
                                          :message => "has already liked this item" },
                         :presence => true

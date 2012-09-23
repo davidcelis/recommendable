@@ -6,16 +6,16 @@ if defined?(Sidekiq)
       module Client
         class UniqueJobs
           HASH_KEY_EXPIRATION = 30 * 60
-  
+
           def call(worker_class, item, queue)
             enabled = worker_class.get_sidekiq_options['unique']
             if enabled
               payload_hash = Digest::MD5.hexdigest(Sidekiq.dump_json(item))
               unique = false
-  
+
               Sidekiq.redis do |conn|
                 conn.watch(payload_hash)
-  
+
                 if conn.get(payload_hash)
                   conn.unwatch
                 else
@@ -29,7 +29,7 @@ if defined?(Sidekiq)
               yield
             end
           end
-  
+
         end
       end
     end

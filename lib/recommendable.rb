@@ -12,7 +12,7 @@ require 'sidekiq/middleware/server/unique_jobs' if defined?(Sidekiq)
 module Recommendable
   mattr_accessor :redis, :user_class
   mattr_writer :recommendable_classes
-  
+
   def self.recommendable_classes
     @@recommendable_classes ||= []
   end

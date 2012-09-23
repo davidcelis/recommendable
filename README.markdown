@@ -44,7 +44,7 @@ In your Rails model that will be receiving recommendations:
 ``` ruby
 class User < ActiveRecord::Base
   recommends :movies, :shows, :other_things
-  
+
   # ...
 end
 ```

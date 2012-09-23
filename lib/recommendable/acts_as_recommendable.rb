@@ -6,7 +6,7 @@ module Recommendable
       def acts_as_recommendable
         class_eval do
           Recommendable.recommendable_classes << self
-          
+
           has_many :recommendable_likes, :as => :likeable, :dependent => :destroy,
                                          :class_name => "Recommendable::Like"
           has_many :recommendable_dislikes, :as => :dislikeable, :dependent => :destroy,
@@ -20,12 +20,12 @@ module Recommendable
                               :foreign_key => :user_id, :class_name => Recommendable.user_class.to_s
           has_many :disliked_by, :through => :recommendable_dislikes, :source => :user,
                                  :foreign_key => :user_id, :class_name => Recommendable.user_class.to_s
-          
+
           include LikeableMethods
           include DislikeableMethods
 
           before_destroy :remove_from_scores, :remove_from_recommendations
-          
+
           def self.acts_as_recommendable?() true end
 
           def been_rated?
@@ -72,7 +72,7 @@ module Recommendable
               user.send :completely_unrecommend, self
             end
           end
-          
+
           # Used for setup purposes. Calls convenience methods to create sets
           # in redis of users that both like and dislike this object.
           # @return [Array] an array containing the liked_by set and the disliked_by set
@@ -80,7 +80,7 @@ module Recommendable
           def create_recommendable_sets
             [create_liked_by_set, create_disliked_by_set]
           end
-          
+
           # Used for teardown purposes. Destroys the sets in redis created by
           # {#create_recommendable_sets}
           # @private
@@ -120,7 +120,7 @@ module Recommendable
     def redis_key() "#{self.class.base_class}:#{id}" end
 
     protected :redis_key
-    
+
     module LikeableMethods
       # Retrieve the number of likes this object has received. Cached in Redis.
       # @return [Fixnum] the number of times this object has been liked
@@ -146,7 +146,7 @@ module Recommendable
         return set
       end
     end
-    
+
     module DislikeableMethods
       # Retrieve the number of dislikes this object has received. Cached in Redis.
       # @return [Fixnum] the number of times this object has been disliked

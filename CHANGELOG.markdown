@@ -62,7 +62,7 @@ rename_column :recommendable_ignores, :ignoreable_type, :ignorable_type
 rename_table  :recommendable_stashed_items, :recommendable_stashes
 ```
 
-* Fix an issue with recommendable models implemented via STI 
+* Fix an issue with recommendable models implemented via STI
 * Fix a library-wide typo of "ignoreable" to "ignorable"
 
 0.1.9
