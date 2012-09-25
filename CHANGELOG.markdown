@@ -1,6 +1,10 @@
 Changelog
 =========
 
+_Future Release_
+----------------
+* No longer use a queue named "recommendable" for Sidekiq, as the Capistrano deployment recipe only looks for the default queue. TODO: allow this to be configured
+
 1.1.7 (Current version)
 -----------------------
 * Fix #50, a method that was forgotten to time during the ignoreable => ignorable typo update
