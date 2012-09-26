@@ -38,8 +38,11 @@ module Recommendable
             liked_by + disliked_by
           end
 
-          def self.top count = 1
-            ids = Recommendable.redis.zrevrange(self.score_set, 0, count - 1).map(&:to_i)
+          def self.top count = 1, options = {}
+            defaults = { :offset => 0 }
+            options = defaults.merge options
+
+            ids = Recommendable.redis.zrevrange(self.score_set, options[:offset], options[:offset] + count - 1).map(&:to_i)
 
             items = self.find ids
             return items.first if count == 1

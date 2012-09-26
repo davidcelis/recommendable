@@ -691,7 +691,13 @@ module Recommendable
       def update_recommendations_for klass
         klass.find_each do |object|
           next if rated?(object) || !object.been_rated? || ignored?(object) || stashed?(object)
-          prediction = predict object
+
+          begin
+            prediction = predict object
+          rescue Redis::CommandError
+            next
+          end
+
           Recommendable.redis.zadd(predictions_set_for(object.class), prediction, object.redis_key) if prediction
         end
       end
