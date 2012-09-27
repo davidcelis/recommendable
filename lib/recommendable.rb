@@ -6,8 +6,6 @@ require 'recommendable/exceptions'
 require 'recommendable/railtie' if defined?(Rails)
 require 'recommendable/version'
 require 'hooks'
-require 'sidekiq/middleware/client/unique_jobs' if defined?(Sidekiq)
-require 'sidekiq/middleware/server/unique_jobs' if defined?(Sidekiq)
 
 module Recommendable
   mattr_accessor :redis, :user_class
