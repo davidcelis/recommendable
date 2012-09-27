@@ -1,3 +1,4 @@
+require 'recommendable/configuration'
 require 'recommendable/engine'
 require 'recommendable/helpers'
 require 'recommendable/acts_as_recommended_to'
@@ -8,8 +9,8 @@ require 'recommendable/version'
 require 'hooks'
 
 module Recommendable
-  mattr_accessor :redis, :user_class
   mattr_writer :recommendable_classes
+  mattr_accessor :user_class
 
   def self.recommendable_classes
     @@recommendable_classes ||= []

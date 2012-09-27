@@ -25,4 +25,4 @@ class MiniTest::Spec
 end
 
 # Select the Redis test database
-Recommendable.redis.select "15"
+Recommendable.configuration.redis.select 15

@@ -25,7 +25,7 @@ After bundling, run the installation generator:
 $ rails g recommendable:install
 ```
 
-Double check `config/initializers/recommendable.rb` for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a queue to have their recommendations updated. If you're using the basic Rails 4.0 queue, you don't need to do anything explicit. If using Sidekiq, Resque, or DelayedJob, start your workers from the command line:
+Double check `config/initializers/recommendable.rb` for options on configuring Recommendable. After a user likes or dislikes something new, they are placed in a queue to have their recommendations updated. If you're using the basic Rails 4.0 queue, you don't need to do anything explicit. If using Sidekiq, Resque, or DelayedJob, start your workers from the command line:
 
 ``` bash
 # sidekiq

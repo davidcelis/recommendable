@@ -3,7 +3,11 @@ Changelog
 
 _Future Release_
 ----------------
-* No longer use a queue named "recommendable" for Sidekiq, as the Capistrano deployment recipe only looks for the default queue. TODO: allow this to be configured
+* Introduce a new configuration method. Please regenerate your intializer: `rails g recommendable:install --no-migrate`
+* Expire non-persistent redis sets after a certain time rather than explicitly tearing them down. Configure this in the initializer
+* Allow configuration of the Sidekiq/Resque queue name in the initializer
+* Allow configuration of whether or not to automatically enqueue users in the initializer
+* Fix a bug where `Float::NAN` was a possible prediction
 
 1.1.7 (Current version)
 -----------------------

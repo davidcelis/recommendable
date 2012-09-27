@@ -42,7 +42,7 @@ module Recommendable
             defaults = { :offset => 0 }
             options = defaults.merge options
 
-            ids = Recommendable.redis.zrevrange(self.score_set, options[:offset], options[:offset] + count - 1).map(&:to_i)
+            ids = Recommendable.configuration.redis.zrevrange(self.score_set, options[:offset], options[:offset] + count - 1).map(&:to_i)
 
             items = self.find ids
             return items.first if count == 1
@@ -61,12 +61,12 @@ module Recommendable
             phat = recommendable_likes.count / n.to_f
             score = (phat + z*z/(2*n) - z * Math.sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n)
 
-            Recommendable.redis.zadd self.class.score_set, score, self.id
+            Recommendable.configuration.redis.zadd self.class.score_set, score, self.id
             true
           end
 
           def remove_from_scores
-            Recommendable.redis.zrem self.class.score_set, self.id
+            Recommendable.configuration.redis.zrem self.class.score_set, self.id
             true
           end
 
@@ -87,9 +87,10 @@ module Recommendable
           # Used for teardown purposes. Destroys the sets in redis created by
           # {#create_recommendable_sets}
           # @private
-          def destroy_recommendable_sets
-            Recommendable.redis.del "#{self.class.base_class}:#{id}:liked_by"
-            Recommendable.redis.del "#{self.class.base_class}:#{id}:disliked_by"
+          def destroy_recommendable_sets(force = false)
+            return unless Recommendable.configuration.expire_keys_in == :destroy || force
+            Recommendable.configuration.redis.del "#{self.class.base_class}:#{id}:liked_by"
+            Recommendable.configuration.redis.del "#{self.class.base_class}:#{id}:disliked_by"
           end
 
           # Returns an array of IDs of users that have liked or disliked this item.
@@ -128,7 +129,7 @@ module Recommendable
       # Retrieve the number of likes this object has received. Cached in Redis.
       # @return [Fixnum] the number of times this object has been liked
       def like_count
-        Recommendable.redis.get("#{redis_key}:like_count").to_i
+        Recommendable.configuration.redis.get("#{redis_key}:like_count").to_i
       end
 
       private
@@ -136,7 +137,7 @@ module Recommendable
       # Updates the cache for how many times this object has been liked.
       # @private
       def update_like_count
-        Recommendable.redis.set "#{redis_key}:like_count", liked_by.count
+        Recommendable.configuration.redis.set "#{redis_key}:like_count", liked_by.count
       end
 
       # Used for setup purposes. Creates a set in redis containing users that
@@ -145,7 +146,12 @@ module Recommendable
       # @return [String] the key in Redis pointing to the set
       def create_liked_by_set
         set = "#{redis_key}:liked_by"
-        liked_by.each { |rater| Recommendable.redis.sadd set, rater.id }
+        liked_by.each { |rater| Recommendable.configuration.redis.sadd set, rater.id }
+
+        if Recommendable.configuration.expire_keys_in.is_a?(Numeric)
+          Recommendable.configuration.redis.expire(set, Recommendable.configuration.expire_keys_in)
+        end
+
         return set
       end
     end
@@ -154,7 +160,7 @@ module Recommendable
       # Retrieve the number of dislikes this object has received. Cached in Redis.
       # @return [Fixnum] the number of times this object has been disliked
       def dislike_count
-        Recommendable.redis.get("#{redis_key}:dislike_count").to_i
+        Recommendable.configuration.redis.get("#{redis_key}:dislike_count").to_i
       end
 
       private
@@ -162,7 +168,7 @@ module Recommendable
       # Updates the cache for how many times this object has been disliked.
       # @private
       def update_dislike_count
-        Recommendable.redis.set "#{redis_key}:dislike_count", disliked_by.count
+        Recommendable.configuration.redis.set "#{redis_key}:dislike_count", disliked_by.count
       end
 
       # Used for setup purposes. Creates a set in redis containing users that
@@ -171,7 +177,12 @@ module Recommendable
       # @return [String] the key in Redis pointing to the set
       def create_disliked_by_set
         set = "#{redis_key}:disliked_by"
-        disliked_by.each { |rater| Recommendable.redis.sadd set, rater.id }
+        disliked_by.each { |rater| Recommendable.configuration.redis.sadd set, rater.id }
+
+        if Recommendable.configuration.expire_keys_in.is_a?(Numeric)
+          Recommendable.configuration.redis.expire(set, Recommendable.configuration.expire_keys_in)
+        end
+
         return set
       end
     end

@@ -6,9 +6,12 @@ class UserSpec < MiniTest::Spec
   # really, there's nothing there of note.
 
   describe User do
+    before(:each) do
+      Recommendable.configuration.redis.flushdb
+    end
+
     describe "before_destroy filters" do
       before :each do
-        Recommendable.redis.flushdb
         @user1 = Factory(:user)
         @user2 = Factory(:user)
         @movie1 = Factory(:movie)
@@ -29,8 +32,8 @@ class UserSpec < MiniTest::Spec
         @user2.destroy
 
         @user1.similar_raters.wont_include @user2
-        Recommendable.redis.get(similarity_set).must_be_nil
-        Recommendable.redis.get(predictions_set).must_be_nil
+        Recommendable.configuration.redis.get(similarity_set).must_be_nil
+        Recommendable.configuration.redis.get(predictions_set).must_be_nil
       end
     end
 
@@ -54,10 +57,10 @@ class UserSpec < MiniTest::Spec
         proc { @user.likes_set_for(Movie) }.must_raise NoMethodError
         proc { @user.dislikes_set_for(Movie) }.must_raise NoMethodError
 
-        Recommendable.redis.smembers("Bully:#{@user.id}:likes:Movie").must_be_empty
-        Recommendable.redis.smembers("Bully:#{@user.id}:dislikes:Movie").must_be_empty
-        Recommendable.redis.smembers("Bully:#{@user.id}:similarities").must_be_empty
-        Recommendable.redis.smembers("Bully:#{@user.id}:predictions:Movie").must_be_empty
+        Recommendable.configuration.redis.smembers("Bully:#{@user.id}:likes:Movie").must_be_empty
+        Recommendable.configuration.redis.smembers("Bully:#{@user.id}:dislikes:Movie").must_be_empty
+        Recommendable.configuration.redis.smembers("Bully:#{@user.id}:similarities").must_be_empty
+        Recommendable.configuration.redis.smembers("Bully:#{@user.id}:predictions:Movie").must_be_empty
       end
     end
 
@@ -68,13 +71,13 @@ class UserSpec < MiniTest::Spec
       end
 
       after :each do
-        Recommendable.redis.flushdb
+        Recommendable.configuration.redis.flushdb
       end
 
       it "should be able to like a recommendable item" do
         @user.like(@movie).must_equal true
         @user.send(:create_recommended_to_sets)
-        Recommendable.redis.smembers("User:#{@user.id}:likes:Movie").must_include @movie.id.to_s
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:likes:Movie").must_include @movie.id.to_s
         @user.send(:destroy_recommended_to_sets)
       end
 
@@ -85,7 +88,7 @@ class UserSpec < MiniTest::Spec
         @user.likes?(@movie).must_equal true
 
         @user.send(:create_recommended_to_sets)
-        Recommendable.redis.smembers("User:#{@user.id}:dislikes:Movie").wont_include @movie.id.to_s
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:dislikes:Movie").wont_include @movie.id.to_s
         @user.send(:destroy_recommended_to_sets)
       end
 
@@ -106,7 +109,7 @@ class UserSpec < MiniTest::Spec
       it "should be able to dislike a recommendable item" do
         @user.dislike(@movie).must_equal true
         @user.send(:create_recommended_to_sets)
-        Recommendable.redis.smembers("User:#{@user.id}:dislikes:Movie").must_include @movie.id.to_s
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:dislikes:Movie").must_include @movie.id.to_s
         @user.send(:destroy_recommended_to_sets)
       end
 
@@ -117,8 +120,8 @@ class UserSpec < MiniTest::Spec
         @user.dislikes?(@movie).must_equal true
 
         @user.send(:create_recommended_to_sets)
-        Recommendable.redis.smembers("User:#{@user.id}:dislikes:Movie").must_include @movie.id.to_s
-        Recommendable.redis.smembers("User:#{@user.id}:likes:Movie").wont_include @movie.id.to_s
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:dislikes:Movie").must_include @movie.id.to_s
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:likes:Movie").wont_include @movie.id.to_s
         @user.send(:destroy_recommended_to_sets)
       end
 
@@ -199,10 +202,10 @@ class UserSpec < MiniTest::Spec
 
         @user.send(:create_recommended_to_sets)
 
-        Recommendable.redis.smembers("User:#{@user.id}:likes:PhpFramework").must_be_empty
-        Recommendable.redis.smembers("User:#{@user.id}:dislikes:PhpFramework").must_be_empty
-        Recommendable.redis.smembers("User:#{@user.id}:similarities").must_be_empty
-        Recommendable.redis.smembers("User:#{@user.id}:predictions:Movie").must_be_empty
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:likes:PhpFramework").must_be_empty
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:dislikes:PhpFramework").must_be_empty
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:similarities").must_be_empty
+        Recommendable.configuration.redis.smembers("User:#{@user.id}:predictions:Movie").must_be_empty
 
         @user.send(:destroy_recommended_to_sets)
       end
@@ -259,6 +262,7 @@ class UserSpec < MiniTest::Spec
 
     describe "while getting recommendations" do
       before :each do
+        Recommendable.configuration.redis.flushdb
         @dave   = Factory(:user)
         @frank  = Factory(:user)
         @hal    = Factory(:user)
@@ -270,10 +274,8 @@ class UserSpec < MiniTest::Spec
       end
 
       after :each do
-        Recommendable.redis.del "User:#{@dave.id}:similarities"
-        Recommendable.redis.del "User:#{@dave.id}:predictions:Movie"
-        Recommendable.redis.del "User:#{@frank.id}:similarities"
-        Recommendable.redis.del "User:#{@frank.id}:predictions:Movie"
+        Recommendable.configuration.redis.flushdb
+        Recommendable.configuration.expire_keys_in = :destroy
       end
 
       it "should respect passed counts" do
@@ -437,6 +439,44 @@ class UserSpec < MiniTest::Spec
         @dave.send :update_recommendations
 
         @dave.recommendations.wont_include @movie4
+      end
+
+      it "should expire recommended_to sets" do
+        Recommendable.configuration.expire_keys_in = 3.seconds
+        @dave.like @movie1
+        @dave.dislike @movie2
+        @dave.send :create_recommended_to_sets
+
+        sleep(1)
+
+        Recommendable.configuration.redis.exists(@dave.send :likes_set_for, Movie).must_equal true
+        Recommendable.configuration.redis.exists(@dave.send :dislikes_set_for, Movie).must_equal true
+
+        sleep(3)
+
+        Recommendable.configuration.redis.exists(@dave.send :likes_set_for, Movie).must_equal false
+        Recommendable.configuration.redis.exists(@dave.send :dislikes_set_for, Movie).must_equal false
+      end
+
+      it "should refresh recommended_to set expirations" do
+        Recommendable.configuration.expire_keys_in = 5.seconds
+        @dave.like @movie1
+        @dave.dislike @movie2
+        @dave.send :create_recommended_to_sets
+
+        sleep(4)
+
+        Recommendable.configuration.redis.exists(@dave.send :likes_set_for, Movie).must_equal true
+        Recommendable.configuration.redis.exists(@dave.send :dislikes_set_for, Movie).must_equal true
+
+        @dave.send :create_recommended_to_sets
+        sleep(3)
+        Recommendable.configuration.redis.exists(@dave.send :likes_set_for, Movie).must_equal true
+        Recommendable.configuration.redis.exists(@dave.send :dislikes_set_for, Movie).must_equal true
+
+        sleep(3)
+        Recommendable.configuration.redis.exists(@dave.send :likes_set_for, Movie).must_equal false
+        Recommendable.configuration.redis.exists(@dave.send :dislikes_set_for, Movie).must_equal false
       end
     end
   end

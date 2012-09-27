@@ -3,7 +3,7 @@ require 'spec_helper'
 class UserBenchmarkSpec < MiniTest::Unit::TestCase
   def test_update_recommendations
     if ENV["BENCH"] then
-      Recommendable.redis.flushdb
+      Recommendable.configuration.redis.flushdb
       @actions = [:like, :dislike]
 
       puts "\n"
@@ -37,7 +37,7 @@ class UserBenchmarkSpec < MiniTest::Unit::TestCase
 
         @user.send :update_similarities
         @user.send :update_recommendations
-        Recommendable.redis.flushdb
+        Recommendable.configuration.redis.flushdb
 
         User.delete_all
         Movie.delete_all

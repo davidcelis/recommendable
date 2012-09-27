@@ -1,7 +1,5 @@
 = TODO
 
-* method_missing for User#common_likes_with, User#common_liked_with
-* Use Sidekiq instead?
-* Move dependencies to gemspec instead of Gemfile
 * Support Mongoid (and potentially other ORMs)
 * Allow the option NOT to queue up on like/dislike/ignore?
+* Don't destroy sets. Can't do that with concurrency. Shit.

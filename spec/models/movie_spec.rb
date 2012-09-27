@@ -4,7 +4,7 @@ class MovieSpec < MiniTest::Spec
   describe Movie do
     describe "before_destroy filters" do
       before :each do
-        Recommendable.redis.flushdb
+        Recommendable.configuration.redis.flushdb
 
         @user1 = Factory(:user)
 
@@ -37,7 +37,7 @@ class MovieSpec < MiniTest::Spec
 
     describe ".top" do
       before :each do
-        Recommendable.redis.flushdb
+        Recommendable.configuration.redis.flushdb
 
         @user1 = Factory(:user)
         @user2 = Factory(:user)
