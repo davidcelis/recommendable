@@ -396,7 +396,7 @@ module Recommendable
       #
       # @return true if self has liked or disliked anything, false if not
       def rated_anything?
-        likes.count > 0 || dislikes.count > 0
+        likes.any? || dislikes.any?
       end
 
       # Get a list of raters that have been found to be the most similar to
