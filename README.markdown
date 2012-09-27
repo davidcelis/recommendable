@@ -36,6 +36,8 @@ $ QUEUE=recommendable rake environment resque:work
 $ rake jobs:work
 ```
 
+If you're using Sidekiq, I recommend also bundling [sidekiq-middleware][sidekiq-middleware] to make your jobs unique. There's no reason for a user to be processed more than once at a time. If using Resque, use [resque-loner][resque-loner] for the same purpose. Bundling one of these gems is enough; the jobs will automatically become unique.
+
 Usage
 -----
 
@@ -125,6 +127,7 @@ further details.
 
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
 [sidekiq]: https://github.com/mperham/sidekiq
+[sidekiq-middleware]: https://github.com/krasnoukhov/sidekiq-middleware
 [delayed_job]: https://github.com/tobi/delayed_job
 [resque]: https://github.com/defunkt/resque
 [resque-loner]: https://github.com/jayniz/resque-loner

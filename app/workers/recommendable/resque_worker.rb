@@ -3,7 +3,7 @@ module Recommendable
     class ResqueWorker
       include Resque::Plugins::UniqueJob if defined?(Resque::Plugins::UniqueJob)
       @queue = :recommendable
-      
+
       def self.perform(user_id)
         user = Recommendable.user_class.find(user_id)
         user.send :update_similarities
