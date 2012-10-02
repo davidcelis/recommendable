@@ -1,4 +1,5 @@
 require "redis"
+require Rails.root.join('app', 'models', 'user')
 
 Recommendable.configure do |config|
   # Recommendable requires a connection to a running redis-server. Create a new

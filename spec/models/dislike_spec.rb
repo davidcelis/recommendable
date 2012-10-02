@@ -12,30 +12,33 @@ class DislikeSpec < MiniTest::Spec
     end
 
     it "should be created for an object that does act_as_recommendable" do
-     movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
-     @user.dislike(movie).must_equal true
+     @movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
+     @user.dislike(@movie).must_equal true
     end
 
     it "should not be created twice for the same user-object pair" do
-      movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
+      @movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
 
-      @user.dislike(movie).must_equal true
-      @user.dislike(movie).must_be_nil
+      @user.dislike(@movie).must_equal true
+      @user.dislike(@movie).must_be_nil
       Recommendable::Dislike.count.must_equal 1
     end
 
     it "should cache the number of dislikes" do
-      movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
+      @movie = Movie.create(:title => "Star Wars: Episode I - The Phantom Menace", :year => 1999)
       @user2 = User.create(:username => "frank")
 
-      @user.dislike(movie)
-      movie.dislike_count.must_equal 1
+      @user.dislike(@movie)
+      @movie.reload
+      @movie.dislikes_count.must_equal 1
 
-      @user2.dislike(movie)
-      movie.dislike_count.must_equal 2
+      @user2.dislike(@movie)
+      @movie.reload
+      @movie.dislikes_count.must_equal 2
 
-      @user.undislike(movie)
-      movie.dislike_count.must_equal 1
+      @user.undislike(@movie)
+      @movie.reload
+      @movie.dislikes_count.must_equal 1
     end
   end
 end

@@ -29,7 +29,7 @@ module Recommendable
           def self.acts_as_recommendable?() true end
 
           def been_rated?
-            recommendable_likes.count + recommendable_dislikes.count > 0
+            likes_count + dislikes_count > 0
           end
 
           # Returns an array of users that have liked or disliked this item.
@@ -56,10 +56,14 @@ module Recommendable
             return 0 unless been_rated?
 
             z = 1.96
-            n = recommendable_likes.count + recommendable_dislikes.count
+            n = likes_count + dislikes_count
 
-            phat = recommendable_likes.count / n.to_f
-            score = (phat + z*z/(2*n) - z * Math.sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n)
+            phat = likes_count / n.to_f
+            begin
+              score = (phat + z*z/(2*n) - z * Math.sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n)
+            rescue Math::DomainError
+              score = 0
+            end
 
             Recommendable.configuration.redis.zadd self.class.score_set, score, self.id
             true
@@ -126,19 +130,7 @@ module Recommendable
     protected :redis_key
 
     module LikeableMethods
-      # Retrieve the number of likes this object has received. Cached in Redis.
-      # @return [Fixnum] the number of times this object has been liked
-      def like_count
-        Recommendable.configuration.redis.get("#{redis_key}:like_count").to_i
-      end
-
       private
-
-      # Updates the cache for how many times this object has been liked.
-      # @private
-      def update_like_count
-        Recommendable.configuration.redis.set "#{redis_key}:like_count", liked_by.count
-      end
 
       # Used for setup purposes. Creates a set in redis containing users that
       # have liked this object.
@@ -157,19 +149,7 @@ module Recommendable
     end
 
     module DislikeableMethods
-      # Retrieve the number of dislikes this object has received. Cached in Redis.
-      # @return [Fixnum] the number of times this object has been disliked
-      def dislike_count
-        Recommendable.configuration.redis.get("#{redis_key}:dislike_count").to_i
-      end
-
       private
-
-      # Updates the cache for how many times this object has been disliked.
-      # @private
-      def update_dislike_count
-        Recommendable.configuration.redis.set "#{redis_key}:dislike_count", disliked_by.count
-      end
 
       # Used for setup purposes. Creates a set in redis containing users that
       # have disliked this object.

@@ -16,9 +16,16 @@ module Recommendable
     @@recommendable_classes ||= []
   end
 
-  def self.enqueue(user_id)
+  def self.enqueue(user_id, options={})
+    defaults = { :priority => false }
+    options = defaults.merge(options)
+
     if defined? Sidekiq
-      SidekiqWorker.perform_async user_id
+      if options[:priority]
+        SidekiqPriorityWorker.perform_async user_id
+      else
+        SidekiqWorker.perform_async user_id
+      end
     elsif defined? Resque
       Resque.enqueue ResqueWorker, user_id
     elsif defined? Delayed::Job

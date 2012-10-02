@@ -49,9 +49,9 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.19)
-    miniskirt (1.2)
-      activesupport (>= 2.2)
-    minitest (3.5.0)
+    miniskirt (1.2.1)
+      activesupport
+    minitest (4.0.0)
     multi_json (1.3.6)
     polyglot (0.3.3)
     rack (1.4.1)
@@ -59,7 +59,7 @@ GEM
       rack (>= 0.4)
     rack-ssl (1.3.2)
       rack
-    rack-test (0.6.1)
+    rack-test (0.6.2)
       rack (>= 1.0)
     rails (3.2.8)
       actionmailer (= 3.2.8)

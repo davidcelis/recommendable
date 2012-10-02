@@ -22,8 +22,10 @@ ActiveRecord::Schema.define(:version => 20120131195416) do
   create_table "movies", :force => true do |t|
     t.string   "title"
     t.integer  "year"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.integer  "likes_count",    :default => 0
+    t.integer  "dislikes_count", :default => 0
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
   end
 
   create_table "php_frameworks", :force => true do |t|
@@ -82,8 +84,10 @@ ActiveRecord::Schema.define(:version => 20120131195416) do
 
   create_table "users", :force => true do |t|
     t.string   "username"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.integer  "likes_count",    :default => 0
+    t.integer  "dislikes_count", :default => 0
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
   end
 
 end

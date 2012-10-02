@@ -286,6 +286,7 @@ class UserSpec < MiniTest::Spec
         @frank.like @movie4
         @frank.like @movie5
 
+        @dave.reload
         @dave.send :update_similarities and @dave.send :update_recommendations
 
         @dave.recommendations.size.must_equal 4
@@ -300,6 +301,7 @@ class UserSpec < MiniTest::Spec
         @frank.like @movie4
         @frank.like @movie5
 
+        @dave.reload
         @dave.send :update_similarities and @dave.send :update_recommendations
 
         @dave.recommended_movies.limit(2).size.must_equal 2
@@ -343,6 +345,8 @@ class UserSpec < MiniTest::Spec
         @dave.like(@movie1)
         @frank.like(@movie1)
         @frank.like(@movie2)
+
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 
@@ -356,6 +360,8 @@ class UserSpec < MiniTest::Spec
         @frank.like(@movie2)
         @frank.like(@movie3)
         @frank.like(@movie4)
+
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 
@@ -372,6 +378,7 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie2)
 
         # hal should be more similar to dave than frank
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 
@@ -387,6 +394,7 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
 
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 
@@ -402,6 +410,7 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
 
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 
@@ -419,6 +428,7 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
 
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 
@@ -435,6 +445,7 @@ class UserSpec < MiniTest::Spec
         @hal.like(@movie1)
         @hal.like(@movie3)
 
+        @dave.reload
         @dave.send :update_similarities
         @dave.send :update_recommendations
 

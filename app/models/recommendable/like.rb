@@ -3,8 +3,8 @@ module Recommendable
     self.table_name = 'recommendable_likes'
     attr_accessible :user_id, :likeable_id, :likeable_type
 
-    belongs_to :user, :class_name => Recommendable.user_class.to_s, :foreign_key => :user_id
-    belongs_to :likeable, :polymorphic => true, :foreign_key => :likeable_id
+    belongs_to :user, :class_name => Recommendable.user_class.to_s, :foreign_key => :user_id, :counter_cache => :likes_count
+    belongs_to :likeable, :polymorphic => true, :foreign_key => :likeable_id, :counter_cache => :likes_count
 
     validates :user_id, :uniqueness => { :scope => [:likeable_id, :likeable_type],
                                          :message => "has already liked this item" },

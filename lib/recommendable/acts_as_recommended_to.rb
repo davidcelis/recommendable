@@ -40,9 +40,14 @@ module Recommendable
 
           %w(like unlike dislike undislike).each do |action|
             send "after_#{action}", lambda { |obj|
-              obj.send(:update_score)
-              obj.send "update_#{action.gsub('un', '')}_count"
-              Recommendable.enqueue(self.id) if Recommendable.configuration.auto_enqueue
+              obj.reload.send(:update_score)
+              if Recommendable.configuration.auto_enqueue
+                if (likes_count + dislikes_count) < 10
+                  Recommendable.enqueue(self.id, :priority => true)
+                else
+                  Recommendable.enqueue(self.id)
+                end
+              end
             }
           end
 
@@ -696,9 +701,12 @@ module Recommendable
       # recommendations.
       #
       # @private
-      def update_recommendations
+      def update_recommendations(options={})
+        defaults = { :priority => false }
+        options = defaults.merge(options)
+
         send :create_recommended_to_sets
-        Recommendable.recommendable_classes.each { |klass| update_recommendations_for klass }
+        Recommendable.recommendable_classes.each { |klass| update_recommendations_for(klass, options) }
         send :destroy_recommended_to_sets
         true
       end
@@ -708,7 +716,12 @@ module Recommendable
       #
       # @param [Class] klass the recommendable type to update predictions for
       # @private
-      def update_recommendations_for klass
+      def update_recommendations_for klass, options = {}
+        defaults = { :priority => false }
+        options = defaults.merge(options)
+
+        klass = klass.order('likes_count + dislikes_count DESC').limit(1000) if options[:priority]
+
         klass.find_each do |object|
           next if rated?(object) || !object.been_rated? || ignored?(object) || stashed?(object)
 
@@ -748,11 +761,17 @@ module Recommendable
       # other users. This is called in the Resque job to refresh recommendations.
       #
       # @private
-      def update_similarities
+      def update_similarities options = {}
+        defaults = { :priority => false }
+        options = defaults.merge(options)
+
         return unless rated_anything?
         send :create_recommended_to_sets
 
-        Recommendable.user_class.find_each do |rater|
+        klass = Recommendable.user_class
+        klass = klass.order('likes_count + dislikes_count DESC').limit(1000) if options[:priority]
+
+        klass.find_each do |rater|
           next if self == rater || !rater.rated_anything?
           Recommendable.configuration.redis.zadd similarity_set, similarity_with(rater), rater.id
         end
