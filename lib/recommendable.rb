@@ -7,6 +7,11 @@ require 'recommendable/helpers'
 require 'recommendable/rater'
 require 'recommendable/ratable'
 
+require 'recommendable/workers/sidekiq'
+require 'recommendable/workers/resque'
+require 'recommendable/workers/delayed_job'
+require 'recommendable/workers/rails'
+
 module Recommendable
   class << self
     def redis() config.redis end
@@ -21,16 +26,12 @@ module Recommendable
       user_id = user_id.id if user_id.is_a?(Recommendable.config.user_class)
 
       if defined?(::Sidekiq)
-        require 'recommendable/workers/sidekiq'
         Recommendable::Workers::Sidekiq.perform_async(user_id)
       elsif defined?(::Resque)
-        require 'recommendable/workers/resque'
         Resque.enqueue(Recommendable::Workers::Resque, user_id)
       elsif defined?(::Delayed::Job)
-        require 'recommendable/workers/delayed_job'
         Delayed::Job.enqueue(Recommendable::Workers::DelayedJob.new(user_id))
       elsif defined?(::Rails::Queueing)
-        require 'recommendable/workers/rails'
         unless Rails.queue.any? { |w| w.user_id == user_id }
           Rails.queue.push(Recommendable::Workers::Rails.new(user_idid))
           Rails.application.queue_consumer.start
