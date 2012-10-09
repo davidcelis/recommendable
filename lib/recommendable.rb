@@ -33,7 +33,7 @@ module Recommendable
         Delayed::Job.enqueue(Recommendable::Workers::DelayedJob.new(user_id))
       elsif defined?(::Rails::Queueing)
         unless Rails.queue.any? { |w| w.user_id == user_id }
-          Rails.queue.push(Recommendable::Workers::Rails.new(user_idid))
+          Rails.queue.push(Recommendable::Workers::Rails.new(user_id))
           Rails.application.queue_consumer.start
         end
       end

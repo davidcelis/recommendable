@@ -84,6 +84,7 @@ module Recommendable
               sets << Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, id)
             end
 
+            return if sets_to_union.empty?
             scores = Recommendable.redis.sunion(sets_to_union).map { |id| [predict_for(user_id, klass, id), id] }
             scores.each do |s|
               Recommendable.redis.zadd(recommended_set, s[0], s[1])
