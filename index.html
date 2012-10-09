@@ -111,6 +111,10 @@
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie id: 23, name: "2001: A Space Odyssey"&gt;, #&lt;Book id: 42, title: "100 Years of Solitude"&gt;]</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">liked_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie id: 23, name: "2001: A Space Odyssey"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">liked_by_count</span>
+<span class="o">=&gt;</span> <span class="mi">2</span>
+<span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">liked_by</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: 'davidbowman'&gt;, #&lt;User username: 'frankpoole'&gt;]</span>
 </pre></div>
 
 <h3>Disliking</h3>
@@ -126,6 +130,8 @@
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movies_count</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislikes_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">disliked_by_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">disliked_by</span>
 </pre></div>
 
 <h3>Bookmarking</h3>
@@ -230,6 +236,8 @@
 <span class="n">current_user</span><span class="o">.</span><span class="n">disliked_movies</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:cast_members</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'cast_members.name = Kim Kardashian'</span><span class="p">)</span>
 <span class="n">current_user</span><span class="o">.</span><span class="n">ignored_minerals</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'density DESC'</span><span class="p">)</span>
 <span class="n">current_user</span><span class="o">.</span><span class="n">recommended_movies</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'year &lt; 2010'</span><span class="p">)</span>
+<span class="n">book</span><span class="o">.</span><span class="n">liked_by</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'age DESC'</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">movie</span><span class="o">.</span><span class="n">disliked_by</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'age &gt; 18'</span><span class="p">)</span>
 </pre></div>
 
 <h2>Installing Redis</h2>
