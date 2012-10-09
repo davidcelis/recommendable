@@ -30,155 +30,177 @@
       <section>
         <h1>Recommendable</h1>
 
-<p>Recommendable is an engine for Rails 3 applications to quickly add the ability
-for your users to Like/Dislike items and receive recommendations for new items.
-It uses Redis to store your recommendations and keep them sorted by how good the
-recommendation is.</p>
+<p>Recommendable is a gem that allows you to quickly add a recommendation engine for Likes and Dislikes to your Ruby application using my version of <a href="http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/">Jaccardian similarity and memory-based collaborative filtering</a>.</p>
 
 <h2>Requirements</h2>
 
 <ul>
-<li>Ruby 1.9.x</li>
-<li>Rails 3.x or 4.x</li>
-<li>Sidekiq or Resque (or DelayedJob)</li>
-</ul><p>Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If running on Rails 4, the built-in queueing system is supported. If you bundle <a href="https://github.com/mperham/sidekiq">Sidekiq</a>, <a href="https://github.com/defunkt/resque">Resque</a>, or <a href="https://github.com/tobi/delayed_job">DelayedJob</a>, Recommendable will use your bundled queueing system instead. If bundling Resque, you should also include <a href="https://github.com/jayniz/resque-loner">'resque-loner'</a> in your Gemfile to ensure your users only get queued once (Sidekiq does this by default, and there is no current way to avoid duplicate jobs in DelayedJob).</p>
+<li>Ruby 1.8.7 or 1.9.x</li>
+<li>ActiveRecord, DataMapper, Mongoid, or MongoMapper</li>
+<li>Sidekiq, Resque, DelayedJob (optional but highly recommended)</li>
+</ul><p>Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If running on Rails 4, the built-in queueing system is supported. If you bundle <a href="https://github.com/mperham/sidekiq">Sidekiq</a>, <a href="https://github.com/defunkt/resque">Resque</a>, or <a href="https://github.com/tobi/delayed_job">DelayedJob</a>, Recommendable will use your bundled queueing system instead. If bundling Sidekiq, you should also include <a href="https://github.com/krasnoukhov/sidekiq-middleware">'sidekiq-middleware'</a> in your Gemfile to ensure that a user will not get enqueued more than once at a time. If bundling Resque, you should include <a href="https://github.com/jayniz/resque-loner">'resque-loner'</a> for this. As far as I know, there is no current way to avoid duplicate jobs in DelayedJob.</p>
 
 <h2>Installation</h2>
 
-<p>Add the following to your Rails application's <code>Gemfile</code>:</p>
+<p>Add the following to your application's <code>Gemfile</code>:</p>
 
 <div class="highlight"><pre>  <span class="n">gem</span> <span class="s1">'recommendable'</span>
 </pre></div>
 
-<p>After bundling, run the installation generator:</p>
+<p>After bundling, you should configure Recommendable. Do this somewhere after you've required it, but before it's actually used. For example, Rails users would create an initializer (<code>config/initializers/recommendable.rb</code>):</p>
 
-<div class="highlight"><pre><span class="nv">$ </span>rails g recommendable:install
+<div class="highlight"><pre><span class="nb">require</span> <span class="s1">'redis'</span>
+
+<span class="no">Recommendable</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="c1"># Recommendable's connection to Redis</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">redis</span> <span class="o">=</span> <span class="no">Redis</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:host</span> <span class="o">=&gt;</span> <span class="s1">'localhost'</span><span class="p">,</span> <span class="ss">:port</span> <span class="o">=&gt;</span> <span class="mi">6379</span><span class="p">,</span> <span class="ss">:db</span> <span class="o">=&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+  <span class="c1"># A prefix for all keys Recommendable uses</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">redis_namespace</span> <span class="o">=</span> <span class="ss">:recommendable</span>
+
+  <span class="c1"># Whether or not to automatically enqueue users to have their recommendations</span>
+  <span class="c1"># refreshed after they like/dislike an item</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">auto_enqueue</span> <span class="o">=</span> <span class="kp">true</span>
+
+  <span class="c1"># The name of the queue that background jobs will be placed in</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">queue_name</span> <span class="o">=</span> <span class="ss">:recommendable</span>
+
+  <span class="c1"># The number of nearest neighbors (k-NN) to check when updating</span>
+  <span class="c1"># recommendations for a user. Set to `nil` if you want to check all</span>
+  <span class="c1"># other users as opposed to a subset of the nearest ones.</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">nearest_neighbors</span> <span class="o">=</span> <span class="kp">nil</span>
+<span class="k">end</span>
 </pre></div>
 
-<p>Double check <code>config/initializers/recommendable.rb</code> for options on configuring your Redis connection. After a user likes or dislikes something new, they are placed in a queue to have their recommendations updated. If you're using the basic Rails 4.0 queue, you don't need to do anything explicit. If using Sidekiq, Resque, or DelayedJob, start your workers from the command line:</p>
-
-<div class="highlight"><pre><span class="c"># sidekiq</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>sidekiq -q recommendable
-<span class="c"># resque</span>
-<span class="nv">$ QUEUE</span><span class="o">=</span>recommendable rake environment resque:work
-<span class="c"># delayed_job</span>
-<span class="nv">$ </span>rake <span class="nb">jobs</span>:work
-</pre></div>
-
-<p>You can run this command multiple times if you wish to start more than one
-worker. For more options on this task, head over to <a href="https://github.com/defunkt/resque">defunkt/resque</a>.</p>
+<p>The values listed above are the defaults. I recommend playing around with the <code>nearest_neighbors</code> setting. A higher value will provide more accurate recommendations at the cost of more time spent generating them. Find your balance.</p>
 
 <h2>Usage</h2>
 
-<p>In your Rails model that will be receiving recommendations:</p>
+<p>In your ONE model that will be receiving recommendations:</p>
 
-<div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-  <span class="n">recommends</span> <span class="ss">:movies</span><span class="p">,</span> <span class="ss">:shows</span><span class="p">,</span> <span class="ss">:other_things</span>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span>
+  <span class="n">recommends</span> <span class="ss">:movies</span><span class="p">,</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:minerals</span><span class="p">,</span> <span class="ss">:other_things</span>
 
   <span class="c1"># ...</span>
 <span class="k">end</span>
 </pre></div>
 
-<p>Note that you can only do this in one model at this time.</p>
+<h3>Liking</h3>
 
-<h3>Liking and disliking</h3>
+<p>Your users should now be able to <code>like</code> your recommendable objects:</p>
 
-<p>Your users should now be able to <code>like</code> and <code>dislike</code> your recommendable objects:</p>
-
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">like</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">like</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Arrested Development"</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">likes?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">dislike</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2012"</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">rated?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="kp">true</span> <span class="c1"># also true if user.dislikes?(movie)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">liked_movies</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie id: 23, name: "2001: A Space Odyssey"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">liked_movie_ids</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="s2">"23"</span><span class="o">]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="n">book</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">liked</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;, #&lt;Show name: "Arrested Development"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">liked_shows</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Show name: "Arrested Development"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">disliked_movies</span> <span class="c1"># or current_user.disliked</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2012"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">likes</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie id: 23, name: "2001: A Space Odyssey"&gt;, #&lt;Book id: 42, title: "100 Years of Solitude"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">likes_count</span>
+<span class="o">=&gt;</span> <span class="mi">2</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">liked_movies_count</span>
+<span class="o">=&gt;</span> <span class="mi">1</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">likes_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie id: 23, name: "2001: A Space Odyssey"&gt;, #&lt;Book id: 42, title: "100 Years of Solitude"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">liked_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie id: 23, name: "2001: A Space Odyssey"&gt;]</span>
 </pre></div>
 
-<h3>Ignoring and saving for later</h3>
+<h3>Disliking</h3>
 
-<p>You may wish to allow your users to allow to ignore items or recommendations, or
-to maintain a list of items that they know they wish to try later.</p>
+<p>Identical to Liking. Just replace the verb.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">stash</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Indie Game: The Movie"</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">ignore</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Jersey Shore"</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">stashed_movies</span> <span class="c1"># or current_user.stashed</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "Indie Game: The Movie"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">ignored_shows</span> <span class="c1"># or current_user.ignored</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Show name: "Jersey Shore"&gt;]</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislike</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislikes?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movies</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movie_ids</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislikes</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislikes_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movies_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislikes_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
 </pre></div>
 
-<h3>Made a mistake?</h3>
+<h3>Bookmarking</h3>
+
+<p>This is a system for users to keep track of items in a "save for later" kind of way. Users can bookmark any item that they have not hidden, including items they've liked or disliked. Bookmarked items will be removed from a user's recommendations.</p>
+
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmark</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarks?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">rated?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span> <span class="c1"># false unless user liked/disliked movie</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarked_movies</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarked_movie_ids</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarks</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarks_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarked_movies_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarks_in_common_with</span><span class="p">(</span><span class="n">friend</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarked_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+</pre></div>
+
+<h3>Hiding</h3>
+
+<p>Aside from abstaining to rate, this is the closest Recommendable will <em>ever</em> get to a "neutral" voting option. Hiding items provides you with a way to let users tell you what they couldn't care less about.</p>
+
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hides?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">rated?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span> <span class="c1"># false</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hidden_movies</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hidden_movie_ids</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hiding</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hidden_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hidden_movies_count</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hiding_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hidden_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
+</pre></div>
+
+<p>Use this as you will, but hidden items can not be liked, disliked, or bookmarked. They are removed from recommendations and completely ignored by Recommendable unless removed from a user's set of hidden items. Speaking of which...</p>
+
+<h3>Removing from sets</h3>
 
 <p>Each of the actions above has an opposite "un" action to remove items from a list:</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">unlike</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Jersey Shore"</span><span class="p">)</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">unlike</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">undislike</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Indie Game: The Movie"</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">undislike</span><span class="p">(</span><span class="n">book</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">unstash</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2012"</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">unbookmark</span><span class="p">(</span><span class="n">mineral</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">unignore</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">unhide</span><span class="p">(</span><span class="n">other_thing</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
 </pre></div>
 
 <h3>Recommendations</h3>
 
-<p>And here we arrive at the whole reason this gem exists! Assuming Redis and Sidekiq
-have been running, your users should automagically begin to receive recommendations
-soon after liking and disliking stuff:</p>
+<p>And here we are. Assuming your queues are being processed, users should begin receiving recommendations as soon as they have rated items that other users have also rated.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"A Clockwork Orange"</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Arrested Development"</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">like</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">recommendations</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "A Clockwork Orange"&gt;, #&lt;Show name: "Arrested Development"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">recommendations</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="c1">#&lt;Movie name: "A Clockwork Orange"&gt;</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">recommended_movies</span>
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"A Clockwork Orange"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"Brave New World"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"A Clockwork Orange"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+<span class="c1"># ...</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">recommendations</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001 A Space Odyssey"&gt;, #&lt;Book title: "Brave New World"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">recommended_movies</span>
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "A Clockwork Orange"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">recommended_shows</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Show name: "Arrested Development"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">similar_raters</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: "frankpoole"&gt;, #&lt;User username: "davidbowman"&gt;]</span>
 </pre></div>
 
 <h3>The "best" of your Recommendable models</h3>
 
-<p>Recommendable does some maths in the background to calculate which of your Recommended objects, based on likes and dislikes, are the best of the best. Using the <code>.top</code> query method on your Recommendable models will return the coolest stuff you have to offer sorted by awesomeness:</p>
+<p>Recommendable does some maths in the background to calculate which of your Recommended objects, based on likes and dislikes, are the best of the best. This algorithm is similar to <a href="http://www.evanmiller.org/how-not-to-sort-by-average-rating.html">the algorithm</a> Reddit uses to sort the "best" comments. Using the <code>.top</code> query method on your Recommendable models will return the coolest stuff you have to offer sorted by awesomeness:</p>
 
 <div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="no">Movie</span><span class="o">.</span><span class="n">top</span>
 <span class="o">=&gt;</span> <span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;</span>
 <span class="o">&gt;&gt;</span> <span class="no">Movie</span><span class="o">.</span><span class="n">top</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;, #&lt;Movie name: "A Clockwork Orange"&gt;, #&lt;Movie name: "The Shining"&gt;]</span>
-</pre></div>
-
-<h3>Additional helpers</h3>
-
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">likes?</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="kp">true</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">dislikes?</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Arrested Development"</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="kp">false</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">rated?</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Jersey Shore"</span><span class="p">)</span>
-<span class="o">=&gt;</span> <span class="kp">false</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">similar_raters</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: "frankpoole"&gt;, #&lt;User username: "davidbowman"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">davidbowman</span><span class="o">.</span><span class="n">liked_in_common_with</span> <span class="n">frankpoole</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;, #&lt;Show name: "Arrested Development"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">davidbowman</span><span class="o">.</span><span class="n">liked_movies_in_common_with</span> <span class="n">frankpoole</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">davidbowman</span><span class="o">.</span><span class="n">disliked_shows_in_common_with</span> <span class="n">frankpoole</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Show name: "Jersey Shore"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span><span class="o">.</span><span class="n">liked_by</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: "davidbowman"&gt;, #&lt;User username: "davidbowman"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="no">Show</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Arrested Development"</span><span class="p">)</span><span class="o">.</span><span class="n">disliked_by</span>
-<span class="o">=&gt;</span> <span class="o">[]</span>
 </pre></div>
 
 <h3>Callbacks</h3>
@@ -191,22 +213,22 @@ soon after liking and disliking stuff:</p>
   <span class="n">recommends</span> <span class="ss">:movies</span>
   <span class="n">after_like</span> <span class="ss">:update_feed</span>
 
-  <span class="k">def</span> <span class="nf">update_feed</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
-    <span class="n">feed</span><span class="o">.</span><span class="n">update</span> <span class="s2">"liked </span><span class="si">#{</span><span class="n">movie</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">!"</span>
+  <span class="k">def</span> <span class="nf">update_feed</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">feed</span><span class="o">.</span><span class="n">update</span> <span class="s2">"liked </span><span class="si">#{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
   <span class="k">end</span>
 <span class="k">end</span>
 </pre></div>
 
-<p>You can define before/after hooks for (un)liking, (un)disliking, (un)stashing, and (un)ignoring. Each hook takes the recommendable object as an argument and can be a block or a method name.</p>
+<p>You can define before/after hooks for <code>(un)like</code>, <code>(un)dislike</code>, <code>(un)bookmark</code>, and <code>(un)hide</code>. Each hook takes the recommendable object as an argument and can be a block or a method name.</p>
 
 <h3>A note on the dynamic finders</h3>
 
-<p>All of the dynamically defined finders return ActiveRecord::Relations. This means you can chain other ActiveRecord query methods with them!</p>
+<p>All of the dynamically defined finders return a Relation. This means that, assuming your ORM's queries are chainable, you can keep that chain going.</p>
 
 <div class="highlight"><pre><span class="n">current_user</span><span class="o">.</span><span class="n">liked_movies</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">current_user</span><span class="o">.</span><span class="n">stashed_books</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:author</span> <span class="o">=&gt;</span> <span class="s2">"Cormac McCarthy"</span><span class="p">)</span>
-<span class="n">current_user</span><span class="o">.</span><span class="n">disliked_shows</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:cast_members</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'cast_members.name = Kim Kardashian'</span><span class="p">)</span>
-<span class="n">current_user</span><span class="o">.</span><span class="n">ignored_movies</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'year DESC'</span><span class="p">)</span>
+<span class="n">current_user</span><span class="o">.</span><span class="n">bookmarked_books</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:author</span> <span class="o">=&gt;</span> <span class="s2">"Cormac McCarthy"</span><span class="p">)</span>
+<span class="n">current_user</span><span class="o">.</span><span class="n">disliked_movies</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:cast_members</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'cast_members.name = Kim Kardashian'</span><span class="p">)</span>
+<span class="n">current_user</span><span class="o">.</span><span class="n">ignored_minerals</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'density DESC'</span><span class="p">)</span>
 <span class="n">current_user</span><span class="o">.</span><span class="n">recommended_movies</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'year &lt; 2010'</span><span class="p">)</span>
 </pre></div>
 
@@ -230,19 +252,6 @@ soon after liking and disliking stuff:</p>
 </pre></div>
 
 <p>Redis will now be running on localhost:6379. After a second, you can hit <code>ctrl-\</code> to detach and keep Redis running in the background.</p>
-
-<h3>Redis problems?</h3>
-
-<p>Oops, did you kill your Redis database? Not to worry. Likes, Dislikes, Ignores,
-and StashedItems are stored as models in your regular database. As long as these
-still exist, you can regenerate the similarity values and recommendations on the
-fly. But try not to have to do it!</p>
-
-<div class="highlight"><pre><span class="no">Users</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
-  <span class="n">user</span><span class="o">.</span><span class="n">send</span> <span class="ss">:update_similarities</span>
-  <span class="n">user</span><span class="o">.</span><span class="n">send</span> <span class="ss">:update_recommendations</span>
-<span class="k">end</span>
-</pre></div>
 
 <h2>Why not stars?</h2>
 
