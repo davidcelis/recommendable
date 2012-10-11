@@ -45,6 +45,7 @@ module Recommendable
           relevant_user_ids = Recommendable.config.ratable_classes.inject([]) do |memo, klass|
             liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id)
             disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
+
             item_ids = Recommendable.redis.sunion(liked_set, disliked_set)
 
             unless item_ids.empty?
@@ -76,16 +77,34 @@ module Recommendable
         def update_recommendations_for(user_id)
           nearest_neighbors = Recommendable.config.nearest_neighbors || Recommendable.config.user_class.count
           Recommendable.config.ratable_classes.each do |klass|
-            similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
+            rated_sets = [
+              Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id),
+              Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id),
+              Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, user_id),
+              Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, user_id)
+            ]
+            temp_set = Recommendable::Helpers::RedisKeyMapper.temp_set_for(Recommendable.config.user_class, user_id)
+            similarity_set  = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
             recommended_set = Recommendable::Helpers::RedisKeyMapper.recommended_set_for(klass, user_id)
-            similar_user_ids = Recommendable.redis.zrevrange(similarity_set, 0, nearest_neighbors - 1)
+            most_similar_user_ids = Recommendable.redis.zrevrange(similarity_set, 0, nearest_neighbors - 1)
+            least_similar_user_ids = Recommendable.redis.zrange(similarity_set, 0, nearest_neighbors - 1)
 
-            sets_to_union = similar_user_ids.inject([]) do |sets, id|
+            # Get likes from the most similar users
+            sets_to_union = most_similar_user_ids.inject([]) do |sets, id|
               sets << Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, id)
             end
 
+            # Get dislikes from the least similar users
+            least_similar_user_ids.inject(sets_to_union) do |sets, id|
+              sets << Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id)
+            end
+
             return if sets_to_union.empty?
-            scores = Recommendable.redis.sunion(sets_to_union).map { |id| [predict_for(user_id, klass, id), id] }
+
+            # SDIFF rated items so they aren't recommended
+            Recommendable.redis.sunionstore(temp_set, sets_to_union)
+            item_ids = Recommendable.redis.sdiff(temp_set, rated_sets)
+            scores = item_ids.map { |id| [predict_for(user_id, klass, id), id] }
             scores.each do |s|
               Recommendable.redis.zadd(recommended_set, s[0], s[1])
             end

@@ -18,7 +18,7 @@ Add the following to your application's `Gemfile`:
   gem 'recommendable'
 ```
 
-For correct detection of your ORM, you may need to place Recommendable below your ORM in the Gemfile.
+You may need to place Recommendable below your ORM and queueing system in the Gemfile.
 
 After bundling, you should configure Recommendable. Do this somewhere after you've required it, but before it's actually used. For example, Rails users would create an initializer (`config/initializers/recommendable.rb`):
 

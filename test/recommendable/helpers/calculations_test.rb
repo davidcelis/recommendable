@@ -40,6 +40,10 @@ class CalculationsTest < MiniTest::Unit::TestCase
     assert_equal Recommendable::Helpers::Calculations.similarity_between(@user.id, @user5.id), -1.0
   end
 
+  def test_update_recommendations_ignores_rated_items
+
+  end
+
   def teardown
     Recommendable.redis.flushdb
   end

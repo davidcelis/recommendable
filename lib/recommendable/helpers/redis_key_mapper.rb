@@ -13,15 +13,19 @@ module Recommendable
         end
 
         def liked_by_set_for(klass, id)
-          [Recommendable.config.redis_namespace, klass.to_s.tableize, id, "liked_by"].compact.join(':')
+          [Recommendable.config.redis_namespace, klass.to_s.tableize, id, 'liked_by'].compact.join(':')
         end
 
         def disliked_by_set_for(klass, id)
-          [Recommendable.config.redis_namespace, klass.to_s.tableize, id, "disliked_by"].compact.join(':')
+          [Recommendable.config.redis_namespace, klass.to_s.tableize, id, 'disliked_by'].compact.join(':')
         end
 
         def score_set_for(klass)
           [Recommendable.config.redis_namespace, klass.to_s.tableize, 'scores'].join(':')
+        end
+
+        def temp_set_for(klass, id)
+          [Recommendable.config.redis_namespace, klass.to_s.tableize, id, 'temp'].compact.join(':')
         end
       end
     end
