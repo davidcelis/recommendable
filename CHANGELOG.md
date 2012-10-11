@@ -1,8 +1,14 @@
 Changelog
 =========
 
-2.0.0 (Current version)
------------------------
+2.0.0.20121011 (Current version)
+--------------------------------
+ * Fix a bug where rated items would show up in recommended sets
+ * Fix support for versions of Redis < 2.4. Redis 1.x is untested.
+ * Fix a bug where workers would not queue up jobs.
+
+2.0.0
+-----
 **IMPORTANT**: This is a MAJOR version bump that should greatly improve the performance of Recommendable. Most of the library has been rewritten from the ground up and, as such, there are steps you must take to make your application compatibile with this version.
 
 1. Flush your Redis database. Yes, you'll have to regenerate any recommendations at the end. Sorry.
