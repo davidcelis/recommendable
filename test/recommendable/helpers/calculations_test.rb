@@ -41,7 +41,14 @@ class CalculationsTest < MiniTest::Unit::TestCase
   end
 
   def test_update_recommendations_ignores_rated_items
+    Recommendable::Helpers::Calculations.update_similarities_for(@user.id)
+    Recommendable::Helpers::Calculations.update_recommendations_for(@user.id)
 
+    movies = @user.liked_movies + @user.disliked_movies
+    books  = @user.liked_books  + @user.disliked_books
+
+    movies.each { |m| refute_includes @user.recommended_movies, m }
+    books.each  { |b| refute_includes @user.recommended_books,  b }
   end
 
   def teardown
