@@ -108,6 +108,8 @@ module Recommendable
             scores.each do |s|
               Recommendable.redis.zadd(recommended_set, s[0], s[1])
             end
+
+            Recommendable.redis.del(temp_set)
           end
 
           true
