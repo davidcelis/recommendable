@@ -1,8 +1,12 @@
 Changelog
 =========
 
-2.0.0.20121011 (Current version)
---------------------------------
+2.0.1 (Current version)
+-----------------------
+* Fix a bug that caused recommendations always to calculate as 0.0
+
+2.0.0.20121011
+--------------
  * Fix a bug where rated items would show up in recommended sets
  * Fix support for versions of Redis < 2.4. Redis 1.x is untested.
  * Fix a bug where workers would not queue up jobs.
