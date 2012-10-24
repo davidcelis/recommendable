@@ -131,11 +131,12 @@ module Recommendable
           disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, item_id)
           similarity_sum = 0.0
 
-          Recommendable.redis.smembers(liked_by_set).inject(similarity_sum) do |sum, id|
-            sum += Recommendable.redis.zscore(similarity_set, id).to_f
+          similarity_sum += Recommendable.redis.smembers(liked_by_set).inject(0) do |memo, id|
+            memo += Recommendable.redis.zscore(similarity_set, id).to_f
           end
-          Recommendable.redis.smembers(disliked_by_set).inject(similarity_sum) do |sum, id|
-            sum -= Recommendable.redis.zscore(similarity_set, id).to_f
+
+          similarity_sum += Recommendable.redis.smembers(disliked_by_set).inject(0) do |memo, id|
+            memo -= Recommendable.redis.zscore(similarity_set, id).to_f
           end
 
           liked_by_count = Recommendable.redis.scard(liked_by_set)
