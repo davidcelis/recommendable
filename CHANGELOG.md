@@ -1,8 +1,12 @@
 Changelog
 =========
 
-2.0.1 (Current version)
+2.0.2 (Current version)
 -----------------------
+* Fix a bug that caused Recommendable to be unusable with Mongoid (and likely DataMapper) - #58
+
+2.0.1
+-----
 * Fix a bug that caused recommendations always to calculate as 0.0
 
 2.0.0.20121011
