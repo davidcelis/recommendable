@@ -9,9 +9,6 @@ Gem::Specification.new do |s|
 A Like/Dislike recommendation engine for Ruby apps using Redis.
 EOF
 
-  s.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
-  s.cert_chain  = ['.public_cert.pem']
-
   s.files       = Dir['lib/**/*']
 
   s.has_rdoc    = 'yard'
