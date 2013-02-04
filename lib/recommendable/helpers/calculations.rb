@@ -56,7 +56,7 @@ module Recommendable
                 [liked_by_set, disliked_by_set]
               end
 
-              memo | Recommendable.redis.sunion(sets.flatten)
+              memo | Recommendable.redis.sunion(*sets.flatten)
             else
               memo
             end
@@ -102,8 +102,8 @@ module Recommendable
             return if sets_to_union.empty?
 
             # SDIFF rated items so they aren't recommended
-            Recommendable.redis.sunionstore(temp_set, sets_to_union)
-            item_ids = Recommendable.redis.sdiff(temp_set, rated_sets)
+            Recommendable.redis.sunionstore(temp_set, *sets_to_union)
+            item_ids = Recommendable.redis.sdiff(temp_set, *rated_sets)
             scores = item_ids.map { |id| [predict_for(user_id, klass, id), id] }
             scores.each do |s|
               Recommendable.redis.zadd(recommended_set, s[0], s[1])
