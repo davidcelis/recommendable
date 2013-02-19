@@ -29,7 +29,8 @@ Recommendable.configure do |config|
   # Recommendable's connection to Redis
   config.redis = Redis.new(:host => 'localhost', :port => 6379, :db => 0)
 
-  # A prefix for all keys Recommendable uses
+  # A prefix for all keys Recommendable uses. If you set this to nil, Redis
+  # keys won't be namespaced and you may see improved memory usage.
   config.redis_namespace = :recommendable
 
   # Whether or not to automatically enqueue users to have their recommendations
