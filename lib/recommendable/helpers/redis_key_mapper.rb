@@ -20,6 +20,10 @@ module Recommendable
           [Recommendable.config.redis_namespace, klass.to_s.tableize, id, 'disliked_by'].compact.join(':')
         end
 
+        def bookmarked_by_set_for(klass, id)
+          [Recommendable.config.redis_namespace, klass.to_s.tableize, id, 'bookmarked_by'].compact.join(':')
+        end
+
         def score_set_for(klass)
           [Recommendable.config.redis_namespace, klass.to_s.tableize, 'scores'].join(':')
         end

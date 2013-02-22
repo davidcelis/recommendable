@@ -1,5 +1,6 @@
 require 'recommendable/ratable/likable'
 require 'recommendable/ratable/dislikable'
+require 'recommendable/ratable/bookmarkable'
 
 module Recommendable
   module Ratable
@@ -14,6 +15,7 @@ module Recommendable
         class_eval do
           include Likable
           include Dislikable
+          include Bookmarkable
 
           if ancestors.include?(ActiveRecord::Base) || include?(Mongoid::Document) || include?(MongoMapper::Document) || include?(MongoMapper::EmbeddedDocument)
             before_destroy :remove_from_recommendable!
