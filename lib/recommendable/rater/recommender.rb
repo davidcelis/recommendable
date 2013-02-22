@@ -54,6 +54,10 @@ module Recommendable
           Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, '*')).each do |set|
             Recommendable.redis.srem(set, id)
           end
+          # Remove this user from any class member's bookmarked_by sets
+          Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.bookmarked_by_set_for(klass, '*')).each do |set|
+            Recommendable.redis.srem(set, id)
+          end
 
           # Remove this user's liked/disliked/hidden/bookmarked/recommended sets for the class
           Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, id))
