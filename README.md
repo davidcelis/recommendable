@@ -1,4 +1,4 @@
-# Recommendable [![Build Status](https://secure.travis-ci.org/davidcelis/recommendable.png)](http://travis-ci.org/davidcelis/recommendable)
+# Recommendable [![Build Status](https://travis-ci.org/davidcelis/recommendable.png?branch=master)](https://travis-ci.org/davidcelis/recommendable)
 
 Recommendable is a gem that allows you to quickly add a recommendation engine for Likes and Dislikes to your Ruby application using my version of [Jaccardian similarity and memory-based collaborative filtering][collaborative filtering].
 
