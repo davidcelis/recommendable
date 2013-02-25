@@ -2,7 +2,7 @@ require 'redis'
 
 module Recommendable
   class Configuration
-    # The ORM you are using. Currently supported: `:activerecord`, `:mongoid`, and `:datamapper`
+    # The ORM you are using. Currently supported: `:activerecord`, `:mongoid`, ':sequel', ':mongo-mapper' and `:datamapper`
     attr_accessor :orm
 
     # Recommendable's connection to Redis
