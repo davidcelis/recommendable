@@ -72,7 +72,7 @@ module Recommendable
       # @private
       def hidden_ids_for(klass)
         ids = Recommendable.redis.smembers(Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, id))
-        ids.map!(&:to_i) if [:active_record, :data_mapper].include?(Recommendable.config.orm)
+        ids.map!(&:to_i) if [:active_record, :data_mapper, :sequel].include?(Recommendable.config.orm)
         ids
       end
 

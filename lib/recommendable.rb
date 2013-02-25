@@ -26,7 +26,7 @@ module Recommendable
       user_id = user_id.id if user_id.is_a?(Recommendable.config.user_class)
 
       if defined?(::Sidekiq)
-        Recommendable::Workers::Sidekiq.perform_async(user_id)
+        # Recommendable::Workers::Sidekiq.perform_async(user_id)
       elsif defined?(::Resque)
         Resque.enqueue(Recommendable::Workers::Resque, user_id)
       elsif defined?(::Delayed::Job)
@@ -45,3 +45,4 @@ require 'recommendable/orm/active_record' if defined?(ActiveRecord::Base)
 require 'recommendable/orm/data_mapper' if defined?(DataMapper::Resource)
 require 'recommendable/orm/mongoid' if defined?(Mongoid::Document)
 require 'recommendable/orm/mongo_mapper' if defined?(MongoMapper::Document)
+require 'recommendable/orm/sequel' if defined?(Sequel::Model)

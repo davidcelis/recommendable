@@ -71,7 +71,7 @@ module Recommendable
       # @private
       def bookmarked_ids_for(klass)
         ids = Recommendable.redis.smembers(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id))
-        ids.map!(&:to_i) if [:active_record, :data_mapper].include?(Recommendable.config.orm)
+        ids.map!(&:to_i) if [:active_record, :data_mapper, :sequel].include?(Recommendable.config.orm)
         ids
       end
 

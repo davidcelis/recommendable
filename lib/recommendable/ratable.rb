@@ -14,12 +14,18 @@ module Recommendable
         class_eval do
           include Likable
           include Dislikable
-
-          if ancestors.include?(ActiveRecord::Base) || include?(Mongoid::Document) || include?(MongoMapper::Document) || include?(MongoMapper::EmbeddedDocument)
+          
+          if ancestors.include?(Sequel::Model)
+            def before_destroy
+              super
+              remove_from_recommendable!
+            end
+          elsif ancestors.include?(ActiveRecord::Base) || include?(Mongoid::Document) || include?(MongoMapper::Document) || include?(MongoMapper::EmbeddedDocument)
             before_destroy :remove_from_recommendable!
           elsif include?(DataMapper::Resource)
             before :destroy, :remove_from_recommendable!
           end
+
 
           # Whether or not items belonging to this class can be recommended.
           #

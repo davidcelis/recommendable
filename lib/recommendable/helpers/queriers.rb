@@ -17,6 +17,10 @@ module Recommendable
         def mongo_mapper(klass, ids)
           klass.where(:id => ids)
         end
+
+        def sequel(klass, ids)
+          klass.where(:id => ids)
+        end
       end
     end
   end
