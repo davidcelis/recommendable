@@ -26,15 +26,21 @@ module Recommendable
           include Recommender
           include Hooks
 
-          if ancestors.include?(Sequel::Model)
+          case
+          when defined?(Sequel::Model) && ancestors.include?(Sequel::Model)
             def before_destroy
               super
               remove_from_recommendable!
             end
-          elsif ancestors.include?(ActiveRecord::Base) || include?(Mongoid::Document) || include?(MongoMapper::Document) || include?(MongoMapper::EmbeddedDocument)
+          when defined?(ActiveRecord::Base)            && ancestors.include?(ActiveRecord::Base),
+               defined?(Mongoid::Document)             && ancestors.include?(Mongoid::Document),
+               defined?(MongoMapper::Document)         && ancestors.include?(MongoMapper::Document),
+               defined?(MongoMapper::EmbeddedDocument) && ancestors.include?(MongoMapper::EmbeddedDocument)
             before_destroy :remove_from_recommendable!
-          elsif include?(DataMapper::Resource)
+          when defined?(DataMapper::Resource) && ancestors.include?(DataMapper::Resource)
             before :destroy, :remove_from_recommendable!
+          else
+            warn "Model #{self} is not using a supported ORM. You must handle removal from Redis manually when destroying instances."
           end
 
           define_hooks :before_like,     :after_like,     :before_unlike,     :after_unlike,
