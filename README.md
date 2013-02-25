@@ -5,7 +5,7 @@ Recommendable is a gem that allows you to quickly add a recommendation engine fo
 ## Requirements
 
 * Ruby 1.8.7 or 1.9.x
-* ActiveRecord, DataMapper, Mongoid, or MongoMapper (your models must have an `id` field)
+* ActiveRecord, Sequel, DataMapper, Mongoid, or MongoMapper (your models must have an `id` field)
 * Sidekiq, Resque, DelayedJob (optional but highly recommended)
 
 Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If running on Rails 4, the built-in queueing system is supported. If you bundle [Sidekiq][sidekiq], [Resque][resque], or [DelayedJob][delayed_job], Recommendable will use your bundled queueing system instead. If bundling Sidekiq, you should also include ['sidekiq-middleware'][sidekiq-middleware] in your Gemfile to ensure that a user will not get enqueued more than once at a time. If bundling Resque, you should include ['resque-loner'][resque-loner] for this. As far as I know, there is no current way to avoid duplicate jobs in DelayedJob.
