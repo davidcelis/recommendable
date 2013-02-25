@@ -1,8 +1,13 @@
 Changelog
 =========
 
-2.0.3 (Current version)
+2.0.4 (Current release)
 -----------------------
+* Add support for the Sequel gem (thanks to [@jeregrine](https://github.com/jeregrine))
+* Fix a bug that likely prevented any ORM but ActiveRecord from being used without, let's be real, probably exploding all over the place.
+
+2.0.3
+-----
 * Fix a nasty bug where calls to SUNION, SDIFF, SINTER, and SUNIONSTORE were not splatting Arrays of set keys. This was preventing calculations of similarity values and recommendations. - #59
 
 2.0.2
