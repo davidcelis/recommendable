@@ -10,6 +10,7 @@ require 'recommendable/ratable'
 require 'recommendable/workers/sidekiq'
 require 'recommendable/workers/resque'
 require 'recommendable/workers/delayed_job'
+require 'recommendable/workers/torque_box'
 require 'recommendable/workers/rails'
 
 module Recommendable
@@ -31,6 +32,8 @@ module Recommendable
         Resque.enqueue(Recommendable::Workers::Resque, user_id)
       elsif defined?(::Delayed::Job)
         Delayed::Job.enqueue(Recommendable::Workers::DelayedJob.new(user_id))
+      elsif defined?(::TorqueBox::Messaging::Backgroundable)
+        Recommendable::Workers::TorqueBox.enqueue(user_id)
       elsif defined?(::Rails::Queueing)
         unless Rails.queue.any? { |w| w.user_id == user_id }
           Rails.queue.push(Recommendable::Workers::Rails.new(user_id))
