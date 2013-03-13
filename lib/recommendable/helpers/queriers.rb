@@ -11,7 +11,7 @@ module Recommendable
         end
 
         def mongoid(klass, ids)
-          klass.where(:id => ids)
+          klass.where(:id.in => ids)
         end
 
         def mongo_mapper(klass, ids)
