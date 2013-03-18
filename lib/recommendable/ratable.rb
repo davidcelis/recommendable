@@ -29,7 +29,6 @@ module Recommendable
             warn "Model #{self} is not using a supported ORM. You must handle removal from Redis manually when destroying instances."
           end
 
-
           # Whether or not items belonging to this class can be recommended.
           #
           # @return true if a user class `recommends :this`
@@ -58,26 +57,28 @@ module Recommendable
           # Completely removes this item from redis. Called from a before_destroy hook.
           # @private
           def remove_from_recommendable!
+            sets  = [] # SREM needed
+            zsets = [] # ZREM needed
+            keys  = [] # DEL  needed
             # Remove this item from the score zset
-            Recommendable.redis.zrem(Recommendable::Helpers::RedisKeyMapper.score_set_for(self.class), id)
+            zsets << Recommendable::Helpers::RedisKeyMapper.score_set_for(self.class)
 
             # Remove this item's liked_by/disliked_by sets
-            %w[liked_by disliked_by].each do |action|
-              set = Recommendable::Helpers::RedisKeyMapper.send("#{action}_set_for", self.class, id)
-              Recommendable.redis.del(set)
-            end
+            keys << Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(self.class, id)
+            keys << Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(self.class, id)
 
             # Remove this item from any user's like/dislike/hidden/bookmark sets
             %w[liked disliked hidden bookmarked].each do |action|
-              set = Recommendable::Helpers::RedisKeyMapper.send("#{action}_set_for", self.class, id)
-              Recommendable.redis.keys(set).each do |set|
-                Recommendable.redis.srem(set, id)
-              end
+              sets += Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.send("#{action}_set_for", self.class, '*'))
             end
 
             # Remove this item from any user's recommendation zset
-            Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.recommended_set_for(self.class, '*')).each do |zset|
-              Recommendable.redis.zrem(zset, id)
+            zsets += Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.recommended_set_for(self.class, '*'))
+
+            Recommendable.redis.pipelined do |redis|
+              sets.each { |set| redis.srem(set, id) }
+              zsets.each { |zset| redis.zrem(zset, id) }
+              redis.del(*keys)
             end
           end
         end

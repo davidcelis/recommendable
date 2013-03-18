@@ -36,31 +36,34 @@ module Recommendable
       # Removes a user from Recommendable. Called internally on a before_destroy hook.
       # @private
       def remove_from_recommendable!
-        # Remove this user's similarity ZSET
-        Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.similarity_set_for(id))
+        sets  = [] # SREM needed
+        zsets = [] # ZREM needed
+        keys  = [] # DEL  needed
 
         # Remove from other users' similarity ZSETs
-        Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.similarity_set_for('*')).each do |zset|
-          Recommendable.redis.zrem(zset, id)
-        end
+        zsets += Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.similarity_set_for('*'))
+
+        # Remove this user's similarity ZSET
+        keys << Recommendable::Helpers::RedisKeyMapper.similarity_set_for(id)
 
         # For each ratable class...
         Recommendable.config.ratable_classes.each do |klass|
           # Remove this user from any class member's liked_by/disliked_by sets
-          Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, '*')).each do |set|
-            Recommendable.redis.srem(set, id)
-          end
-
-          Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, '*')).each do |set|
-            Recommendable.redis.srem(set, id)
-          end
+          sets += Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, '*'))
+          sets += Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, '*'))
 
           # Remove this user's liked/disliked/hidden/bookmarked/recommended sets for the class
-          Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, id))
-          Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id))
-          Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, id))
-          Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id))
-          Recommendable.redis.del(Recommendable::Helpers::RedisKeyMapper.recommended_set_for(klass, id))
+          keys << Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, id)
+          keys << Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id)
+          keys << Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, id)
+          keys << Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id)
+          keys << Recommendable::Helpers::RedisKeyMapper.recommended_set_for(klass, id)
+        end
+
+        Recommendable.redis.pipelined do |redis|
+          sets.each { |set| redis.srem(set, id) }
+          zsets.each { |zset| redis.zrem(zset, id) }
+          redis.del(*keys)
         end
       end
     end
