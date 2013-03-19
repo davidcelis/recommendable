@@ -67,6 +67,13 @@ module Recommendable
             Recommendable.redis.zadd(similarity_set, similarity_between(user_id, id), id)
           end
 
+          if knn = Recommendable.config.nearest_neighbors
+            length = Recommendable.redis.zcard(similarity_set)
+            kfn = Recommendable.config.furthest_neighbors || 0
+
+            Recommendable.redis.zremrangebyrank(similarity_set, kfn, length - knn - 1)
+          end
+
           true
         end
 
@@ -110,6 +117,11 @@ module Recommendable
             end
 
             Recommendable.redis.del(temp_set)
+
+            if number_recommendations = Recommendable.config.recommendations_to_store
+              length = Recommendable.redis.zcard(recommended_set)
+              Recommendable.redis.zremrangebyrank(recommended_set, 0, length - number_recommendations - 1)
+            end
           end
 
           true
