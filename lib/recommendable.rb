@@ -11,7 +11,6 @@ require 'recommendable/workers/sidekiq'
 require 'recommendable/workers/resque'
 require 'recommendable/workers/delayed_job'
 require 'recommendable/workers/torque_box'
-require 'recommendable/workers/rails'
 
 module Recommendable
   class << self

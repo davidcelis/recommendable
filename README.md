@@ -42,11 +42,6 @@ Recommendable.configure do |config|
   # Default: true
   config.auto_enqueue = true
 
-  # The name of the queue that background jobs will be placed in.
-  #
-  # Default: recommendable
-  config.queue_name = :recommendable
-
   # The number of nearest neighbors (k-NN) to check when updating
   # recommendations for a user. Set to `nil` if you want to check all
   # neighbors as opposed to a subset of the nearest ones. Set this to a lower

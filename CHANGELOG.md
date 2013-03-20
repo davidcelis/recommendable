@@ -1,8 +1,15 @@
 Changelog
 =========
 
-2.1.0 (Current release)
------------------------
+2.1.0.1 (Current release)
+-------------------------
+
+* Fix #67, a bug with setting the queue name used in the Sidekiq worker.
+  * Deprecate `Recommendable.config.queue_name`.
+* Remove the Rails queueing worker as Rails::Queue has been deprecated
+
+2.1.0
+-----
 * Introducing two new configuration options aimed to reduce memory consumed by Redis:
   * `furthest_neighbors`: Uses N most dissimilar users when updating recommendations for a user. Similar to `nearest_neighbors`, and can only be used in conjunction with kNN.
   * `recommendations_to_store`: the number of recommendations to store in Redis per user. Defaults to 100.

@@ -21,11 +21,6 @@ module Recommendable
     # Default: true
     attr_accessor :auto_enqueue
 
-    # The name of the queue that background jobs will be placed in.
-    #
-    # Default: recommendable
-    attr_accessor :queue_name
-
     # The number of nearest neighbors (k-NN) to check when updating
     # recommendations for a user. Set to `nil` if you want to check all
     # neighbors as opposed to a subset of the nearest ones. Set this to a lower
@@ -56,20 +51,29 @@ module Recommendable
       @redis                    = Redis.new
       @redis_namespace          = :recommendable
       @auto_enqueue             = true
-      @queue_name               = :recommendable
       @ratable_classes          = []
       @nearest_neighbors        = nil
       @furthest_neihbors        = nil
       @recommendations_to_store = 100
     end
+
+    def queue_name
+      warn "Recommendable.config.queue_name has been deprecated. Jobs will always be placed in a queue named 'recommendable'."
+    end
+
+    def queue_name=(queue_name)
+      warn "Recommendable.config.queue_name has been deprecated. Jobs will always be placed in a queue named 'recommendable'."
+    end
   end
 
   class << self
-    attr_accessor :config
-
     def configure
       @config ||= Configuration.new
       yield @config
+    end
+
+    def config
+      @config ||= Configuration.new
     end
   end
 end
