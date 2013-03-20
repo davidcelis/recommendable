@@ -1,9 +1,18 @@
 Changelog
 =========
 
-2.0.4 (Current release)
+2.1.0 (Current release)
 -----------------------
-* Add support for the Sequel gem (thanks to [@jeregrine](https://github.com/jeregrine))
+* Introducing two new configuration options aimed to reduce memory consumed by Redis:
+  * `furthest_neighbors`: Uses N most dissimilar users when updating recommendations for a user. Similar to `nearest_neighbors`, and can only be used in conjunction with kNN.
+  * `recommendations_to_store`: the number of recommendations to store in Redis per user. Defaults to 100.
+* Support for Torquebox queueing (thanks to [erichmenge](https://github.com/erichmenge))
+* Fix a bug with the Mongoid querier not using `:id.in`
+* Redis pipelining is now used when removing records from recommendable
+
+2.0.4
+-----
+* Add support for the Sequel gem (thanks to [jeregrine](https://github.com/jeregrine))
 * Fix a bug that likely prevented any ORM but ActiveRecord from being used without, let's be real, probably exploding all over the place.
 
 2.0.3

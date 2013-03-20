@@ -3,7 +3,7 @@ module Recommendable
     class Sidekiq
       if defined?(::Sidekiq)
         include ::Sidekiq::Worker
-        sidekiq_options :unique => true, :queue => :recommendable
+        sidekiq_options :unique => true, :queue => Recommendable.config.queue_name
       end
 
       def perform(user_id)
