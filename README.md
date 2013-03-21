@@ -6,9 +6,9 @@ Recommendable is a gem that allows you to quickly add a recommendation engine fo
 
 * Ruby 1.8.7 or 1.9.x
 * ActiveRecord, Sequel, DataMapper, Mongoid, or MongoMapper (your models must have an `id` field)
-* Sidekiq, Resque, DelayedJob (optional but highly recommended)
+* [Sidekiq][sidekiq], [Resque][resque], [DelayedJob][delayed-job] (optional but highly recommended)
 
-Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If running on Rails 4, the built-in queueing system is supported. If you bundle [Sidekiq][sidekiq], [Resque][resque], or [DelayedJob][delayed_job], Recommendable will use your bundled queueing system instead. If bundling Sidekiq, you should also include ['sidekiq-middleware'][sidekiq-middleware] in your Gemfile to ensure that a user will not get enqueued more than once at a time. If bundling Resque, you should include ['resque-loner'][resque-loner] for this. As far as I know, there is no current way to avoid duplicate jobs in DelayedJob.
+Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If you bundle [Sidekiq][sidekiq], you should also include ['sidekiq-middleware'][sidekiq-middleware] in your Gemfile to ensure that a user will not get enqueued more than once at a time. If bundling [Resque][resque], you should include ['resque-loner'][resque-loner] for this. As far as I know, there is no current way to avoid duplicate jobs in [DelayedJob][delayed-job]. Queueing for [Torquebox][torquebox] is also supported.
 
 ## Installation
 
@@ -154,9 +154,10 @@ further details.
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
 [sidekiq]: https://github.com/mperham/sidekiq
 [sidekiq-middleware]: https://github.com/krasnoukhov/sidekiq-middleware
-[delayed_job]: https://github.com/tobi/delayed_job
+[delayed-job]: https://github.com/tobi/delayed_job
 [resque]: https://github.com/defunkt/resque
 [resque-loner]: https://github.com/jayniz/resque-loner
+[torquebox]: https://github.com/torquebox/torquebox
 [forking]: http://help.github.com/forking/
 [pull requests]: http://help.github.com/pull-requests/
 [collaborative filtering]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
