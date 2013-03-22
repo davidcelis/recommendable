@@ -138,7 +138,7 @@ Once you've made your great commits:
 5. Create a [Pull Request][pull requests] from your branch
 6. That's it!
 
-If you love Recommendable and/or my other contributions to open source, please consider [making a small Gittip][gittip] to support me. Thank you!
+Like what you see? please consider [making a small Gittip][gittip] to support me, Recommendable, and my other open source contributions. Thank you! :heart:
 
 ## Links
 
@@ -150,7 +150,7 @@ If you love Recommendable and/or my other contributions to open source, please c
 
 ## Copyright
 
-Copyright © 2012 David Celis. See LICENSE.txt for
+Copyright © 2013 David Celis. See LICENSE.txt for
 further details.
 
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
