@@ -138,6 +138,8 @@ Once you've made your great commits:
 5. Create a [Pull Request][pull requests] from your branch
 6. That's it!
 
+If you love Recommendable and/or my other contributions to open source, please consider [making a small Gittip][gittip] to support me. Thank you!
+
 ## Links
 
 * Code: `git clone git://github.com/davidcelis/recommendable.git`
@@ -163,3 +165,4 @@ further details.
 [collaborative filtering]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
 [recommendable]: http://davidcelis.github.com/recommendable/
 [documentation]: http://rubydoc.info/gems/recommendable/frames
+[gittip]: http://gittip.com/davidcelis/
