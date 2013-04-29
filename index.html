@@ -214,7 +214,7 @@
 
 <p>Recommendable uses <a href="https://github.com/apotonick/hooks">apotonick/hooks</a> to implement before/after callbacks for liking, disliking, and more.</p>
 
-<div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
   <span class="n">has_one</span> <span class="ss">:feed</span>
 
   <span class="n">recommends</span> <span class="ss">:movies</span>
