@@ -1,4 +1,3 @@
-$LOAD_PATH.unshift File.expand_path('../../test', __FILE__)
 require 'test_helper'
 
 class LikerTest < MiniTest::Unit::TestCase
