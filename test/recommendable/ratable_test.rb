@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class RatableTest < MiniTest::Unit::TestCase
   def setup

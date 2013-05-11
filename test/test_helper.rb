@@ -1,18 +1,18 @@
-ENV['RAILS_ENV'] = 'test'
+ENV["RAILS_ENV"] = "test"
 
-require File.expand_path('../dummy/config/environment.rb', __FILE__)
-require 'rails/test_help'
+require File.expand_path("../dummy/config/environment.rb", __FILE__)
+require "rails/test_help"
 
-require 'minitest/unit'
-require 'minitest/pride'
-require 'minitest/autorun'
+require "minitest/unit"
+require "minitest/pride"
+require "minitest/autorun"
 
-require 'database_cleaner'
+require "database_cleaner"
 
-require 'miniskirt'
-require 'factories'
+require "miniskirt"
+require "factories"
 
-require 'recommendable'
+require "recommendable"
 
 DatabaseCleaner.strategy = :transaction
 Rails.backtrace_cleaner.remove_silencers!

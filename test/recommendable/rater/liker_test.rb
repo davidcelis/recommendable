@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class LikerTest < MiniTest::Unit::TestCase
   def setup

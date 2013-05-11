@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class DislikableTest < MiniTest::Unit::TestCase
   def setup
