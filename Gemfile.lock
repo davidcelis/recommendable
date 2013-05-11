@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    recommendable (2.1.0)
+    recommendable (2.1.0.1)
       activesupport (>= 3.0.0)
       hooks (>= 0.2.1)
       redis (>= 2.2.0)
@@ -80,7 +80,7 @@ GEM
     rake (10.0.3)
     rdoc (3.12.2)
       json (~> 1.4)
-    redis (3.0.3)
+    redis (3.0.4)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
