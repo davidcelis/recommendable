@@ -15,9 +15,9 @@ Gem::Specification.new do |spec|
   spec.email       = %w[david@davidcelispec.com]
   spec.homepage    = "https://davidcelis.github.com/recommendable"
 
-  spec.add_dependency "activesupport", ">= 3.0.0"
-  spec.add_dependency "redis",         ">= 2.2.0"
-  spec.add_dependency "hooks",         ">= 0.2.1"
+  spec.add_dependency "activesupport", "~> 3.0"
+  spec.add_dependency "redis",         "~> 2.2"
+  spec.add_dependency "hooks",         "~> 0.2"
 
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "miniskirt"
