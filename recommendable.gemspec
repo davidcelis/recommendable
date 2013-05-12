@@ -5,9 +5,7 @@ Gem::Specification.new do |s|
   s.name        = 'recommendable'
   s.version     = Recommendable::VERSION
   s.summary     = 'A Like/Dislike recommendation engine for Ruby apps using Redis'
-  s.description = <<EOF
-A Like/Dislike recommendation engine for Ruby apps using Redis.
-EOF
+  s.description = s.summary
 
   s.files       = Dir['lib/**/*']
 
