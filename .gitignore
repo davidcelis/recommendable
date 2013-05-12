@@ -16,8 +16,14 @@
 /vendor/cache
 /vendor/ruby
 
+# Ignore test dummy files
+/test/dummy/log/*.log
+/test/dummy/db/*.sqlite*
+
 # Ignore all tempfiles
 /tmp
+
+# Ignore all log files
 
 # Ignores that should be in the global gitignore
 # /*.rbc
