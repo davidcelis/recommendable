@@ -1,5 +1,9 @@
-ENV["RAILS_ENV"] = "test"
+require "coveralls"
+Coveralls.wear! do
+  add_filter "/test/"
+end
 
+ENV["RAILS_ENV"] = "test"
 require File.expand_path("../dummy/config/environment.rb", __FILE__)
 require "rails/test_help"
 
