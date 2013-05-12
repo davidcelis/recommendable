@@ -1,5 +1,4 @@
-$LOAD_PATH.unshift File.expand_path('../../test', __FILE__)
-require 'test_helper'
+require "test_helper"
 
 class BookmarkerTest < MiniTest::Unit::TestCase
   def setup
