@@ -1,33 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Recommendable by davidcelis</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Recommendable : A recommendation engine for Likes and Dislikes in Rails 3" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Recommendable</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Recommendable</h1>
-        <p>A recommendation engine for Likes and Dislikes in Rails 3</p>
 
-        <p class="view"><a href="https://github.com/davidcelis/recommendable">View the Project on GitHub <small>davidcelis/recommendable</small></a></p>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/davidcelis/recommendable">View on GitHub</a>
 
+          <h1 id="project_title">Recommendable</h1>
+          <h2 id="project_tagline">A recommendation engine for Likes and Dislikes in Rails 3</h2>
 
-        <ul>
-          <li><a href="https://github.com/davidcelis/recommendable/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/davidcelis/recommendable/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/davidcelis/recommendable">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/davidcelis/recommendable/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/davidcelis/recommendable/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
         <h1>Recommendable</h1>
 
 <p>Recommendable is a gem that allows you to quickly add a recommendation engine for Likes and Dislikes to your Ruby application using my version of <a href="http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/">Jaccardian similarity and memory-based collaborative filtering</a>.</p>
@@ -241,6 +244,16 @@
 <span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">disliked_by</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'age &gt; 18'</span><span class="p">)</span>
 </pre></div>
 
+<h3>Manually generating Recommendations</h3>
+
+<p>If you don't wish to bundle a queueing system but, instead, want to manually update similarity values and recommendations, you can do so via the <code>Calculations</code> helper module. For instance:</p>
+
+<div class="highlight"><pre><span class="ss">Recommendable</span><span class="p">:</span><span class="ss">:Helpers</span><span class="o">::</span><span class="no">Calculations</span><span class="o">.</span><span class="n">update_similarities_for</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="ss">Recommendable</span><span class="p">:</span><span class="ss">:Helpers</span><span class="o">::</span><span class="no">Calculations</span><span class="o">.</span><span class="n">update_recommendations_for</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</pre></div>
+
+<p>It's always recommended that you update the similarities first; otherwise, the recommendations may not change.</p>
+
 <h2>Installing Redis</h2>
 
 <p>Recommendable requires Redis to deliver recommendations. The collaborative filtering logic is based almost entirely on set math, and Redis is blazing fast for this. <em>NOTE: Your redis database MUST be persistent.</em></p>
@@ -297,12 +310,17 @@
 
 <p>Copyright © 2012 David Celis. See LICENSE.txt for further details.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/davidcelis">davidcelis</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Recommendable maintained by <a href="https://github.com/davidcelis">davidcelis</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+
     
+
   </body>
 </html>
