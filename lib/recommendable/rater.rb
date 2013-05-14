@@ -77,13 +77,13 @@ module Recommendable
               end
             elsif method.to_s =~ /\A((?:dis)?liked|hidden|bookmarked)_(.+)_ids\z/
               begin
-                send("#{$1}_ids_for", $2.classify.constantize)
+                send("#{$1}_ids_for", $2.classify.constantize, *args)
               rescue NameError
                 super
               end
             elsif method.to_s =~ /\A((?:dis)?liked|hidden|bookmarked|recommended)_(.+)\z/
               begin
-                send("#{$1}_for", $2.classify.constantize)
+                send("#{$1}_for", $2.classify.constantize, *args)
               rescue NameError
                 super
               end

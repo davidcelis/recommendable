@@ -12,6 +12,9 @@ module Recommendable
         # @return [Float] the numeric similarity between this user and the passed user
         # @note Similarity values are asymmetrical. `Calculations.similarity_between(user_id, other_user_id)` will not necessarily equal `Calculations.similarity_between(other_user_id, user_id)`
         def similarity_between(user_id, other_user_id)
+          user_id = user_id.to_s
+          other_user_id = other_user_id.to_s
+
           similarity = liked_count = disliked_count = 0
           in_common = Recommendable.config.ratable_classes.each do |klass|
             liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id)
@@ -82,6 +85,8 @@ module Recommendable
         #
         # @private
         def update_recommendations_for(user_id)
+          user_id = user_id.to_s
+
           nearest_neighbors = Recommendable.config.nearest_neighbors || Recommendable.config.user_class.count
           Recommendable.config.ratable_classes.each do |klass|
             rated_sets = [
@@ -138,6 +143,9 @@ module Recommendable
         # @param [Fixnum, String] item_id the item's ID
         # @return [Float] the probability that the user will like the item
         def predict_for(user_id, klass, item_id)
+          user_id = user_id.to_s
+          item_id = item_id.to_s
+
           similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
           liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, item_id)
           disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, item_id)

@@ -138,7 +138,7 @@ Once you've made your great commits:
 5. Create a [Pull Request][pull requests] from your branch
 6. That's it!
 
-Like what you see? please consider [making a small Gittip][gittip] to support me, Recommendable, and my other open source contributions. Thank you! :heart:
+If you love Recommendable and/or my other contributions to open source, please consider [making a small Gittip][gittip] to support me. Thank you!
 
 ## Links
 

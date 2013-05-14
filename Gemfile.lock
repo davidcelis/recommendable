@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    recommendable (2.1.0)
+    recommendable (2.1.0.1)
       activesupport (>= 3.0.0)
       hooks (>= 0.2.1)
       redis (>= 2.2.0)
