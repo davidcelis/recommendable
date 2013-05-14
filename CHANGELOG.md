@@ -1,8 +1,13 @@
 Changelog
 =========
 
-2.1.0.1 (Current release)
+2.1.0.2 (Current release)
 -------------------------
+
+* Fix #77, a bug for people who wanted to generate recommendations manually. IDs passed to Redis are now always strings.
+
+2.1.0.1
+-------
 
 * Fix #67, a bug with setting the queue name used in the Sidekiq worker.
   * Deprecate `Recommendable.config.queue_name`.
