@@ -10,6 +10,7 @@ A Like/Dislike recommendation engine for Ruby apps using Redis.
 EOF
 
   s.files       = Dir['lib/**/*']
+  s.test_files  = Dir['test/**/*']
 
   s.has_rdoc    = 'yard'
 
