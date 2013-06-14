@@ -50,10 +50,6 @@ class RecommenderTest < MiniTest::Unit::TestCase
     [@movie7, @movie8, @movie9, @movie10].each { |movie| refute_includes @user.recommended_books, movie }
   end
 
-  def test_unrecommend_removes_items_from_recommendations
-
-  end
-
   def test_that_it_is_removed_from_recommendable_after_destroy
     Recommendable::Helpers::Calculations.update_similarities_for(@user2.id)
 
