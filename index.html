@@ -1,41 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Recommendable : A recommendation engine for Likes and Dislikes in Rails 3" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Recommendable by davidcelis</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Recommendable</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/davidcelis/recommendable">View on GitHub</a>
-
-          <h1 id="project_title">Recommendable</h1>
-          <h2 id="project_tagline">A recommendation engine for Likes and Dislikes in Rails 3</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/davidcelis/recommendable/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/davidcelis/recommendable/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+    <div class="wrapper">
+      <header>
         <h1>Recommendable</h1>
+        <p>A recommendation engine for Likes and Dislikes in Rails 3</p>
+
+        <p class="view"><a href="https://github.com/davidcelis/recommendable">View the Project on GitHub <small>davidcelis/recommendable</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/davidcelis/recommendable/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/davidcelis/recommendable/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/davidcelis/recommendable">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="recommendable" class="anchor" href="#recommendable"><span class="octicon octicon-link"></span></a>Recommendable</h1>
 
 <p>Recommendable is a gem that allows you to quickly add a recommendation engine for Likes and Dislikes to your Ruby application using my version of <a href="http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/">Jaccardian similarity and memory-based collaborative filtering</a>.</p>
 
-<h2>Requirements</h2>
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
 
 <ul>
 <li>Ruby 1.8.7 or 1.9.x</li>
@@ -43,7 +42,8 @@
 <li>Sidekiq, Resque, DelayedJob (optional but highly recommended)</li>
 </ul><p>Bundling one of the queueing systems above is highly recommended to avoid having to manually refresh users' recommendations. If running on Rails 4, the built-in queueing system is supported. If you bundle <a href="https://github.com/mperham/sidekiq">Sidekiq</a>, <a href="https://github.com/defunkt/resque">Resque</a>, or <a href="https://github.com/tobi/delayed_job">DelayedJob</a>, Recommendable will use your bundled queueing system instead. If bundling Sidekiq, you should also include <a href="https://github.com/krasnoukhov/sidekiq-middleware">'sidekiq-middleware'</a> in your Gemfile to ensure that a user will not get enqueued more than once at a time. If bundling Resque, you should include <a href="https://github.com/jayniz/resque-loner">'resque-loner'</a> for this. As far as I know, there is no current way to avoid duplicate jobs in DelayedJob.</p>
 
-<h2>Installation</h2>
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>Add the following to your application's <code>Gemfile</code>:</p>
 
@@ -77,7 +77,8 @@
 
 <p>The values listed above are the defaults. I recommend playing around with the <code>nearest_neighbors</code> setting. A higher value will provide more accurate recommendations at the cost of more time spent generating them. Find your balance.</p>
 
-<h2>Usage</h2>
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <p>In your ONE model that will be receiving recommendations:</p>
 
@@ -88,7 +89,22 @@
 <span class="k">end</span>
 </pre></div>
 
-<h3>Liking</h3>
+<h3>
+<a name="a-note-on-the-dynamic-finders" class="anchor" href="#a-note-on-the-dynamic-finders"><span class="octicon octicon-link"></span></a>A note on the dynamic finders</h3>
+
+<p>Keep in mind that, aside from <code>similar_raters</code>, all of the dynamically defined finders return a Relation/Criteria. This means that, assuming your ORM's queries are chainable, you can keep that chain going.</p>
+
+<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">liked_movies</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">bookmarked_books</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:author</span> <span class="o">=&gt;</span> <span class="s2">"Cormac McCarthy"</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">disliked_movies</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:cast_members</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'cast_members.name = Kim Kardashian'</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">hidden_minerals</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'density DESC'</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">recommended_movies</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'year &lt; 2010'</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">book</span><span class="o">.</span><span class="n">liked_by</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'age DESC'</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">disliked_by</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'age &gt; 18'</span><span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="liking" class="anchor" href="#liking"><span class="octicon octicon-link"></span></a>Liking</h3>
 
 <p>Your users should now be able to <code>like</code> your recommendable objects:</p>
 
@@ -120,7 +136,8 @@
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: 'davidbowman'&gt;, #&lt;User username: 'frankpoole'&gt;]</span>
 </pre></div>
 
-<h3>Disliking</h3>
+<h3>
+<a name="disliking" class="anchor" href="#disliking"><span class="octicon octicon-link"></span></a>Disliking</h3>
 
 <p>Identical to Liking. Just replace the verb.</p>
 
@@ -137,7 +154,8 @@
 <span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">disliked_by</span>
 </pre></div>
 
-<h3>Bookmarking</h3>
+<h3>
+<a name="bookmarking" class="anchor" href="#bookmarking"><span class="octicon octicon-link"></span></a>Bookmarking</h3>
 
 <p>This is a system for users to keep track of items in a "save for later" kind of way. Users can bookmark any item that they have not hidden, including items they've liked or disliked. Bookmarked items will be removed from a user's recommendations.</p>
 
@@ -153,7 +171,8 @@
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarked_movies_in_common_with</span><span class="p">(</span><span class="n">friend</span><span class="p">)</span>
 </pre></div>
 
-<h3>Hiding</h3>
+<h3>
+<a name="hiding" class="anchor" href="#hiding"><span class="octicon octicon-link"></span></a>Hiding</h3>
 
 <p>Aside from abstaining to rate, this is the closest Recommendable will <em>ever</em> get to a "neutral" voting option. Hiding items provides you with a way to let users tell you what they couldn't care less about.</p>
 
@@ -171,7 +190,8 @@
 
 <p>Use this as you will, but hidden items can not be liked, disliked, or bookmarked. They are removed from recommendations and completely ignored by Recommendable unless removed from a user's set of hidden items. Speaking of which...</p>
 
-<h3>Removing from sets</h3>
+<h3>
+<a name="removing-from-sets" class="anchor" href="#removing-from-sets"><span class="octicon octicon-link"></span></a>Removing from sets</h3>
 
 <p>Each of the actions above has an opposite "un" action to remove items from a list:</p>
 
@@ -185,7 +205,8 @@
 <span class="o">=&gt;</span> <span class="kp">true</span>
 </pre></div>
 
-<h3>Recommendations</h3>
+<h3>
+<a name="recommendations" class="anchor" href="#recommendations"><span class="octicon octicon-link"></span></a>Recommendations</h3>
 
 <p>And here we are. Assuming your queues are being processed, users should begin receiving recommendations as soon as they have rated items that other users have also rated.</p>
 
@@ -194,16 +215,19 @@
 <span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"Brave New World"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"One Flew Over the Cuckoo's Next"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"A Clockwork Orange"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
-<span class="c1"># ...</span>
-<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">recommended_books</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: "frankpoole"&gt;, #&lt;User username: "davidbowman"&gt;, ...]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">recommended_books</span> <span class="c1"># Defaults to 10 recommendations</span>
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Book title: "Brave New World"&gt;, #&lt;Book title: "One Flew Over the Cuckoo's Nest"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">recommended_movies</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "A Clockwork Orange"&gt;]</span>
-<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">similar_raters</span>
-<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: "frankpoole"&gt;, #&lt;User username: "davidbowman"&gt;]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">similar_raters</span> <span class="c1"># Defaults to 10 similar users</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">recommended_movies</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span> <span class="c1"># 10 Recommendations, offset by 30 (i.e. page 4)</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "A Clockwork Orange"&gt;, #&lt;Movie name: "Chinatown"&gt;, ...]</span>
+<span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">similar_raters</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span> <span class="c1"># 25 similar users, offset by 50 (i.e. page 3)</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;User username: "frankpoole"&gt;, #&lt;User username: "davidbowman"&gt;, ...]</span>
 </pre></div>
 
-<h3>The "best" of your Recommendable models</h3>
+<h3>
+<a name="the-best-of-your-recommendable-models" class="anchor" href="#the-best-of-your-recommendable-models"><span class="octicon octicon-link"></span></a>The "best" of your Recommendable models</h3>
 
 <p>Recommendable does some maths in the background to calculate which of your Recommended objects, based on likes and dislikes, are the best of the best. This algorithm is similar to <a href="http://www.evanmiller.org/how-not-to-sort-by-average-rating.html">the algorithm</a> Reddit uses to sort the "best" comments. Using the <code>.top</code> query method on your Recommendable models will return the coolest stuff you have to offer sorted by awesomeness:</p>
 
@@ -213,7 +237,8 @@
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;, #&lt;Movie name: "A Clockwork Orange"&gt;, #&lt;Movie name: "The Shining"&gt;]</span>
 </pre></div>
 
-<h3>Callbacks</h3>
+<h3>
+<a name="callbacks" class="anchor" href="#callbacks"><span class="octicon octicon-link"></span></a>Callbacks</h3>
 
 <p>Recommendable uses <a href="https://github.com/apotonick/hooks">apotonick/hooks</a> to implement before/after callbacks for liking, disliking, and more.</p>
 
@@ -231,20 +256,8 @@
 
 <p>You can define before/after hooks for <code>(un)like</code>, <code>(un)dislike</code>, <code>(un)bookmark</code>, and <code>(un)hide</code>. Each hook takes the recommendable object as an argument and can be a block or a method name.</p>
 
-<h3>A note on the dynamic finders</h3>
-
-<p>All of the dynamically defined finders return a Relation. This means that, assuming your ORM's queries are chainable, you can keep that chain going.</p>
-
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">liked_movies</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">bookmarked_books</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:author</span> <span class="o">=&gt;</span> <span class="s2">"Cormac McCarthy"</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">disliked_movies</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:cast_members</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'cast_members.name = Kim Kardashian'</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">hidden_minerals</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'density DESC'</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">recommended_movies</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'year &lt; 2010'</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">book</span><span class="o">.</span><span class="n">liked_by</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'age DESC'</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="n">movie</span><span class="o">.</span><span class="n">disliked_by</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'age &gt; 18'</span><span class="p">)</span>
-</pre></div>
-
-<h3>Manually generating Recommendations</h3>
+<h3>
+<a name="manually-generating-recommendations" class="anchor" href="#manually-generating-recommendations"><span class="octicon octicon-link"></span></a>Manually generating Recommendations</h3>
 
 <p>If you don't wish to bundle a queueing system but, instead, want to manually update similarity values and recommendations, you can do so via the <code>Calculations</code> helper module. For instance:</p>
 
@@ -254,18 +267,21 @@
 
 <p>It's always recommended that you update the similarities first; otherwise, the recommendations may not change.</p>
 
-<h2>Installing Redis</h2>
+<h2>
+<a name="installing-redis" class="anchor" href="#installing-redis"><span class="octicon octicon-link"></span></a>Installing Redis</h2>
 
 <p>Recommendable requires Redis to deliver recommendations. The collaborative filtering logic is based almost entirely on set math, and Redis is blazing fast for this. <em>NOTE: Your redis database MUST be persistent.</em></p>
 
-<h3>Mac OS X</h3>
+<h3>
+<a name="mac-os-x" class="anchor" href="#mac-os-x"><span class="octicon octicon-link"></span></a>Mac OS X</h3>
 
 <p>For Mac OS X users, homebrew is by far the easiest way to install Redis. Make sure to read the caveats after installation!</p>
 
 <div class="highlight"><pre><span class="nv">$ </span>brew install redis
 </pre></div>
 
-<h3>Linux</h3>
+<h3>
+<a name="linux" class="anchor" href="#linux"><span class="octicon octicon-link"></span></a>Linux</h3>
 
 <p>For Linux users, there is a package on apt-get.</p>
 
@@ -275,13 +291,15 @@
 
 <p>Redis will now be running on localhost:6379. After a second, you can hit <code>ctrl-\</code> to detach and keep Redis running in the background.</p>
 
-<h2>Why not stars?</h2>
+<h2>
+<a name="why-not-stars" class="anchor" href="#why-not-stars"><span class="octicon octicon-link"></span></a>Why not stars?</h2>
 
 <p>I'll let Randall Munroe of <a href="http://xkcd.com/">XKCD</a> take this one for me:</p>
 
 <p><a href="http://xkcd.com/1098/"><img src="http://imgs.xkcd.com/comics/star_ratings.png" alt="I got lost and wandered into the world's creepiest cemetery, where the headstones just had names and star ratings. Freaked me out. When I got home I tried to leave the cemetery a bad review on Yelp, but as my hand hovered over the 'one star' button I felt this distant chill ..."></a></p>
 
-<h2>Contributing to recommendable</h2>
+<h2>
+<a name="contributing-to-recommendable" class="anchor" href="#contributing-to-recommendable"><span class="octicon octicon-link"></span></a>Contributing to recommendable</h2>
 
 <p>Once you've made your great commits:</p>
 
@@ -293,7 +311,8 @@
 <li>Push to your branch's origin</li>
 <li>Create a <a href="http://help.github.com/pull-requests/">Pull Request</a> from your branch</li>
 <li>That's it!</li>
-</ol><h2>Links</h2>
+</ol><h2>
+<a name="links" class="anchor" href="#links"><span class="octicon octicon-link"></span></a>Links</h2>
 
 <ul>
 <li>Code: <code>git clone git://github.com/davidcelis/recommendable.git</code>
@@ -306,21 +325,17 @@
 </li>
 <li>Gems: <a href="http://rubygems.org/gems/recommendable">http://rubygems.org/gems/recommendable</a>
 </li>
-</ul><h2>Copyright</h2>
+</ul><h2>
+<a name="copyright" class="anchor" href="#copyright"><span class="octicon octicon-link"></span></a>Copyright</h2>
 
 <p>Copyright © 2012 David Celis. See LICENSE.txt for further details.</p>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Recommendable maintained by <a href="https://github.com/davidcelis">davidcelis</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/davidcelis">davidcelis</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
-
   </body>
 </html>
