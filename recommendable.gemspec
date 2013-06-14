@@ -9,6 +9,8 @@ Gem::Specification.new do |s|
 A Like/Dislike recommendation engine for Ruby apps using Redis.
 EOF
 
+  s.license     = 'MIT'
+
   s.files       = Dir['lib/**/*']
   s.test_files  = Dir['test/**/*']
 
