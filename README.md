@@ -4,7 +4,7 @@ Recommendable is a gem that allows you to quickly add a recommendation engine fo
 
 ## Requirements
 
-* Ruby 1.8.7 or 1.9.x
+* Ruby 1.9.x or 2.0.0. 1.8.7 works, but is no longer supported.
 * ActiveRecord, Sequel, DataMapper, Mongoid, or MongoMapper (your models must have an `id` field)
 * [Sidekiq][sidekiq], [Resque][resque], [DelayedJob][delayed-job] (optional but highly recommended)
 
