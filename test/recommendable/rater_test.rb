@@ -23,6 +23,17 @@ class RaterTest < MiniTest::Unit::TestCase
     refute @user.rated_anything?
   end
 
+  def test_that_unrate_removes_any_rating
+    @movie = Factory(:movie)
+    %w[like dislike hide bookmark].each do |action|
+      @user.send(action, @movie)
+      assert @user.send("#{action.pluralize}?", @movie)
+
+      @user.unrate(@movie)
+      refute @user.send("#{action.pluralize}?", @movie)
+    end
+  end
+
   def teardown
     Recommendable.redis.flushdb
   end

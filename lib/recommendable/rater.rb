@@ -113,6 +113,11 @@ module Recommendable
           def rated_anything?
             likes_count > 0 || dislikes_count > 0
           end
+
+          def unrate(obj)
+            unlike(obj) || undislike(obj) || unhide(obj)
+            unbookmark(obj)
+          end
         end
       end
     end
