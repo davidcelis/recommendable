@@ -16,7 +16,7 @@
     <div class="wrapper">
       <header>
         <h1>Recommendable</h1>
-        <p>A recommendation engine for Likes and Dislikes in Rails 3</p>
+        <p>A recommendation engine for Likes and Dislikes for Ruby apps using Redis</p>
 
         <p class="view"><a href="https://github.com/davidcelis/recommendable">View the Project on GitHub <small>davidcelis/recommendable</small></a></p>
 
@@ -47,12 +47,12 @@
 
 <p>Add the following to your application's <code>Gemfile</code>:</p>
 
-<div class="highlight"><pre>  <span class="n">gem</span> <span class="s1">'recommendable'</span>
+<div class="highlight highlight-ruby"><pre>  <span class="n">gem</span> <span class="s1">'recommendable'</span>
 </pre></div>
 
 <p>After bundling, you should configure Recommendable. Do this somewhere after you've required it, but before it's actually used. For example, Rails users would create an initializer (<code>config/initializers/recommendable.rb</code>):</p>
 
-<div class="highlight"><pre><span class="nb">require</span> <span class="s1">'redis'</span>
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'redis'</span>
 
 <span class="no">Recommendable</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
   <span class="c1"># Recommendable's connection to Redis</span>
@@ -82,7 +82,7 @@
 
 <p>In your ONE model that will be receiving recommendations:</p>
 
-<div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span>
+<div class="highlight highlight-ruby"><pre><span class="k">class</span> <span class="nc">User</span>
   <span class="n">recommends</span> <span class="ss">:movies</span><span class="p">,</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:minerals</span><span class="p">,</span> <span class="ss">:other_things</span>
 
   <span class="c1"># ...</span>
@@ -94,7 +94,7 @@
 
 <p>Keep in mind that, aside from <code>similar_raters</code>, all of the dynamically defined finders return a Relation/Criteria. This means that, assuming your ORM's queries are chainable, you can keep that chain going.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">liked_movies</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">liked_movies</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">bookmarked_books</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:author</span> <span class="o">=&gt;</span> <span class="s2">"Cormac McCarthy"</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">disliked_movies</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:cast_members</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">'cast_members.name = Kim Kardashian'</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">current_user</span><span class="o">.</span><span class="n">hidden_minerals</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s1">'density DESC'</span><span class="p">)</span>
@@ -108,7 +108,7 @@
 
 <p>Your users should now be able to <code>like</code> your recommendable objects:</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">likes?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
@@ -141,7 +141,7 @@
 
 <p>Identical to Liking. Just replace the verb.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislike</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislike</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">dislikes?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movies</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">disliked_movie_ids</span>
@@ -159,7 +159,7 @@
 
 <p>This is a system for users to keep track of items in a "save for later" kind of way. Users can bookmark any item that they have not hidden, including items they've liked or disliked. Bookmarked items will be removed from a user's recommendations.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmark</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmark</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarks?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">rated?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span> <span class="c1"># false unless user liked/disliked movie</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">bookmarked_movies</span>
@@ -176,7 +176,7 @@
 
 <p>Aside from abstaining to rate, this is the closest Recommendable will <em>ever</em> get to a "neutral" voting option. Hiding items provides you with a way to let users tell you what they couldn't care less about.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hides?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">rated?</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span> <span class="c1"># false</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">hidden_movies</span>
@@ -195,7 +195,7 @@
 
 <p>Each of the actions above has an opposite "un" action to remove items from a list:</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">unlike</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">unlike</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
 <span class="o">&gt;&gt;</span> <span class="n">user</span><span class="o">.</span><span class="n">undislike</span><span class="p">(</span><span class="n">book</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="kp">true</span>
@@ -210,7 +210,7 @@
 
 <p>And here we are. Assuming your queues are being processed, users should begin receiving recommendations as soon as they have rated items that other users have also rated.</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Movie</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"2001: A Space Odyssey"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"A Clockwork Orange"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"Brave New World"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="n">friend</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">:title</span> <span class="o">=&gt;</span> <span class="s2">"One Flew Over the Cuckoo's Next"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">)</span>
@@ -231,7 +231,7 @@
 
 <p>Recommendable does some maths in the background to calculate which of your Recommended objects, based on likes and dislikes, are the best of the best. This algorithm is similar to <a href="http://www.evanmiller.org/how-not-to-sort-by-average-rating.html">the algorithm</a> Reddit uses to sort the "best" comments. Using the <code>.top</code> query method on your Recommendable models will return the coolest stuff you have to offer sorted by awesomeness:</p>
 
-<div class="highlight"><pre><span class="o">&gt;&gt;</span> <span class="no">Movie</span><span class="o">.</span><span class="n">top</span>
+<div class="highlight highlight-ruby"><pre><span class="o">&gt;&gt;</span> <span class="no">Movie</span><span class="o">.</span><span class="n">top</span>
 <span class="o">=&gt;</span> <span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;</span>
 <span class="o">&gt;&gt;</span> <span class="no">Movie</span><span class="o">.</span><span class="n">top</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Movie name: "2001: A Space Odyssey"&gt;, #&lt;Movie name: "A Clockwork Orange"&gt;, #&lt;Movie name: "The Shining"&gt;]</span>
@@ -242,7 +242,7 @@
 
 <p>Recommendable uses <a href="https://github.com/apotonick/hooks">apotonick/hooks</a> to implement before/after callbacks for liking, disliking, and more.</p>
 
-<div class="highlight"><pre><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+<div class="highlight highlight-ruby"><pre><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
   <span class="n">has_one</span> <span class="ss">:feed</span>
 
   <span class="n">recommends</span> <span class="ss">:movies</span>
@@ -261,7 +261,7 @@
 
 <p>If you don't wish to bundle a queueing system but, instead, want to manually update similarity values and recommendations, you can do so via the <code>Calculations</code> helper module. For instance:</p>
 
-<div class="highlight"><pre><span class="ss">Recommendable</span><span class="p">:</span><span class="ss">:Helpers</span><span class="o">::</span><span class="no">Calculations</span><span class="o">.</span><span class="n">update_similarities_for</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<div class="highlight highlight-ruby"><pre><span class="ss">Recommendable</span><span class="p">:</span><span class="ss">:Helpers</span><span class="o">::</span><span class="no">Calculations</span><span class="o">.</span><span class="n">update_similarities_for</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <span class="ss">Recommendable</span><span class="p">:</span><span class="ss">:Helpers</span><span class="o">::</span><span class="no">Calculations</span><span class="o">.</span><span class="n">update_recommendations_for</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 
@@ -277,7 +277,7 @@
 
 <p>For Mac OS X users, homebrew is by far the easiest way to install Redis. Make sure to read the caveats after installation!</p>
 
-<div class="highlight"><pre><span class="nv">$ </span>brew install redis
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>brew install redis
 </pre></div>
 
 <h3>
@@ -285,7 +285,7 @@
 
 <p>For Linux users, there is a package on apt-get.</p>
 
-<div class="highlight"><pre><span class="nv">$ </span>sudo apt-get install redis-server
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>sudo apt-get install redis-server
 <span class="nv">$ </span>redis-server
 </pre></div>
 
@@ -336,6 +336,16 @@
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-28731352-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
