@@ -2,6 +2,10 @@
 .bundle
 vendor/bundle
 
+# Lockfiles
+gemfiles/*.lock
+Gemfile.lock
+
 # logging
 *.log
 
