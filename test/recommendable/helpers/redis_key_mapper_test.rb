@@ -37,4 +37,69 @@ class RedisKeyMapperTest < MiniTest::Unit::TestCase
   def test_output_of_score_set_for
     assert_equal Recommendable::Helpers::RedisKeyMapper.score_set_for(Movie), 'recommendable:movies:scores'
   end
+
+  def test_output_of_liked_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.liked_set_for(Documentary, 1), 'recommendable:users:1:liked_movies'
+  end
+
+  def test_output_of_disliked_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.disliked_set_for(Documentary, 1), 'recommendable:users:1:disliked_movies'
+  end
+
+  def test_output_of_hidden_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.hidden_set_for(Documentary, 1), 'recommendable:users:1:hidden_movies'
+  end
+
+  def test_output_of_bookmarked_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(Documentary, 1), 'recommendable:users:1:bookmarked_movies'
+  end
+
+  def test_output_of_recommended_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.recommended_set_for(Documentary, 1), 'recommendable:users:1:recommended_movies'
+  end
+
+  def test_output_of_liked_by_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(Documentary, 1), 'recommendable:movies:1:liked_by'
+  end
+
+  def test_output_of_disliked_by_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(Documentary, 1), 'recommendable:movies:1:disliked_by'
+  end
+
+  def test_output_of_score_set_for_subclass_of_ratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.score_set_for(Documentary), 'recommendable:movies:scores'
+  end
+
+  def test_output_of_liked_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.liked_set_for(Car, 1), 'recommendable:users:1:liked_cars'
+  end
+
+  def test_output_of_disliked_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.disliked_set_for(Car, 1), 'recommendable:users:1:disliked_cars'
+  end
+
+  def test_output_of_hidden_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.hidden_set_for(Car, 1), 'recommendable:users:1:hidden_cars'
+  end
+
+  def test_output_of_bookmarked_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(Car, 1), 'recommendable:users:1:bookmarked_cars'
+  end
+
+  def test_output_of_recommended_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.recommended_set_for(Car, 1), 'recommendable:users:1:recommended_cars'
+  end
+
+  def test_output_of_liked_by_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(Car, 1), 'recommendable:cars:1:liked_by'
+  end
+
+  def test_output_of_disliked_by_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(Car, 1), 'recommendable:cars:1:disliked_by'
+  end
+
+  def test_output_of_score_set_for_ratable_subclass_of_nonratable
+    assert_equal Recommendable::Helpers::RedisKeyMapper.score_set_for(Car), 'recommendable:cars:scores'
+  end
+
 end

@@ -5,12 +5,19 @@ class BookmarkerTest < MiniTest::Unit::TestCase
   def setup
     @user = Factory(:user)
     @movie = Factory(:movie)
+    @doc = Factory(:documentary)
   end
 
   def test_that_bookmark_adds_to_bookmarked_set
     refute_includes @user.bookmarked_movie_ids, @movie.id
     @user.bookmark(@movie)
     assert_includes @user.bookmarked_movie_ids, @movie.id
+  end
+
+  def test_that_bookmark_adds_subclass_bookmarks_to_bookmarked_set
+    refute_includes @user.bookmarked_movie_ids, @doc.id
+    @user.bookmark(@doc)
+    assert_includes @user.bookmarked_movie_ids, @doc.id
   end
 
   def test_that_cant_bookmark_already_bookmarked_object
@@ -39,6 +46,13 @@ class BookmarkerTest < MiniTest::Unit::TestCase
     refute_includes @user.bookmarked_movie_ids, @movie.id
   end
 
+  def test_that_unbookmark_removes_subclass_item_from_bookmarked_set
+    @user.bookmark(@doc)
+    assert_includes @user.bookmarked_movie_ids, @doc.id
+    @user.unbookmark(@doc)
+    refute_includes @user.bookmarked_movie_ids, @doc.id
+  end
+
   def test_that_cant_unbookmark_item_unless_bookmarked
     assert_nil @user.unbookmark(@movie)
   end
@@ -47,6 +61,10 @@ class BookmarkerTest < MiniTest::Unit::TestCase
     refute_includes @user.bookmarks, @movie
     @user.bookmark(@movie)
     assert_includes @user.bookmarks, @movie
+
+    refute_includes @user.bookmarks, @doc
+    @user.bookmark(@doc)
+    assert_includes @user.bookmarks, @doc
   end
 
   def test_that_dynamic_bookmarked_finder_only_returns_relevant_records
@@ -65,8 +83,9 @@ class BookmarkerTest < MiniTest::Unit::TestCase
     @user.bookmark(@movie)
     @user.bookmark(movie2)
     @user.bookmark(book)
+    @user.bookmark(@doc)
 
-    assert_equal @user.bookmarks_count, 3
+    assert_equal @user.bookmarks_count, 4
   end
 
   def test_that_dynamic_bookmarked_count_methods_only_count_relevant_bookmarks
@@ -75,9 +94,10 @@ class BookmarkerTest < MiniTest::Unit::TestCase
 
     @user.bookmark(@movie)
     @user.bookmark(movie2)
+    @user.bookmark(@doc)
     @user.bookmark(book)
 
-    assert_equal @user.bookmarked_movies_count, 2
+    assert_equal @user.bookmarked_movies_count, 3
     assert_equal @user.bookmarked_books_count, 1
   end
 
@@ -90,11 +110,14 @@ class BookmarkerTest < MiniTest::Unit::TestCase
     @user.bookmark(@movie)
     @user.bookmark(book)
     @user.bookmark(movie2)
+    @user.bookmark(@doc)
     friend.bookmark(@movie)
     friend.bookmark(book)
     friend.bookmark(book2)
+    friend.bookmark(@doc)
 
     assert_includes @user.bookmarks_in_common_with(friend), @movie
+    assert_includes @user.bookmarks_in_common_with(friend), @doc
     assert_includes @user.bookmarks_in_common_with(friend), book
     refute_includes @user.bookmarks_in_common_with(friend), movie2
     refute_includes friend.bookmarks_in_common_with(@user), book2
@@ -106,14 +129,18 @@ class BookmarkerTest < MiniTest::Unit::TestCase
     book = Factory(:book)
 
     @user.bookmark(@movie)
+    @user.bookmark(@doc)
     @user.bookmark(book)
     friend.bookmark(@movie)
     friend.bookmark(book)
+    friend.bookmark(@doc)
 
     assert_includes @user.bookmarked_movies_in_common_with(friend), @movie
+    assert_includes @user.bookmarked_movies_in_common_with(friend), @doc
     assert_includes @user.bookmarked_books_in_common_with(friend), book
     refute_includes @user.bookmarked_movies_in_common_with(friend), book
     refute_includes @user.bookmarked_books_in_common_with(friend), @movie
+    refute_includes @user.bookmarked_books_in_common_with(friend), @doc
   end
 
   def teardown
