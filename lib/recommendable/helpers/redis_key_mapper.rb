@@ -4,39 +4,45 @@ module Recommendable
       class << self
         %w[liked disliked hidden bookmarked recommended].each do |action|
           define_method "#{action}_set_for" do |klass, id|
-            [
-              Recommendable.config.redis_namespace,
-              Recommendable.config.user_class.to_s.tableize,
-              id,
-              "#{action}_#{ratable_class(klass).to_s.tableize}"
-            ].compact.join(':')
+            [redis_namespace, user_namespace, id, "#{action}_#{ratable_namespace(klass)}"].compact.join(':')
           end
         end
 
         def similarity_set_for(id)
-          [Recommendable.config.redis_namespace, Recommendable.config.user_class.to_s.tableize, id, 'similarities'].compact.join(':')
+          [redis_namespace, user_namespace, id, 'similarities'].compact.join(':')
         end
 
         def liked_by_set_for(klass, id)
-          [Recommendable.config.redis_namespace, ratable_class(klass).to_s.tableize, id, 'liked_by'].compact.join(':')
+          [redis_namespace, ratable_namespace(klass), id, 'liked_by'].compact.join(':')
         end
 
         def disliked_by_set_for(klass, id)
-          [Recommendable.config.redis_namespace, ratable_class(klass).to_s.tableize, id, 'disliked_by'].compact.join(':')
+          [redis_namespace, ratable_namespace(klass), id, 'disliked_by'].compact.join(':')
         end
 
         def score_set_for(klass)
-          [Recommendable.config.redis_namespace, ratable_class(klass).to_s.tableize, 'scores'].join(':')
+          [redis_namespace, ratable_namespace(klass), 'scores'].join(':')
         end
 
         def temp_set_for(klass, id)
-          [Recommendable.config.redis_namespace, ratable_class(klass).to_s.tableize, id, 'temp'].compact.join(':')
+          [redis_namespace, ratable_namespace(klass), id, 'temp'].compact.join(':')
         end
 
         private
 
-        def ratable_class(klass)
-          klass.respond_to?(:ratable_class) ? klass.ratable_class : klass
+        def redis_namespace
+          Recommendable.config.redis_namespace
+        end
+
+        def user_namespace
+          Recommendable.config.user_class.to_s.tableize
+        end
+
+        # If the class or a superclass has been configured as ratable with <tt>recommends :class_name</tt>
+        # then that ratable class is used to produce the namespace. Fall back on just using the given class.
+        def ratable_namespace(klass)
+          klass = klass.ratable_class if klass.respond_to?(:ratable_class)
+          klass.to_s.tableize
         end
       end
     end
