@@ -5,7 +5,8 @@ class CalculationsTest < MiniTest::Unit::TestCase
   def setup
     @user = Factory(:user)
     5.times  { |x| instance_variable_set(:"@user#{x+1}",  Factory(:user))  }
-    10.times { |x| instance_variable_set(:"@movie#{x+1}", Factory(:movie)) }
+    5.times { |x| instance_variable_set(:"@movie#{x+1}", Factory(:movie)) }
+    5.upto(9) { |x| instance_variable_set(:"@movie#{x+1}", Factory(:documentary)) }
     10.times { |x| instance_variable_set(:"@book#{x+1}",  Factory(:book))  }
 
     [@movie1, @movie2, @movie3, @book4, @book5, @book6].each { |obj| @user.like(obj) }

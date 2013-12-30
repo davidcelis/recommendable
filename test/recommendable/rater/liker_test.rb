@@ -5,12 +5,19 @@ class LikerTest < MiniTest::Unit::TestCase
   def setup
     @user = Factory(:user)
     @movie = Factory(:movie)
+    @doc = Factory(:documentary)
   end
 
   def test_that_like_adds_to_liked_set
     refute_includes @user.liked_movie_ids, @movie.id
     @user.like(@movie)
     assert_includes @user.liked_movie_ids, @movie.id
+  end
+
+  def test_that_like_adds_subclass_likes_to_liked_set
+    refute_includes @user.liked_movie_ids, @doc.id
+    @user.like(@doc)
+    assert_includes @user.liked_movie_ids, @doc.id
   end
 
   def test_that_cant_like_already_liked_object
@@ -39,6 +46,13 @@ class LikerTest < MiniTest::Unit::TestCase
     refute_includes @user.liked_movie_ids, @movie.id
   end
 
+  def test_that_unlike_removes_subclass_item_from_liked_set
+    @user.like(@doc)
+    assert_includes @user.liked_movie_ids, @doc.id
+    @user.unlike(@doc)
+    refute_includes @user.liked_movie_ids, @doc.id
+  end
+
   def test_that_cant_unlike_item_unless_liked
     assert_nil @user.unlike(@movie)
   end
@@ -47,6 +61,10 @@ class LikerTest < MiniTest::Unit::TestCase
     refute_includes @user.likes, @movie
     @user.like(@movie)
     assert_includes @user.likes, @movie
+
+    refute_includes @user.likes, @doc
+    @user.like(@doc)
+    assert_includes @user.likes, @doc
   end
 
   def test_that_dynamic_liked_finder_only_returns_relevant_records
@@ -65,8 +83,9 @@ class LikerTest < MiniTest::Unit::TestCase
     @user.like(@movie)
     @user.like(movie2)
     @user.like(book)
+    @user.like(@doc)
 
-    assert_equal @user.likes_count, 3
+    assert_equal @user.likes_count, 4
   end
 
   def test_that_dynamic_liked_count_methods_only_count_relevant_likes
@@ -75,9 +94,10 @@ class LikerTest < MiniTest::Unit::TestCase
 
     @user.like(@movie)
     @user.like(movie2)
+    @user.like(@doc)
     @user.like(book)
 
-    assert_equal @user.liked_movies_count, 2
+    assert_equal @user.liked_movies_count, 3
     assert_equal @user.liked_books_count, 1
   end
 
@@ -90,11 +110,14 @@ class LikerTest < MiniTest::Unit::TestCase
     @user.like(@movie)
     @user.like(book)
     @user.like(movie2)
+    @user.like(@doc)
     friend.like(@movie)
     friend.like(book)
     friend.like(book2)
+    friend.like(@doc)
 
     assert_includes @user.likes_in_common_with(friend), @movie
+    assert_includes @user.likes_in_common_with(friend), @doc
     assert_includes @user.likes_in_common_with(friend), book
     refute_includes @user.likes_in_common_with(friend), movie2
     refute_includes friend.likes_in_common_with(@user), book2
@@ -106,14 +129,18 @@ class LikerTest < MiniTest::Unit::TestCase
     book = Factory(:book)
 
     @user.like(@movie)
+    @user.like(@doc)
     @user.like(book)
     friend.like(@movie)
+    friend.like(@doc)
     friend.like(book)
 
     assert_includes @user.liked_movies_in_common_with(friend), @movie
+    assert_includes @user.liked_movies_in_common_with(friend), @doc
     assert_includes @user.liked_books_in_common_with(friend), book
     refute_includes @user.liked_movies_in_common_with(friend), book
     refute_includes @user.liked_books_in_common_with(friend), @movie
+    refute_includes @user.liked_books_in_common_with(friend), @doc
   end
 
   def teardown

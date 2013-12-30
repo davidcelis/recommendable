@@ -52,6 +52,14 @@ module Recommendable
             Recommendable.query(self, ids).sort_by { |item| ids.index(item.id.to_s) }
           end
 
+          # Returns the class that has been explicitly been made ratable, whether it is this
+          # class or a superclass. This allows a ratable class and all of its subclasses to be
+          # considered the same type of ratable and give recommendations from the base class
+          # or any of the subclasses.
+          def self.ratable_class
+            ancestors.find { |klass| Recommendable.config.ratable_classes.include?(klass) }
+          end
+
           private
 
           # Completely removes this item from redis. Called from a before_destroy hook.
