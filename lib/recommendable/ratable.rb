@@ -14,7 +14,7 @@ module Recommendable
         class_eval do
           include Likable
           include Dislikable
-          
+
           case
           when defined?(Sequel::Model) && ancestors.include?(Sequel::Model)
             def before_destroy() super and remove_from_recommendable! end
@@ -45,9 +45,9 @@ module Recommendable
           #
           # @param [Fixnum] count the number of items to fetch (defaults to 1)
           # @return [Array] the top items belonging to this class, sorted by score
-          def self.top(count = 1)
+          def self.top(count = 1, start = 0)
             score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(self)
-            ids = Recommendable.redis.zrevrange(score_set, 0, count - 1)
+            ids = Recommendable.redis.zrevrange(score_set, start, start + count - 1)
 
             Recommendable.query(self, ids).sort_by { |item| ids.index(item.id.to_s) }
           end

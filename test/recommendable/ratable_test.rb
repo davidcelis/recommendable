@@ -67,6 +67,22 @@ class RatableTest < MiniTest::Unit::TestCase
     assert_equal top[2], @movie
   end
 
+  def test_top_scope_returns_best_things_with_start
+    @movie2 = Factory(:movie)
+    @doc = Factory(:documentary)
+    @user = Factory(:user)
+    @friend = Factory(:user)
+
+    @user.like(@doc)
+    @friend.like(@doc)
+    @user.like(@movie2)
+    @user.dislike(@movie)
+
+    top = Movie.top(2, 1)
+    assert_equal top[0], @movie2
+    assert_equal top[1], @movie
+  end
+
   def test_removed_from_recommendable_upon_destruction
     @user = Factory(:user)
     @friend = Factory(:user)
