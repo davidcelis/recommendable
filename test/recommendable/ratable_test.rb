@@ -61,7 +61,7 @@ class RatableTest < MiniTest::Unit::TestCase
     @user.like(@book3)
     @user.dislike(@book)
 
-    top = Book.top(count: 3)
+    top = Book.top(:count => 3)
     assert_equal top[0], @book2
     assert_equal top[1], @book3
     assert_equal top[2], @book
@@ -78,7 +78,7 @@ class RatableTest < MiniTest::Unit::TestCase
     @user.like(@movie2)
     @user.dislike(@movie)
 
-    top = Movie.top(count: 3)
+    top = Movie.top(:count => 3)
     assert_equal top[0], @doc
     assert_equal top[1], @movie2
     assert_equal top[2], @movie
@@ -95,7 +95,7 @@ class RatableTest < MiniTest::Unit::TestCase
     @user.like(@movie2)
     @user.dislike(@movie)
 
-    top = Movie.top(count: 2, offset: 1)
+    top = Movie.top(:count =>2, :offset => 1)
     assert_equal top[0], @movie2
     assert_equal top[1], @movie
   end
