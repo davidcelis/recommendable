@@ -1,8 +1,13 @@
 module Recommendable
-  MAJOR = 2
-  MINOR = 1
-  PATCH = 2
-  PRE   = nil
+  class Version
+    MAJOR = 2
+    MINOR = 1
+    PATCH = 3
 
-  VERSION = [MAJOR, MINOR, PATCH, PRE].compact.join '.'
+    def self.to_s
+      [MAJOR, MINOR, PATCH].join('.')
+    end
+  end
+
+  VERSION = Version.to_s.freeze
 end
