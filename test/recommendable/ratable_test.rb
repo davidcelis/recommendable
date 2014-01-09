@@ -33,7 +33,7 @@ class RatableTest < MiniTest::Unit::TestCase
     assert @movie.rated?
   end
 
-  def test_top_scope_returns_best_things
+  def test_top_scope_deprecated_syntax_returns_best_things
     @book2 = Factory(:book)
     @book3 = Factory(:book)
     @user = Factory(:user)
@@ -50,6 +50,23 @@ class RatableTest < MiniTest::Unit::TestCase
     assert_equal top[2], @book
   end
 
+  def test_top_scope_returns_best_things
+    @book2 = Factory(:book)
+    @book3 = Factory(:book)
+    @user = Factory(:user)
+    @friend = Factory(:user)
+
+    @user.like(@book2)
+    @friend.like(@book2)
+    @user.like(@book3)
+    @user.dislike(@book)
+
+    top = Book.top(count: 3)
+    assert_equal top[0], @book2
+    assert_equal top[1], @book3
+    assert_equal top[2], @book
+  end
+
   def test_top_scope_returns_best_things_for_ratable_base_class
     @movie2 = Factory(:movie)
     @doc = Factory(:documentary)
@@ -61,7 +78,7 @@ class RatableTest < MiniTest::Unit::TestCase
     @user.like(@movie2)
     @user.dislike(@movie)
 
-    top = Movie.top(3)
+    top = Movie.top(count: 3)
     assert_equal top[0], @doc
     assert_equal top[1], @movie2
     assert_equal top[2], @movie
@@ -78,7 +95,7 @@ class RatableTest < MiniTest::Unit::TestCase
     @user.like(@movie2)
     @user.dislike(@movie)
 
-    top = Movie.top(2, 1)
+    top = Movie.top(count: 2, offset: 1)
     assert_equal top[0], @movie2
     assert_equal top[1], @movie
   end
