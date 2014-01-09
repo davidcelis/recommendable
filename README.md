@@ -4,7 +4,7 @@ Recommendable is a gem that allows you to quickly add a recommendation engine fo
 
 ## Requirements
 
-* Ruby 1.9.x or 2.0.0. 1.8.7 works, but is no longer supported.
+* Ruby >= 1.9.3
 * ActiveRecord, Sequel, DataMapper, Mongoid, or MongoMapper (your models must have an `id` field)
 * [Sidekiq][sidekiq], [Resque][resque], [DelayedJob][delayed-job] (optional but highly recommended)
 
@@ -18,7 +18,7 @@ Add the following to your application's `Gemfile`:
   gem 'recommendable'
 ```
 
-Please note that you currently must need to place Recommendable below your ORM and queueing system in the Gemfile. If you are using Sidekiq and ActiveRecord, please place `gem recommendable` below both `gem 'rails'` and  `gem 'sidekiq'`. 
+Please note that you currently must need to place Recommendable below your ORM and queueing system in the Gemfile. If you are using Sidekiq and ActiveRecord, please place `gem recommendable` below both `gem 'rails'` and  `gem 'sidekiq'`.
 
 After bundling, you should configure Recommendable. Do this somewhere after you've required it, but before it's actually used. For example, Rails users would create an initializer (`config/initializers/recommendable.rb`):
 
