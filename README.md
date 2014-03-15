@@ -1,4 +1,4 @@
-# Recommendable [![Build Status](https://travis-ci.org/davidcelis/recommendable.png?branch=master)](https://travis-ci.org/davidcelis/recommendable)
+# Recommendable
 
 Recommendable is a gem that allows you to quickly add a recommendation engine for Likes and Dislikes to your Ruby application using my version of [Jaccardian similarity and memory-based collaborative filtering][collaborative filtering].
 
@@ -127,20 +127,9 @@ I'll let Randall Munroe of [XKCD](http://xkcd.com/) take this one for me:
 
 [![I got lost and wandered into the world's creepiest cemetery, where the headstones just had names and star ratings. Freaked me out. When I got home I tried to leave the cemetery a bad review on Yelp, but as my hand hovered over the 'one star' button I felt this distant chill ...](http://imgs.xkcd.com/comics/star_ratings.png)](http://xkcd.com/1098/)
 
-## Contributing to recommendable
-
-Once you've made your great commits:
-
-1. [Fork][forking] recommendable
-2. Create a feature branch
-3. Write your code (and tests please)
-4. Push to your branch's origin
-5. Create a [Pull Request][pull requests] from your branch
-6. That's it!
-
-If you love Recommendable and/or my other contributions to open source, please consider [making a small Gittip][gittip] to support me. Thank you!
-
 ## Links
+
+[![Build Status][travis-badge]][travis] [![Coverage][coveralls-badge]][coveralls] [![Climate][code-climate-badge]][code-climate] [![Dependencies][gemnasium-badge]][gemnasium] [![gittip][gittip-badge]][gittip]
 
 * Code: `git clone git://github.com/davidcelis/recommendable.git`
 * Home: <http://github.com/davidcelis/recommendable>
@@ -160,9 +149,18 @@ further details.
 [resque]: https://github.com/defunkt/resque
 [resque-loner]: https://github.com/jayniz/resque-loner
 [torquebox]: https://github.com/torquebox/torquebox
-[forking]: http://help.github.com/forking/
-[pull requests]: http://help.github.com/pull-requests/
 [collaborative filtering]: http://davidcelis.com/blog/2012/02/07/collaborative-filtering-with-likes-and-dislikes/
 [recommendable]: http://davidcelis.github.com/recommendable/
 [documentation]: http://rubydoc.info/gems/recommendable/frames
-[gittip]: http://gittip.com/davidcelis/
+
+[travis]: https://travis-ci.org/davidcelis/recommendable
+[travis-badge]: http://img.shields.io/travis/davidcelis/recommendable/master.svg
+[coveralls]: https://coveralls.io/r/davidcelis/recommendable
+[coveralls-badge]: http://img.shields.io/coveralls/davidcelis/recommendable/master.svg
+[code-climate]: https://codeclimate.com/github/davidcelis/recommendable
+[code-climate-badge]: http://img.shields.io/codeclimate/github/davidcelis/recommendable.svg
+[gemnasium]: http://gemnasium.com/davidcelis/recommendable
+[gemnasium-badge]: http://img.shields.io/gemnasium/davidcelis/recommendable.svg
+
+[gittip]: https://gittip.com/davidcelis
+[gittip-badge]: http://img.shields.io/gittip/davidcelis.svg
