@@ -15,14 +15,14 @@ Bundling one of the queueing systems above is highly recommended to avoid having
 Add the following to your application's `Gemfile`:
 
 ``` ruby
-  gem 'recommendable'
+gem 'recommendable'
 ```
 
 Please note that you currently must need to place Recommendable below your ORM and queueing system in the Gemfile. If you are using Sidekiq and ActiveRecord, please place `gem recommendable` below both `gem 'rails'` and  `gem 'sidekiq'`.
 
 After bundling, you should configure Recommendable. Do this somewhere after you've required it, but before it's actually used. For example, Rails users would create an initializer (`config/initializers/recommendable.rb`):
 
-``` ruby
+```ruby
 require 'redis'
 
 Recommendable.configure do |config|
@@ -73,7 +73,7 @@ The values listed above are the defaults. I recommend playing around with the `n
 
 In your model that will be receiving recommendations:
 
-``` ruby
+```ruby
 class User
   recommends :movies, :books, :minerals, :other_things
 
@@ -83,7 +83,7 @@ end
 
 To ensure that users' recommendations are processed after they rate items, make sure your bundled queue system is running:
 
-``` bash
+```bash
 # sidekiq
 $ [bundle exec] sidekiq -q recommendable
 # resque
@@ -106,7 +106,7 @@ _NOTE: Your Redis database **MUST** be persistent. All ratings are stored perman
 
 For Mac OS X users, homebrew is by far the easiest way to install Redis. Make sure to read the caveats after installation!
 
-``` bash
+```bash
 $ brew install redis
 ```
 
@@ -114,7 +114,7 @@ $ brew install redis
 
 For Linux users, there is a package on apt-get.
 
-``` bash
+```bash
 $ sudo apt-get install redis-server
 $ redis-server
 ```
@@ -161,6 +161,5 @@ further details.
 [code-climate-badge]: http://img.shields.io/codeclimate/github/davidcelis/recommendable.svg
 [gemnasium]: http://gemnasium.com/davidcelis/recommendable
 [gemnasium-badge]: http://img.shields.io/gemnasium/davidcelis/recommendable.svg
-
 [gittip]: https://gittip.com/davidcelis
 [gittip-badge]: http://img.shields.io/gittip/davidcelis.svg
