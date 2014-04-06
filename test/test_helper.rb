@@ -8,7 +8,7 @@ require 'minitest/pride'
 
 require 'database_cleaner'
 
-require 'miniskirt'
+require 'minifacture'
 require 'factories'
 
 require 'recommendable'
