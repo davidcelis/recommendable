@@ -189,7 +189,7 @@ module Recommendable
               Recommendable.redis.zscore(similarity_set, id)
             end
           end
-          similarity_values.reduce(&:+).to_f
+          similarity_values.map(&:to_f).reduce(&:+).to_f
         end
 
         def update_score_for(klass, id)
