@@ -2,7 +2,7 @@ module Recommendable
   class Version
     MAJOR = 2
     MINOR = 1
-    PATCH = 3
+    PATCH = 4
 
     def self.to_s
       [MAJOR, MINOR, PATCH].join('.')
