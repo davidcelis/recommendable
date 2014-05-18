@@ -44,7 +44,7 @@ class RatableTest < MiniTest::Unit::TestCase
     @user.like(@book3)
     @user.dislike(@book)
 
-    top = Book.top(3)
+    top = Book.top(:count => 3)
     assert_equal top[0], @book2
     assert_equal top[1], @book3
     assert_equal top[2], @book

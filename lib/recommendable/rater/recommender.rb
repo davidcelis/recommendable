@@ -22,7 +22,9 @@ module Recommendable
         recommended_set = Recommendable::Helpers::RedisKeyMapper.recommended_set_for(klass, self.id)
         return Recommendable.query(klass, []) unless rated_anything? && Recommendable.redis.zcard(recommended_set) > 0
 
-        ids = Recommendable.redis.zrevrange(recommended_set, offset, count - 1)
+        ids = Recommendable.redis.zrevrange(recommended_set, offset, count - 1, :with_scores => true)
+        ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
+
         Recommendable.query(klass, ids)
       end
 
