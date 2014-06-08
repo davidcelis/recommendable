@@ -169,7 +169,7 @@ module Recommendable
           liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, item_id)
           disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, item_id)
           similarity_sum = 0.0
-   
+
           similarity_sum += similarity_total_for(user_id, liked_by_set)
           similarity_sum -= similarity_total_for(user_id, disliked_by_set)
 
@@ -180,7 +180,7 @@ module Recommendable
           prediction = similarity_sum / (liked_by_count + disliked_by_count).to_f
           prediction.finite? ? prediction : 0.0
         end
-        
+
         def similarity_total_for(user_id, set)
           similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
           ids = Recommendable.redis.smembers(set)

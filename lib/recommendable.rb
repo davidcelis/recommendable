@@ -24,6 +24,7 @@ module Recommendable
 
     def enqueue(user_id)
       user_id = user_id.id if user_id.is_a?(Recommendable.config.user_class)
+      user_id = user_id.to_s
 
       if defined?(::Sidekiq)
         Recommendable::Workers::Sidekiq.perform_async(user_id)
