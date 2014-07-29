@@ -125,7 +125,7 @@ module Recommendable
             end
 
             # Get dislikes from the least similar users
-            least_similar_user_ids.inject(sets_to_union) do |sets, id|
+            sets_to_union = least_similar_user_ids.inject(sets_to_union) do |sets, id|
               sets << Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id)
             end
 
