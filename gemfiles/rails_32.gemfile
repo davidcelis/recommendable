@@ -1,7 +1,7 @@
 source 'https://rubygems.org/'
 gemspec :path => '../'
 
-gem 'rails', '~> 3.2.15'
+gem 'rails', '~> 3.2'
 
 gem 'sqlite3', :platform => :ruby
 gem 'activerecord-jdbcsqlite3-adapter', :platforms => :jruby

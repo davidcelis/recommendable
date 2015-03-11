@@ -11,4 +11,6 @@ gemfile:
   - gemfiles/rails_32.gemfile
   - gemfiles/rails_40.gemfile
   - gemfiles/rails_41.gemfile
+  - gemfiles/rails_42.gemfile
+  - gemfiles/rails_edge.gemfile
 script: bundle exec rake test
