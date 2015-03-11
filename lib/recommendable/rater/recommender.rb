@@ -8,7 +8,11 @@ module Recommendable
       # @return [Array] An array of instances of your user class
       def similar_raters(count = 10, offset = 0)
         ids = Recommendable.redis.zrevrange(Recommendable::Helpers::RedisKeyMapper.similarity_set_for(id), offset, count - 1)
-        Recommendable.query(self.class, ids).sort_by { |user| ids.index(user.id.to_s) }
+
+        order = ids.map { |id| "`#{Recommendable.config.user_class.table_name}`.`id` = %d DESC" }.join(', ')
+        order = self.class.send(:sanitize_sql_for_assignment, [order, *ids])
+
+        Recommendable.query(self.class, ids).order(order)
       end
 
       private
@@ -25,7 +29,9 @@ module Recommendable
         ids = Recommendable.redis.zrevrange(recommended_set, offset, count - 1, :with_scores => true)
         ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
 
-        Recommendable.query(klass, ids).sort_by { |record| ids.index(record.id.to_s) }
+        order = ids.map { |id| "`#{klass.table_name}`.`id` = %d DESC" }.join(', ')
+        order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
+        Recommendable.query(klass, ids).order(order)
       end
 
       # Removes an item from a user's set of recommendations
