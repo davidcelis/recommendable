@@ -1,10 +1,10 @@
 ENV['RAILS_ENV'] = 'test'
 
-require File.expand_path('../dummy/config/environment.rb', __FILE__)
-
 require 'minitest/autorun'
 require 'minitest/unit'
 require 'minitest/pride'
+
+require File.expand_path('../dummy/config/environment.rb', __FILE__)
 
 require 'database_cleaner'
 

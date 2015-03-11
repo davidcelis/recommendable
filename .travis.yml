@@ -42,7 +42,7 @@ matrix:
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.1.0
       gemfile: gemfiles/rails_edge.gemfile
-    - jruby-21mode
+    - rvm: jruby-21mode
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.2.0
       gemfile: gemfiles/rails_31.gemfile

@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../test', __FILE__)
 require 'test_helper'
 
-class RecommenderTest < MiniTest::Unit::TestCase
+class RecommenderTest < Minitest::Test
   def setup
     @user = Factory(:user)
     5.times  { |x| instance_variable_set(:"@user#{x+1}",  Factory(:user))  }

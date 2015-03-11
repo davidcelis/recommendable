@@ -24,7 +24,7 @@ EOF
   s.add_dependency 'redis',         '>= 2.2.0'
   s.add_dependency 'hooks',         '>= 0.2.1'
 
-  s.add_development_dependency 'minitest', '>= 4.2'
+  s.add_development_dependency 'minitest', '>= 5.0'
   s.add_development_dependency 'minifacture'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'rails', '>= 3.1.0'

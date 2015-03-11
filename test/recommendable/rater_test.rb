@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../test', __FILE__)
 require 'test_helper'
 
-class RaterTest < MiniTest::Unit::TestCase
+class RaterTest < Minitest::Test
   def setup
     @user = Factory(:user)
   end

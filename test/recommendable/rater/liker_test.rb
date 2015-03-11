@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift File.expand_path('../../test', __FILE__)
 require 'test_helper'
 
-class LikerTest < MiniTest::Unit::TestCase
+class LikerTest < Minitest::Test
   def setup
     @user = Factory(:user)
     @movie = Factory(:movie)
