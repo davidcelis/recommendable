@@ -5,6 +5,7 @@ rvm:
   - 1.9.3
   - 2.0.0
   - 2.1.0
+  - 2.2.0
   - jruby-19mode
   - jruby-20mode
   - jruby-21mode
@@ -16,3 +17,22 @@ gemfile:
   - gemfiles/rails_42.gemfile
   - gemfiles/rails_edge.gemfile
 script: bundle exec rake test
+
+matrix:
+  exclude:
+    - rvm: 1.9.3
+      gemfile: gemfiles/rails_40.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/rails_41.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/rails_42.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/rails_edge.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails_edge.gemfile
+    - rvm: 2.1.0
+      gemfile: gemfiles/rails_edge.gemfile
+    - rvm: 2.2.0
+      gemfile: gemfiles/rails_31.gemfile
+    - rvm: 2.2.0
+      gemfile: gemfiles/rails_32.gemfile
