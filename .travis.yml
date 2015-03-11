@@ -28,9 +28,21 @@ matrix:
       gemfile: gemfiles/rails_42.gemfile
     - rvm: 1.9.3
       gemfile: gemfiles/rails_edge.gemfile
+    - rvm: jruby-19mode
+      gemfile: gemfiles/rails_40.gemfile
+    - rvm: jruby-19mode
+      gemfile: gemfiles/rails_41.gemfile
+    - rvm: jruby-19mode
+      gemfile: gemfiles/rails_42.gemfile
+    - rvm: jruby-19mode
+      gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.0.0
       gemfile: gemfiles/rails_edge.gemfile
+    - rvm: jruby-20mode
+      gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.1.0
+      gemfile: gemfiles/rails_edge.gemfile
+    - jruby-21mode
       gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.2.0
       gemfile: gemfiles/rails_31.gemfile
