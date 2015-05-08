@@ -69,6 +69,14 @@ end
 
 The values listed above are the defaults. I recommend playing around with the `nearest_neighbors` setting. A higher value will provide more accurate recommendations at the cost of more time spent generating them.
 
+If your application uses multiple ORMs, you must configure Recommendable to use the correct one. For example:
+
+```ruby
+Recommendable.configure do |config|
+  config.orm = :active_record
+end
+```
+
 ## Usage
 
 In your model that will be receiving recommendations:
