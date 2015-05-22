@@ -6,6 +6,8 @@ module Recommendable
           klass.where(:id => ids)
         end
 
+        alias_method :active_record_uuid, :active_record
+
         def data_mapper(klass, ids)
           klass.all(:id => ids)
         end
