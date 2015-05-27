@@ -22,26 +22,36 @@ module Recommendable
             disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
             other_disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, other_user_id)
 
+            temp0_set = Recommendable::Helpers::RedisKeyMapper.temp0_set_for(klass, user_id, other_user_id)
+            temp1_set = Recommendable::Helpers::RedisKeyMapper.temp1_set_for(klass, user_id, other_user_id)
+            temp2_set = Recommendable::Helpers::RedisKeyMapper.temp2_set_for(klass, user_id, other_user_id)
+            temp3_set = Recommendable::Helpers::RedisKeyMapper.temp3_set_for(klass, user_id, other_user_id)
+
             results = Recommendable.redis.pipelined do
               # Agreements
-              Recommendable.redis.sinter(liked_set, other_liked_set)
-              Recommendable.redis.sinter(disliked_set, other_disliked_set)
+              Recommendable.redis.sinterstore(temp0_set, liked_set, other_liked_set)
+              Recommendable.redis.sinterstore(temp1_set, disliked_set, other_disliked_set)
 
               # Disagreements
-              Recommendable.redis.sinter(liked_set, other_disliked_set)
-              Recommendable.redis.sinter(disliked_set, other_liked_set)
+              Recommendable.redis.sinterstore(temp2_set, liked_set, other_disliked_set)
+              Recommendable.redis.sinterstore(temp3_set, disliked_set, other_liked_set)
 
               Recommendable.redis.scard(liked_set)
               Recommendable.redis.scard(disliked_set)
+
+              Recommendable.redis.del(temp0_set)
+              Recommendable.redis.del(temp1_set)
+              Recommendable.redis.del(temp2_set)
+              Recommendable.redis.del(temp3_set)
             end
 
             # Agreements
-            similarity += results[0].size
-            similarity += results[1].size
+            similarity += results[0]
+            similarity += results[1]
 
             # Disagreements
-            similarity -= results[2].size
-            similarity -= results[3].size
+            similarity -= results[2]
+            similarity -= results[3]
 
             liked_count += results[4]
             disliked_count += results[5]
