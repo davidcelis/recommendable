@@ -191,15 +191,25 @@ module Recommendable
           prediction.finite? ? prediction : 0.0
         end
 
-        def similarity_total_for(user_id, set)
-          similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
-          ids = Recommendable.redis.smembers(set)
-          similarity_values = Recommendable.redis.pipelined do
-            ids.each do |id|
-              Recommendable.redis.zscore(similarity_set, id)
+        def sum_of_scores_lua
+          <<-LUA
+          local sum=0
+          local z=redis.call('ZRANGE', KEYS[2], 0, -1, 'WITHSCORES')
+
+          for i=1, #z, 2 do
+            if redis.call('SISMEMBER', KEYS[1], z[i]) == 1 then
+              sum=sum+z[i+1]
             end
           end
-          similarity_values.map(&:to_f).reduce(&:+).to_f
+
+          return sum
+          LUA
+        end
+
+        def similarity_total_for(user_id, set)
+          similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
+
+          Recommendable.redis.eval(sum_of_scores_lua, keys: [set, similarity_set]).to_f
         end
 
         def update_score_for(klass, id)
