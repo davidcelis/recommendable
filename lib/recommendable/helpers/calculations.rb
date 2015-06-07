@@ -202,7 +202,7 @@ module Recommendable
             end
           end
 
-          return sum
+          return tostring(sum)
           LUA
         end
 
