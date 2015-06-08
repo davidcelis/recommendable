@@ -28,6 +28,10 @@ module Recommendable
           [redis_namespace, ratable_namespace(klass), id, 'temp'].compact.join(':')
         end
 
+        def temp_sub_set_for(klass, id)
+          [redis_namespace, ratable_namespace(klass), id, 'temp_sub'].compact.join(':')
+        end
+
         def agreements_set_for(klass, id, other_id)
           [redis_namespace, ratable_namespace(klass), id, other_id, 'agreements'].compact.join(':')
         end
