@@ -22,27 +22,23 @@ module Recommendable
             disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
             other_disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, other_user_id)
 
-            temp0_set = Recommendable::Helpers::RedisKeyMapper.temp0_set_for(klass, user_id, other_user_id)
-            temp1_set = Recommendable::Helpers::RedisKeyMapper.temp1_set_for(klass, user_id, other_user_id)
-            temp2_set = Recommendable::Helpers::RedisKeyMapper.temp2_set_for(klass, user_id, other_user_id)
-            temp3_set = Recommendable::Helpers::RedisKeyMapper.temp3_set_for(klass, user_id, other_user_id)
+            agreements_set = Recommendable::Helpers::RedisKeyMapper.agreements_set_for(klass, user_id, other_user_id)
+            disagreements_set = Recommendable::Helpers::RedisKeyMapper.disagreements_set_for(klass, user_id, other_user_id)
 
             results = Recommendable.redis.pipelined do
               # Agreements
-              Recommendable.redis.sinterstore(temp0_set, liked_set, other_liked_set)
-              Recommendable.redis.sinterstore(temp1_set, disliked_set, other_disliked_set)
+              Recommendable.redis.sinterstore(agreements_set, liked_set, other_liked_set)
+              Recommendable.redis.sinterstore(agreements_set, disliked_set, other_disliked_set)
 
               # Disagreements
-              Recommendable.redis.sinterstore(temp2_set, liked_set, other_disliked_set)
-              Recommendable.redis.sinterstore(temp3_set, disliked_set, other_liked_set)
+              Recommendable.redis.sinterstore(disagreements_set, liked_set, other_disliked_set)
+              Recommendable.redis.sinterstore(disagreements_set, disliked_set, other_liked_set)
 
               Recommendable.redis.scard(liked_set)
               Recommendable.redis.scard(disliked_set)
 
-              Recommendable.redis.del(temp0_set)
-              Recommendable.redis.del(temp1_set)
-              Recommendable.redis.del(temp2_set)
-              Recommendable.redis.del(temp3_set)
+              Recommendable.redis.del(agreements_set)
+              Recommendable.redis.del(disagreements_set)
             end
 
             # Agreements

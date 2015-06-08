@@ -28,20 +28,12 @@ module Recommendable
           [redis_namespace, ratable_namespace(klass), id, 'temp'].compact.join(':')
         end
 
-        def temp0_set_for(klass, id, other_id)
-          [redis_namespace, ratable_namespace(klass), id, other_id, 'temp0'].compact.join(':')
+        def agreements_set_for(klass, id, other_id)
+          [redis_namespace, ratable_namespace(klass), id, other_id, 'agreements'].compact.join(':')
         end
 
-        def temp1_set_for(klass, id, other_id)
-          [redis_namespace, ratable_namespace(klass), id, other_id, 'temp1'].compact.join(':')
-        end
-
-        def temp2_set_for(klass, id, other_id)
-          [redis_namespace, ratable_namespace(klass), id, other_id, 'temp2'].compact.join(':')
-        end
-
-        def temp3_set_for(klass, id, other_id)
-          [redis_namespace, ratable_namespace(klass), id, other_id, 'temp3'].compact.join(':')
+        def disagreements_set_for(klass, id, other_id)
+          [redis_namespace, ratable_namespace(klass), id, other_id, 'disagreements'].compact.join(':')
         end
 
         private
