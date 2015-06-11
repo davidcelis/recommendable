@@ -21,7 +21,7 @@ module Recommendable
         end
 
         def similarity_between_lua_func
-          <<-LUA
+          <<-LUA.strip_heredoc
           local function similarity_between(klasses, user_id, other_user_id, similarity_set, redis_namespace, user_namespace)
             local similarity = 0
             local liked_count = 0
@@ -58,7 +58,7 @@ module Recommendable
         end
 
         def similarity_between_lua
-          <<-LUA
+          <<-LUA.strip_heredoc
           #{similarity_between_lua_func}
 
           return tostring(similarity_between(ARGV, unpack(KEYS)))
@@ -66,7 +66,7 @@ module Recommendable
         end
 
         def similarity_between_multi_zadd_lua
-          <<-LUA
+          <<-LUA.strip_heredoc
           #{similarity_between_lua_func}
 
           local user_id = KEYS[1]
@@ -116,7 +116,7 @@ module Recommendable
           temp_sub_set = Recommendable::Helpers::RedisKeyMapper.temp_sub_set_for(Recommendable.config.user_class, user_id)
           similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
           klasses = Recommendable.config.ratable_classes.map { |klass| klass.to_s.tableize }
-          scan_slice(user_id, temp_set, temp_sub_set, count: 300) do
+          scan_slice(temp_set, temp_sub_set, count: 300) do
             Recommendable.redis.eval(similarity_between_multi_zadd_lua,
               [ user_id, temp_sub_set, similarity_set,
                 Recommendable.config.redis_namespace,
@@ -136,7 +136,7 @@ module Recommendable
           true
         end
 
-        def scan_slice(user_id, set, sub_set, options={})
+        def scan_slice(set, sub_set, options={})
           cursor = 0
           loop do
             cursor, keys = Recommendable.redis.sscan(set, cursor, options)
@@ -150,7 +150,7 @@ module Recommendable
         end
 
         def sunion_sets_lua
-          <<-LUA
+          <<-LUA.strip_heredoc
           local item_ids = redis.call('SMEMBERS', ARGV[1])
 
           local sets = {}
@@ -249,7 +249,7 @@ module Recommendable
         end
 
         def sum_of_scores_lua
-          <<-LUA
+          <<-LUA.strip_heredoc
           local sum=0
           local z=redis.call('ZRANGE', KEYS[2], 0, -1, 'WITHSCORES')
 
