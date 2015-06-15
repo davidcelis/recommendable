@@ -178,7 +178,7 @@ module Recommendable
               Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, user_id),
               Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, user_id)
             ]
-            temp_set = Recommendable::Helpers::RedisKeyMapper.temp_set_for(Recommendable.config.user_class, user_id)
+            temp_set = Recommendable::Helpers::RedisKeyMapper.temp_set_for(klass, user_id)
             similarity_set  = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
             recommended_set = Recommendable::Helpers::RedisKeyMapper.recommended_set_for(klass, user_id)
             most_similar_user_ids, least_similar_user_ids = Recommendable.redis.pipelined do
