@@ -9,7 +9,7 @@ module Recommendable
       def similar_raters(limit = 10, offset = 0)
         ids = Recommendable.redis.zrevrange(Recommendable::Helpers::RedisKeyMapper.similarity_set_for(id), 0, -1)
 
-        order = ids.map { |id| "`#{Recommendable.config.user_class.table_name}`.`id` = %d DESC" }.join(', ')
+        order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = self.class.send(:sanitize_sql_for_assignment, [order, *ids])
 
         Recommendable.query(self.class, ids).order(order).limit(limit).offset(offset)
@@ -29,7 +29,7 @@ module Recommendable
         ids = Recommendable.redis.zrevrange(recommended_set, 0, -1, :with_scores => true)
         ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
 
-        order = ids.map { |id| "`#{klass.table_name}`.`id` = %d DESC" }.join(', ')
+        order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
         Recommendable.query(klass, ids).order(order).limit(limit).offset(offset)
       end
