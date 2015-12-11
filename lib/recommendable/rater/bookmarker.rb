@@ -12,6 +12,7 @@ module Recommendable
 
         run_hook(:before_bookmark, obj)
         Recommendable.redis.sadd(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(obj.class, id), obj.id)
+        Recommendable.redis.sadd(Recommendable::Helpers::RedisKeyMapper.bookmarked_by_set_for(obj.class, obj.id), id)
         run_hook(:after_bookmark, obj)
 
         true
@@ -34,6 +35,7 @@ module Recommendable
 
         run_hook(:before_unbookmark, obj)
         Recommendable.redis.srem(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(obj.class, id), obj.id)
+        Recommendable.redis.srem(Recommendable::Helpers::RedisKeyMapper.bookmarked_by_set_for(obj.class, obj.id), id)
         run_hook(:after_unbookmark, obj)
 
         true

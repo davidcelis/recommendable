@@ -51,7 +51,7 @@ module Recommendable
           before_like    lambda { |obj| undislike(obj) || unhide(obj) }
           before_dislike lambda { |obj| unlike(obj)    || unhide(obj) }
 
-          %w[like unlike dislike undislike].each do |action|
+          %w[like unlike dislike undislike bookmark].each do |action|
             send("after_#{action}", lambda { |obj|
               Recommendable::Helpers::Calculations.update_score_for(obj.class, obj.id)
               Recommendable.enqueue(self.id) if Recommendable.config.auto_enqueue

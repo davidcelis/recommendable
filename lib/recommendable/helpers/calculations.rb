@@ -1,3 +1,4 @@
+require 'pry'
 module Recommendable
   module Helpers
     module Calculations
@@ -15,17 +16,20 @@ module Recommendable
           user_id = user_id.to_s
           other_user_id = other_user_id.to_s
 
-          similarity = liked_count = disliked_count = 0
-          in_common = Recommendable.config.ratable_classes.each do |klass|
+          similarity = liked_count = disliked_count = bookmarked_count = 0
+          Recommendable.config.ratable_classes.each do |klass|
             liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id)
             other_liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, other_user_id)
             disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
             other_disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, other_user_id)
+            bookmarked_set = Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, user_id)
+            other_bookmarked_set = Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, other_user_id)
 
             results = Recommendable.redis.pipelined do
               # Agreements
               Recommendable.redis.sinter(liked_set, other_liked_set)
               Recommendable.redis.sinter(disliked_set, other_disliked_set)
+              Recommendable.redis.sinter(bookmarked_set, other_bookmarked_set)
 
               # Disagreements
               Recommendable.redis.sinter(liked_set, other_disliked_set)
@@ -33,21 +37,24 @@ module Recommendable
 
               Recommendable.redis.scard(liked_set)
               Recommendable.redis.scard(disliked_set)
+              Recommendable.redis.scard(bookmarked_set)
             end
 
             # Agreements
             similarity += results[0].size
             similarity += results[1].size
+            similarity += results[2].size * Recommendable.config.bookmark_weight
 
             # Disagreements
-            similarity -= results[2].size
             similarity -= results[3].size
+            similarity -= results[4].size
 
-            liked_count += results[4]
-            disliked_count += results[5]
+            liked_count += results[5]
+            disliked_count += results[6]
+            bookmarked_count += results[6] * Recommendable.config.bookmark_weight
           end
 
-          similarity / (liked_count + disliked_count).to_f
+          similarity / (liked_count + disliked_count + bookmarked_count).to_f
         end
 
         # Used internally to update the similarity values between this user and all
@@ -61,15 +68,17 @@ module Recommendable
           relevant_user_ids = Recommendable.config.ratable_classes.inject([]) do |memo, klass|
             liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id)
             disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
+            bookmarked_set = Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, user_id)
 
-            item_ids = Recommendable.redis.sunion(liked_set, disliked_set)
+            item_ids = Recommendable.redis.sunion(liked_set, disliked_set, bookmarked_set)
 
             unless item_ids.empty?
               sets = item_ids.map do |id|
                 liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, id)
                 disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, id)
+                bookmarked_by_set = Recommendable::Helpers::RedisKeyMapper.bookmarked_by_set_for(klass, id)
 
-                [liked_by_set, disliked_by_set]
+                [liked_by_set, disliked_by_set, bookmarked_by_set]
               end
 
               memo | Recommendable.redis.sunion(*sets.flatten)
@@ -124,6 +133,11 @@ module Recommendable
               sets << Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, id)
             end
 
+            # Get bookmarked from the most similar users
+            sets_to_union = most_similar_user_ids.inject(sets_to_union) do |sets, id|
+              sets << Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id)
+            end
+
             # Get dislikes from the least similar users
             sets_to_union = least_similar_user_ids.inject(sets_to_union) do |sets, id|
               sets << Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id)
@@ -168,16 +182,20 @@ module Recommendable
 
           liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, item_id)
           disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, item_id)
+          bookmarked_by_set = Recommendable::Helpers::RedisKeyMapper.bookmarked_by_set_for(klass, item_id)
           similarity_sum = 0.0
 
           similarity_sum += similarity_total_for(user_id, liked_by_set)
+          similarity_sum += similarity_total_for(user_id, bookmarked_by_set) * Recommendable.config.bookmark_weight
           similarity_sum -= similarity_total_for(user_id, disliked_by_set)
 
-          liked_by_count, disliked_by_count = Recommendable.redis.pipelined do
+          liked_by_count, disliked_by_count, bookmarked_by_count = Recommendable.redis.pipelined do
             Recommendable.redis.scard(liked_by_set)
             Recommendable.redis.scard(disliked_by_set)
+            Recommendable.redis.scard(bookmarked_by_set)
           end
-          prediction = similarity_sum / (liked_by_count + disliked_by_count).to_f
+          bookmarked_by_count *= Recommendable.config.bookmark_weight
+          prediction = similarity_sum / (liked_by_count + disliked_by_count + bookmarked_by_count).to_f
           prediction.finite? ? prediction : 0.0
         end
 

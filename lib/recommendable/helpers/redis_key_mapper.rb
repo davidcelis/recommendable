@@ -20,6 +20,10 @@ module Recommendable
           [redis_namespace, ratable_namespace(klass), id, 'disliked_by'].compact.join(':')
         end
 
+        def bookmarked_by_set_for(klass, id)
+          [redis_namespace, ratable_namespace(klass), id, 'bookmarked_by'].compact.join(':')
+        end
+
         def score_set_for(klass)
           [redis_namespace, ratable_namespace(klass), 'scores'].join(':')
         end
