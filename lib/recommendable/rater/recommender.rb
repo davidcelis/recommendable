@@ -11,7 +11,6 @@ module Recommendable
 
         order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = self.class.send(:sanitize_sql_for_assignment, [order, *ids])
-
         Recommendable.query(self.class, ids).order(order).limit(limit).offset(offset)
       end
 
@@ -24,10 +23,16 @@ module Recommendable
       # @return [Array] a list of things this person's gonna love
       def recommended_for(klass, limit = 10, offset = 0)
         recommended_set = Recommendable::Helpers::RedisKeyMapper.recommended_set_for(klass, self.id)
-        return Recommendable.query(klass, []) unless rated_anything? && Recommendable.redis.zcard(recommended_set) > 0
 
         ids = Recommendable.redis.zrevrange(recommended_set, 0, -1, :with_scores => true)
         ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
+
+        #if recommeded set is not enough, just add top products
+        if ids.count < limit
+          score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(klass)
+          ids = ids + Recommendable.redis.zrevrange(score_set, 0, limit - ids.count - 1)
+          ids.compact! #todo - if there is duplicated id, number of ids should be less number than limit
+        end
 
         order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
