@@ -1,4 +1,3 @@
-require 'pry'
 module Recommendable
   module Helpers
     module Calculations
