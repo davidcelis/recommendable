@@ -1,5 +1,4 @@
-require 'recommendable/ratable/likable'
-require 'recommendable/ratable/dislikable'
+require 'recommendable/ratable/scoreable'
 
 module Recommendable
   module Ratable
@@ -12,8 +11,7 @@ module Recommendable
         Recommendable.configure { |config| config.ratable_classes << self }
 
         class_eval do
-          include Likable
-          include Dislikable
+          include Scoreable
 
           case
           when defined?(Sequel::Model) && ancestors.include?(Sequel::Model)
@@ -38,7 +36,7 @@ module Recommendable
           #
           # @return true if anybody has liked/disliked this
           def rated?
-            liked_by_count > 0 || disliked_by_count > 0
+            scored_by_count > 0
           end
 
           # Query for the top-N items sorted by score
@@ -77,11 +75,10 @@ module Recommendable
             zsets << Recommendable::Helpers::RedisKeyMapper.score_set_for(self.class)
 
             # Remove this item's liked_by/disliked_by sets
-            keys << Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(self.class, id)
-            keys << Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(self.class, id)
+            keys << Recommendable::Helpers::RedisKeyMapper.scored_by_set_for(self.class, id)
 
             # Remove this item from any user's like/dislike/hidden/bookmark sets
-            %w[liked disliked hidden bookmarked].each do |action|
+            %w[scored bookmarked].each do |action|
               sets += Recommendable.redis.keys(Recommendable::Helpers::RedisKeyMapper.send("#{action}_set_for", self.class, '*'))
             end
 

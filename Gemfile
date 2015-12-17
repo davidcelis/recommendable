@@ -3,5 +3,5 @@ gemspec
 
 gem 'sqlite3', :platform => :ruby
 gem 'activerecord-jdbcsqlite3-adapter', :platforms => :jruby
-
+gem 'gsl'
 gem 'pry'

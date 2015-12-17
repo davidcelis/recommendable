@@ -29,7 +29,7 @@ class RatableTest < Minitest::Test
   def test_rated_predicate_works
     refute @movie.rated?
     user = Factory(:user)
-    user.like(@movie)
+    user.score(@movie, 1)
     assert @movie.rated?
   end
 
@@ -39,10 +39,10 @@ class RatableTest < Minitest::Test
     @user = Factory(:user)
     @friend = Factory(:user)
 
-    @user.like(@book2)
-    @friend.like(@book2)
-    @user.like(@book3)
-    @user.dislike(@book)
+    @user.score(@book2, 1)
+    @friend.score(@book2, 1)
+    @user.score(@book3, 1)
+    @user.score(@book, -1)
 
     top = Book.top(:count => 3)
     assert_equal top[0], @book2
@@ -56,10 +56,10 @@ class RatableTest < Minitest::Test
     @user = Factory(:user)
     @friend = Factory(:user)
 
-    @user.like(@book2)
-    @friend.like(@book2)
-    @user.like(@book3)
-    @user.dislike(@book)
+    @user.score(@book2, 1)
+    @friend.score(@book2, 1)
+    @user.score(@book3, 1)
+    @user.score(@book, -1)
 
     top = Book.top(:count => 3)
     assert_equal top[0], @book2
@@ -73,10 +73,10 @@ class RatableTest < Minitest::Test
     @user = Factory(:user)
     @friend = Factory(:user)
 
-    @user.like(@doc)
-    @friend.like(@doc)
-    @user.like(@movie2)
-    @user.dislike(@movie)
+    @user.score(@doc, 1)
+    @friend.score(@doc, 1)
+    @user.score(@movie2, 1)
+    @user.score(@movie, -1)
 
     top = Movie.top(:count => 3)
     assert_equal top[0], @doc
@@ -90,10 +90,10 @@ class RatableTest < Minitest::Test
     @user = Factory(:user)
     @friend = Factory(:user)
 
-    @user.like(@doc)
-    @friend.like(@doc)
-    @user.like(@movie2)
-    @user.dislike(@movie)
+    @user.score(@doc, 1)
+    @friend.score(@doc, 1)
+    @user.score(@movie2, 1)
+    @user.score(@movie, -1)
 
     top = Movie.top(:count =>2, :offset => 1)
     assert_equal top[0], @movie2
@@ -104,30 +104,25 @@ class RatableTest < Minitest::Test
     @user = Factory(:user)
     @friend = Factory(:user)
     @buddy = Factory(:user)
-    @user.like(@movie)
-    @friend.dislike(@movie)
-    @user.dislike(@book)
-    @friend.like(@book)
-    @buddy.hide(@movie)
+    @user.score(@movie, 1)
+    @friend.score(@movie, -1)
+    @user.score(@book, -1)
+    @friend.score(@book, 1)
     @buddy.bookmark(@book)
 
-    liked_by_sets = [@movie, @book].map { |obj| Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(obj.class, obj.id) }
-    disliked_by_sets = [@movie, @book].map { |obj| Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(obj.class, obj.id) }
-    [liked_by_sets, disliked_by_sets].flatten.each { |set| assert_equal Recommendable.redis.scard(set), 1 }
+    scoreed_by_sets = [@movie, @book].map { |obj| Recommendable::Helpers::RedisKeyMapper.scored_by_set_for(obj.class, obj.id) }
+    scoreed_by_sets.flatten.each { |set| assert_equal Recommendable.redis.scard(set), 2 }
 
-    assert @user.likes?(@movie)
-    assert @user.dislikes?(@book)
-    assert @friend.likes?(@book)
-    assert @friend.dislikes?(@movie)
-    assert @buddy.hides?(@movie)
+    assert @user.scores?(@movie)
+    assert @user.scores?(@book)
+    assert @friend.scores?(@book)
+    assert @friend.scores?(@movie)
     assert @buddy.bookmarks?(@book)
 
     @movie.destroy
     @book.destroy
 
-    [liked_by_sets, disliked_by_sets].flatten.each { |set| assert_equal Recommendable.redis.scard(set), 0 }
-
-    assert_empty @buddy.hidden_movies
+    scoreed_by_sets.flatten.each { |set| assert_equal Recommendable.redis.scard(set), 0 }
     assert_empty @buddy.bookmarked_books
   end
 
@@ -135,26 +130,21 @@ class RatableTest < Minitest::Test
     @doc = Factory(:documentary)
     @user = Factory(:user)
     @friend = Factory(:user)
-    @buddy = Factory(:user)
     @stranger = Factory(:user)
-    @user.like(@doc)
-    @friend.dislike(@doc)
-    @buddy.hide(@doc)
+
+    @user.score(@doc, 1)
+    @friend.score(@doc, -1)
     @stranger.bookmark(@doc)
 
-    liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(@doc.class, @doc.id)
-    disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(@doc.class, @doc.id)
-    [liked_by_set, disliked_by_set].each { |set| assert_equal Recommendable.redis.scard(set), 1 }
+    scored_by_set = Recommendable::Helpers::RedisKeyMapper.scored_by_set_for(@doc.class, @doc.id)
+    assert_equal Recommendable.redis.scard(scored_by_set), 2
 
-    assert @user.likes?(@doc)
-    assert @friend.dislikes?(@doc)
-    assert @buddy.hides?(@doc)
+    assert @user.scores?(@doc)
+    assert @friend.scores?(@doc)
 
     @doc.destroy
+    assert_equal Recommendable.redis.scard(scored_by_set), 0
 
-    [liked_by_set, disliked_by_set].each { |set| assert_equal Recommendable.redis.scard(set), 0 }
-
-    assert_empty @buddy.hidden_movies
     assert_empty @stranger.bookmarked_books
   end
 

@@ -23,6 +23,7 @@ EOF
   s.add_dependency 'activesupport', '>= 3.0.0'
   s.add_dependency 'redis',         '>= 2.2.0'
   s.add_dependency 'hooks',         '>= 0.2.1'
+  s.add_dependency 'gsl',           '= 1.16.0.6'
 
   s.add_development_dependency 'minitest', '>= 5.0'
   s.add_development_dependency 'minifacture'
