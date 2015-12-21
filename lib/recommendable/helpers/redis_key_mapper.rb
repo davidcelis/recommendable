@@ -2,7 +2,7 @@ module Recommendable
   module Helpers
     module RedisKeyMapper
       class << self
-        %w[liked disliked hidden bookmarked recommended].each do |action|
+        %w[scored bookmarked recommended].each do |action|
           define_method "#{action}_set_for" do |klass, id|
             [redis_namespace, user_namespace, id, "#{action}_#{ratable_namespace(klass)}"].compact.join(':')
           end
@@ -12,12 +12,8 @@ module Recommendable
           [redis_namespace, user_namespace, id, 'similarities'].compact.join(':')
         end
 
-        def liked_by_set_for(klass, id)
-          [redis_namespace, ratable_namespace(klass), id, 'liked_by'].compact.join(':')
-        end
-
-        def disliked_by_set_for(klass, id)
-          [redis_namespace, ratable_namespace(klass), id, 'disliked_by'].compact.join(':')
+        def scored_by_set_for(klass, id)
+          [redis_namespace, ratable_namespace(klass), id, 'scored_by'].compact.join(':')
         end
 
         def bookmarked_by_set_for(klass, id)

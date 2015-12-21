@@ -8,7 +8,7 @@ module Recommendable
       # @raise [ArgumentError] if the passed object was not declared ratable
       def bookmark(obj)
         raise(ArgumentError, 'Object has not been declared ratable.') unless obj.respond_to?(:recommendable?) && obj.recommendable?
-        return if hides?(obj) || bookmarks?(obj)
+        return if bookmarks?(obj)
 
         run_hook(:before_bookmark, obj)
         Recommendable.redis.sadd(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(obj.class, id), obj.id)

@@ -11,7 +11,7 @@ class RaterTest < Minitest::Test
   end
 
   def test_that_its_class_responds_to_recommendable_hooks
-    %w[like dislike hide bookmark].each do |action|
+    %w[score bookmark].each do |action|
       assert_respond_to @user.class, "before_#{action}"
       assert_respond_to @user.class, "before_un#{action}"
       assert_respond_to @user.class, "after_#{action}"
@@ -25,7 +25,7 @@ class RaterTest < Minitest::Test
 
   def test_that_unrate_removes_any_rating
     @movie = Factory(:movie)
-    %w[like dislike hide bookmark].each do |action|
+    %w[score bookmark].each do |action|
       @user.send(action, @movie)
       assert @user.send("#{action.pluralize}?", @movie)
 
