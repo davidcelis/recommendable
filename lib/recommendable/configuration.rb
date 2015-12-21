@@ -46,9 +46,6 @@ module Recommendable
 
     attr_accessor :ratable_classes, :user_class
 
-    #weight for bookmark
-    attr_accessor :bookmark_weight
-
     # Default values
     def initialize
       @redis                    = Redis.new
@@ -58,7 +55,6 @@ module Recommendable
       @nearest_neighbors        = nil
       @furthest_neihbors        = nil
       @recommendations_to_store = 100
-      @bookmark_weight          = 1
     end
 
     def queue_name
