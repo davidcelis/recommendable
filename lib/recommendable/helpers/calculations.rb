@@ -1,5 +1,4 @@
 require 'gsl'
-require 'pry'
 
 module Recommendable
   module Helpers
