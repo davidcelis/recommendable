@@ -9,7 +9,6 @@ module Recommendable
       # @raise [ArgumentError] if the passed object was not declared ratable
       def score(obj, score = 1)
         raise(ArgumentError, 'Object has not been declared ratable.') unless obj.respond_to?(:recommendable?) && obj.recommendable?
-        return if scores?(obj)
 
         run_hook(:before_score, obj)
         Recommendable.redis.zincrby(Recommendable::Helpers::RedisKeyMapper.scored_set_for(obj.class, id), score, obj.id)
