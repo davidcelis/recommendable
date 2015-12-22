@@ -20,18 +20,25 @@ module Recommendable
           scored_array = []
           other_scored_array = []
           Recommendable.config.ratable_classes.each do |klass|
+            # create 0 filled array first
+            count = klass.all.count
+            scored_array += Array.new(count, 0)
+            other_scored_array += Array.new(count, 0)
+
             scored_set = scored_set_with_score(klass, user_id)
             other_scored_set = scored_set_with_score(klass, other_user_id)
+
             (scored_set.keys + other_scored_set.keys).uniq.each do |ratable_id|
+              scored_array.shift
+              other_scored_array.shift
               scored_array << (scored_set[ratable_id] || 0)
               other_scored_array << (other_scored_set[ratable_id] || 0)
             end
           end
-
           #when standard deviation of an array is 0 gsl_pearson returns nan.
           #in case of that, set correlation as 0
           similarity = gsl_pearson(scored_array, other_scored_array) rescue Float::NAN
-          similarity.nan? ? 0 : similarity.round(2)
+          similarity.nan? ? 0 : similarity.round(5)
         end
 
         def scored_set_with_score(klass, user_id)
@@ -141,7 +148,7 @@ module Recommendable
 
           scored_by_set = Recommendable::Helpers::RedisKeyMapper.scored_by_set_for(klass, item_id)
           prediction = similarity_total_for(user_id, scored_by_set, klass, item_id) / Recommendable.redis.scard(scored_by_set).to_f
-          prediction.finite? ? prediction.round(2) : 0.0
+          prediction.finite? ? prediction.round(5) : 0.0
         end
 
         def similarity_total_for(user_id, set, klass, item_id)
