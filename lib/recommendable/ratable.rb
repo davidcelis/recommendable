@@ -52,7 +52,9 @@ module Recommendable
             score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(self)
             ids = Recommendable.redis.zrevrange(score_set, options[:offset], options[:offset] + options[:count] - 1)
 
-            Recommendable.query(self, ids).sort_by { |item| ids.index(item.id.to_s) }
+            order = ids.map { |id| "id = %d DESC" }.join(', ')
+            order = self.send(:sanitize_sql_for_assignment, [order, *ids])
+            Recommendable.query(self, ids).order(order)
           end
 
           # Returns the class that has been explicitly been made ratable, whether it is this
