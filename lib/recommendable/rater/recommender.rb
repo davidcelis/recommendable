@@ -27,12 +27,12 @@ module Recommendable
         ids = Recommendable.redis.zrevrange(recommended_set, 0, -1, :with_scores => true)
         ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
 
-        #if recommeded set is not enough, just add top products
-        if ids.count < limit
-          score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(klass)
-          ids = ids + Recommendable.redis.zrevrange(score_set, 0, limit - ids.count - 1)
-          ids.compact! #todo - if there is duplicated id, number of ids should be less number than limit
-        end
+        #merge personal recommendation and general recommendation
+        score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(klass)
+        ids = ids + Recommendable.redis.zrevrange(score_set, 0, -1)
+        ids.compact!
+
+        ids = ids[0..offset+limit-1]
 
         order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
