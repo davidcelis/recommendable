@@ -32,11 +32,11 @@ module Recommendable
         ids = ids + Recommendable.redis.zrevrange(score_set, 0, -1)
         ids.compact!
 
-        ids = ids[0..offset+limit-1]
+        ids = ids[offset..offset+limit-1]
 
         order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
-        Recommendable.query(klass, ids).order(order).limit(limit).offset(offset)
+        Recommendable.query(klass, ids).order(order)
       end
 
       # Removes an item from a user's set of recommendations
