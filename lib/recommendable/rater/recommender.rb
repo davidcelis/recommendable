@@ -32,7 +32,10 @@ module Recommendable
         ids = ids + Recommendable.redis.zrevrange(score_set, 0, -1)
         ids.compact!
 
-        ids = ids[offset..offset+limit-1]
+        index_max = ids.count
+        index_start = [offset, index_max].min
+        index_end = [offset+limit-1, index_max].min
+        ids = ids[index_start..index_end]
 
         order = ids.map { |id| "id = %d DESC" }.join(', ')
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
