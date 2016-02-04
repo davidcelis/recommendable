@@ -26,6 +26,7 @@ module Recommendable
 
         ids = Recommendable.redis.zrevrange(recommended_set, 0, -1, :with_scores => true)
         ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
+        ids = Recommendable.query(klass, ids).order(:created_at).pluck(:id)
 
         #merge personal recommendation and general recommendation
         score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(klass)
