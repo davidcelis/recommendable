@@ -19,13 +19,14 @@ module Recommendable
           scored_array = []
           other_scored_array = []
           Recommendable.config.ratable_classes.each do |klass|
+            scored_set = scored_set_with_score(klass, user_id)
+            other_scored_set = scored_set_with_score(klass, other_user_id)
+            next if scored_set.empty? and other_scored_set.empty?
+
             # create 0 filled array first
             count = klass.all.count
             scored_array += Array.new(count, 0)
             other_scored_array += Array.new(count, 0)
-
-            scored_set = scored_set_with_score(klass, user_id)
-            other_scored_set = scored_set_with_score(klass, other_user_id)
 
             (scored_set.keys + other_scored_set.keys).uniq.each do |ratable_id|
               scored_array.shift
