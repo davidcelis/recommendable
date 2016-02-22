@@ -8,7 +8,10 @@ module Recommendable
 
     module ClassMethods
       def make_recommendable!
-        Recommendable.configure { |config| config.ratable_classes << self }
+        Recommendable.configure do |config|
+          config.ratable_classes << self
+          config.ratable_class_count.merge!(self.name.to_sym => self.all.count)
+        end
 
         class_eval do
           include Scoreable

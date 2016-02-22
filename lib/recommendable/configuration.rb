@@ -44,7 +44,8 @@ module Recommendable
     # Default: 100
     attr_accessor :recommendations_to_store
 
-    attr_accessor :ratable_classes, :user_class
+    attr_accessor :ratable_classes, :user_class, :ratable_class_count
+
 
     # Default values
     def initialize
@@ -52,6 +53,7 @@ module Recommendable
       @redis_namespace          = :recommendable
       @auto_enqueue             = true
       @ratable_classes          = []
+      @ratable_class_count      = {}
       @nearest_neighbors        = nil
       @furthest_neihbors        = nil
       @recommendations_to_store = 100
