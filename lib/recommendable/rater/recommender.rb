@@ -31,7 +31,7 @@ module Recommendable
         #merge personal recommendation and general recommendation
         score_set = Recommendable::Helpers::RedisKeyMapper.score_set_for(klass)
         ids = ids + Recommendable.redis.zrevrange(score_set, 0, -1).map(&:to_i)
-        ids.compact!
+        ids.uniq!
 
         index_max = ids.count
         index_start = [offset, index_max].min
