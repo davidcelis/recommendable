@@ -6,17 +6,12 @@ module Recommendable
       end
 
       def perform(user_id)
+        return if $current_job == user_id
         lock.lock
-        queue = ::Sidekiq::Queue.new
-        # skip if there are same job in the queue
-        queue.select {|job| job.klass == self.class.to_s }.each do |job|
-          if job.args[0] == user_id
-            lock.unlock
-            return
-          end
-        end
+        $current_job = user_id
         Recommendable::Helpers::Calculations.update_similarities_for(user_id)
         Recommendable::Helpers::Calculations.update_recommendations_for(user_id)
+        $current_job = nil
         lock.unlock
       end
 
