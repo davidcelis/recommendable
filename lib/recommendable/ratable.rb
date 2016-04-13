@@ -10,7 +10,6 @@ module Recommendable
       def make_recommendable!
         Recommendable.configure do |config|
           config.ratable_classes << self
-          config.ratable_class_count.merge!(self.name.to_sym => self.all.count)
         end
 
         class_eval do

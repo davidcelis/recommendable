@@ -24,7 +24,7 @@ module Recommendable
             next if scored_set.empty? and other_scored_set.empty?
 
             # create 0 filled array first
-            count = Recommendable.config.ratable_class_count[klass.name.to_sym] || klass.all.count
+            count = Recommendable.config.ratable_class_count[klass.name.to_sym] ||= klass.all.count
             scored_array += Array.new(count, 0)
             other_scored_array += Array.new(count, 0)
 
