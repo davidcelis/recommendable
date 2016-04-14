@@ -1,13 +1,15 @@
 language: ruby
 services:
   - redis-server
+before_install:
+  - gem update --system
+  - gem --version
+  - gem update bundler
+  - bundler --version
 rvm:
   - 2.0
   - 2.1
   - 2.2
-  - jruby-19mode
-  - jruby-20mode
-  - jruby-21mode
 gemfile:
   - gemfiles/rails_31.gemfile
   - gemfiles/rails_32.gemfile
@@ -18,13 +20,7 @@ script: bundle exec rake test
 
 matrix:
   exclude:
-    - rvm: jruby-19mode
-      gemfile: gemfiles/rails_40.gemfile
-    - rvm: jruby-19mode
-      gemfile: gemfiles/rails_41.gemfile
-    - rvm: jruby-19mode
-      gemfile: gemfiles/rails_42.gemfile
-    - rvm: 2.2.2
+    - rvm: 2.2
       gemfile: gemfiles/rails_31.gemfile
-    - rvm: 2.2.2
+    - rvm: 2.2
       gemfile: gemfiles/rails_32.gemfile
