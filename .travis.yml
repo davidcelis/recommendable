@@ -2,10 +2,9 @@ language: ruby
 services:
   - redis-server
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.6
-  - 2.2.2
+  - 2.0
+  - 2.1
+  - 2.2
   - jruby-19mode
   - jruby-20mode
   - jruby-21mode
@@ -15,35 +14,16 @@ gemfile:
   - gemfiles/rails_40.gemfile
   - gemfiles/rails_41.gemfile
   - gemfiles/rails_42.gemfile
-  - gemfiles/rails_edge.gemfile
 script: bundle exec rake test
 
 matrix:
   exclude:
-    - rvm: 1.9.3
-      gemfile: gemfiles/rails_40.gemfile
-    - rvm: 1.9.3
-      gemfile: gemfiles/rails_41.gemfile
-    - rvm: 1.9.3
-      gemfile: gemfiles/rails_42.gemfile
-    - rvm: 1.9.3
-      gemfile: gemfiles/rails_edge.gemfile
     - rvm: jruby-19mode
       gemfile: gemfiles/rails_40.gemfile
     - rvm: jruby-19mode
       gemfile: gemfiles/rails_41.gemfile
     - rvm: jruby-19mode
       gemfile: gemfiles/rails_42.gemfile
-    - rvm: jruby-19mode
-      gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.0.0
-      gemfile: gemfiles/rails_edge.gemfile
-    - rvm: jruby-20mode
-      gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.1.6
-      gemfile: gemfiles/rails_edge.gemfile
-    - rvm: jruby-21mode
-      gemfile: gemfiles/rails_edge.gemfile
     - rvm: 2.2.2
       gemfile: gemfiles/rails_31.gemfile
     - rvm: 2.2.2
