@@ -10,6 +10,12 @@ module Recommendable
       def score(obj, score = 1)
         raise(ArgumentError, 'Object has not been declared ratable.') unless obj.respond_to?(:recommendable?) && obj.recommendable?
 
+        if obj.id == nil
+          Bugsnag.notify(RuntimeError.new("Rater#score called with nil id type: #{obj.class}, self.id: #{id}"))
+          Rails.logger.warn "Rater#score called with nil id type: #{obj.class}, self.id: #{id}"
+          Rails.logger.warn caller.join("\n")
+        end
+
         run_hook(:before_score, obj)
         Recommendable.redis.zincrby(Recommendable::Helpers::RedisKeyMapper.scored_set_for(obj.class, id), score, obj.id)
         Recommendable.redis.sadd(Recommendable::Helpers::RedisKeyMapper.scored_by_set_for(obj.class, obj.id), id)
