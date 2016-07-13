@@ -3,6 +3,7 @@ module Recommendable
     class Sidekiq
       if defined?(::Sidekiq)
         include ::Sidekiq::Worker
+        sidekiq_options queue: :low
       end
 
       def perform(user_id)
