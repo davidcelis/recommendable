@@ -208,5 +208,9 @@ class RedisKeyMapperTest < Minitest::Test
     def test_output_of_score_set_for_ratable_subclass_of_nonratable
       assert_equal 'recommendable_proc:cars:scores', Recommendable::Helpers::RedisKeyMapper.score_set_for(Car)
     end
+
+    def teardown
+      Recommendable::config.redis_namespace = :recommendable
+    end
   end
 end
