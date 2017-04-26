@@ -31,7 +31,13 @@ module Recommendable
         private
 
         def redis_namespace
-          Recommendable.config.redis_namespace
+          name_space = Recommendable.config.redis_namespace
+          case
+          when name_space.kind_of?(Proc)
+            return name_space.call
+          else
+            return name_space
+          end
         end
 
         def user_namespace
