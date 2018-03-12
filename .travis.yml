@@ -4,9 +4,8 @@ services:
 before_install:
   - gem update --system
   - gem --version
-  - gem install bundler
   - gem update bundler
-  - bundler --version
+  - bundle --version
 rvm:
   - 2.0
   - 2.1
