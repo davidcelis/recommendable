@@ -20,10 +20,6 @@ script: bundle exec rake test
 
 matrix:
   exclude:
-    - rvm: 2.2
-      gemfile: gemfiles/rails_31.gemfile
-    - rvm: 2.2
-      gemfile: gemfiles/rails_32.gemfile
     - rvm: 2.4
       gemfile: gemfiles/rails_31.gemfile
     - rvm: 2.4
