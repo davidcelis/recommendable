@@ -28,9 +28,17 @@ matrix:
     - rvm: 2.2
       gemfile: gemfiles/rails_32.gemfile
     - rvm: 2.4
+      gemfile: gemfiles/rails_31.gemfile
+    - rvm: 2.4
+      gemfile: gemfiles/rails_32.gemfile
+    - rvm: 2.4
       gemfile: gemfiles/rails_40.gemfile
     - rvm: 2.4
       gemfile: gemfiles/rails_41.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_31.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_32.gemfile
     - rvm: 2.5
       gemfile: gemfiles/rails_40.gemfile
     - rvm: 2.5
