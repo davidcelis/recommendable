@@ -5,11 +5,11 @@ before_install:
   - gem update --system
   - gem --version
   - gem update bundler
-  - bundler --version
+  - bundle --version
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2
+  - 2.3
+  - 2.4
+  - 2.5
 gemfile:
   - gemfiles/rails_31.gemfile
   - gemfiles/rails_32.gemfile
@@ -20,7 +20,19 @@ script: bundle exec rake test
 
 matrix:
   exclude:
-    - rvm: 2.2
+    - rvm: 2.4
       gemfile: gemfiles/rails_31.gemfile
-    - rvm: 2.2
+    - rvm: 2.4
       gemfile: gemfiles/rails_32.gemfile
+    - rvm: 2.4
+      gemfile: gemfiles/rails_40.gemfile
+    - rvm: 2.4
+      gemfile: gemfiles/rails_41.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_31.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_32.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_40.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_41.gemfile
