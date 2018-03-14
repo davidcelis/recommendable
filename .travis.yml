@@ -13,9 +13,9 @@ rvm:
   - 2.5
 
 gemfile:
-  - gemfiles/rails_4.gemfile
-  - gemfiles/rails_5.gemfile
+  - gemfiles/rails4.gemfile
+  - gemfiles/rails5.gemfile
 
 script: bundle exec rake test
 
-cache: bundler    
+cache: bundler
