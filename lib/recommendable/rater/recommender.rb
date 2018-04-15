@@ -15,8 +15,6 @@ module Recommendable
         Recommendable.query(self.class, ids).order(order).limit(limit).offset(offset)
       end
 
-      private
-
       # Fetch a list of recommendations for a passed class.
       #
       # @param [String, Symbol, Class] klass the class from which to get recommendations
@@ -33,6 +31,8 @@ module Recommendable
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
         Recommendable.query(klass, ids).order(order).limit(limit).offset(offset)
       end
+
+      private
 
       # Removes an item from a user's set of recommendations
       # @private

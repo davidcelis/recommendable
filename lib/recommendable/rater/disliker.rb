@@ -65,13 +65,10 @@ module Recommendable
         end
       end
 
-      private
-
       # Fetch IDs for objects belonging to a passed class that the user has disliked
       #
       # @param [String, Symbol, Class] the class for which you want IDs
       # @return [Array] an array of IDs
-      # @private
       def disliked_ids_for(klass)
         ids = Recommendable.redis.smembers(Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id))
         ids.map!(&:to_i) if [:active_record, :data_mapper, :sequel].include?(Recommendable.config.orm)
@@ -82,7 +79,6 @@ module Recommendable
       #
       # @param [String, Symbol, Class] the class for which you want disliked records
       # @return [Array] an array of disliked records
-      # @private
       def disliked_for(klass)
         Recommendable.query(klass, disliked_ids_for(klass))
       end
@@ -91,7 +87,6 @@ module Recommendable
       #
       # @param [String, Symbol, Class] the class for which you want a count of dislikes
       # @return [Fixnum] the number of dislikes
-      # @private
       def disliked_count_for(klass)
         Recommendable.redis.scard(Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id))
       end
@@ -101,7 +96,6 @@ module Recommendable
       # @param [User] the other user
       # @param [String, Symbol, Class] the class of common disliked items
       # @return [Array] an array of records both users have disliked
-      # @private
       def disliked_in_common_with(klass, user)
         Recommendable.query(klass, disliked_ids_in_common_with(klass, user))
       end
@@ -112,7 +106,6 @@ module Recommendable
       # @param [User, Fixnum] the other user (or its ID)
       # @param [String, Symbol, Class] the class of common disliked items
       # @return [Array] an array of IDs for records that both users have disliked
-      # @private
       def disliked_ids_in_common_with(klass, user_id)
         user_id = user_id.id if user_id.is_a?(Recommendable.config.user_class)
         Recommendable.redis.sinter(Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, id), Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id))

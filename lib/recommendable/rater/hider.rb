@@ -63,13 +63,10 @@ module Recommendable
         end
       end
 
-      private
-
       # Fetch IDs for objects belonging to a passed class that the user has hidden
       #
       # @param [String, Symbol, Class] the class for which you want IDs
       # @return [Array] an array of IDs
-      # @private
       def hidden_ids_for(klass)
         ids = Recommendable.redis.smembers(Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, id))
         ids.map!(&:to_i) if [:active_record, :data_mapper, :sequel].include?(Recommendable.config.orm)
@@ -80,7 +77,6 @@ module Recommendable
       #
       # @param [String, Symbol, Class] the class for which you want hidden records
       # @return [Array] an array of hidden records
-      # @private
       def hidden_for(klass)
         Recommendable.query(klass, hidden_ids_for(klass))
       end
@@ -89,7 +85,6 @@ module Recommendable
       #
       # @param [String, Symbol, Class] the class for which you want a count of hidden items
       # @return [Fixnum] the number of hidden items
-      # @private
       def hidden_count_for(klass)
         Recommendable.redis.scard(Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, id))
       end
@@ -99,7 +94,6 @@ module Recommendable
       # @param [User] the other user
       # @param [String, Symbol, Class] the class of common hidden items
       # @return [Array] an array of records both users have hidden
-      # @private
       def hidden_in_common_with(klass, user)
         Recommendable.query(klass, hidden_ids_in_common_with(klass, user))
       end
@@ -110,7 +104,6 @@ module Recommendable
       # @param [User] the other user
       # @param [String, Symbol, Class] the class of common hidden items
       # @return [Array] an array of IDs for records that both users have hidden
-      # @private
       def hidden_ids_in_common_with(klass, user_id)
         user_id = user_id.id if user_id.is_a?(Recommendable.config.user_class)
         Recommendable.redis.sinter(Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, id), Recommendable::Helpers::RedisKeyMapper.hidden_set_for(klass, user_id))

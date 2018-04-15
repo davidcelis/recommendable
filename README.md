@@ -145,11 +145,6 @@ I'll let Randall Munroe of [XKCD](http://xkcd.com/) take this one for me:
 * Bugs: <http://github.com/davidcelis/recommendable/issues>
 * Gems: <http://rubygems.org/gems/recommendable>
 
-## Copyright
-
-Copyright © 2013 David Celis. See LICENSE.txt for
-further details.
-
 [stars]: http://davidcelis.com/blog/2012/02/01/why-i-hate-five-star-ratings/
 [sidekiq]: https://github.com/mperham/sidekiq
 [sidekiq-middleware]: https://github.com/krasnoukhov/sidekiq-middleware

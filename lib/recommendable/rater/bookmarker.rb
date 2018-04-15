@@ -62,13 +62,10 @@ module Recommendable
         end
       end
 
-      private
-
       # Fetch IDs for objects belonging to a passed class that the user has bookmarked
       #
       # @param [String, Symbol, Class] the class for which you want IDs
       # @return [Array] an array of IDs
-      # @private
       def bookmarked_ids_for(klass)
         ids = Recommendable.redis.smembers(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id))
         ids.map!(&:to_i) if [:active_record, :data_mapper, :sequel].include?(Recommendable.config.orm)
@@ -79,7 +76,6 @@ module Recommendable
       #
       # @param [String, Symbol, Class] the class for which you want bookmarked records
       # @return [Array] an array of bookmarked records
-      # @private
       def bookmarked_for(klass)
         Recommendable.query(klass, bookmarked_ids_for(klass))
       end
@@ -88,7 +84,6 @@ module Recommendable
       #
       # @param [String, Symbol, Class] the class for which you want a count of bookmarks
       # @return [Fixnum] the number of bookmarks
-      # @private
       def bookmarked_count_for(klass)
         Recommendable.redis.scard(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id))
       end
@@ -99,7 +94,6 @@ module Recommendable
       # @param [User] the other user
       # @param [String, Symbol, Class] the class of common bookmarked items
       # @return [Array] an array of records both users have bookmarked
-      # @private
       def bookmarked_in_common_with(klass, user)
         Recommendable.query(klass, bookmarked_ids_in_common_with(klass, user))
       end
@@ -110,7 +104,6 @@ module Recommendable
       # @param [User] the other user
       # @param [String, Symbol, Class] the class of common bookmarked items
       # @return [Array] an array of IDs for records that both users have bookmarked
-      # @private
       def bookmarked_ids_in_common_with(klass, user_id)
         user_id = user_id.id if user_id.is_a?(Recommendable.config.user_class)
         Recommendable.redis.sinter(Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, id), Recommendable::Helpers::RedisKeyMapper.bookmarked_set_for(klass, user_id))
