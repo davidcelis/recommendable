@@ -43,11 +43,13 @@ module Recommendable
 
           # Query for the top-N items sorted by score
           #
-          # @param [Fixnum] count the number of items to fetch (defaults to 1)
+          # @param [Hash] options a hash of options to modify which items are returned
+          # @option options [Integer] :count the number of items to fetch (defaults to 1)
+          # @option options [Integer] :offset an offset to allow paging through results
           # @return [Array] the top items belonging to this class, sorted by score
           def self.top(options = {})
             if options.is_a?(Integer)
-              options = { :count => options}
+              options = { :count => options }
               warn "[DEPRECATION] Recommenable::Ratable.top now takes an options hash. Please call `.top(count: #{options[:count]})` instead of just `.top(#{options[:count]})`"
             end
             options.reverse_merge!(:count => 1, :offset => 0)
