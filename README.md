@@ -77,6 +77,8 @@ Recommendable.configure do |config|
 end
 ```
 
+Important: in case of `active_record` with id of type `uuid`, use `:active_record_uuid`.
+
 ## Usage
 
 In your model that will be receiving recommendations:
