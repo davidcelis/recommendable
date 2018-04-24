@@ -8,8 +8,9 @@ module Recommendable
       # @return [Array] An array of instances of your user class
       def similar_raters(limit = 10, offset = 0)
         ids = Recommendable.redis.zrevrange(Recommendable::Helpers::RedisKeyMapper.similarity_set_for(id), 0, -1)
+        ids = sanitize_ids(ids, self.class)
 
-        order = ids.map { |id| "#{Recommendable.config.user_class.quoted_table_name}.#{Recommendable.config.user_class.quoted_primary_key} = %d DESC" }.join(', ')
+        order = ids.map { |id| "#{Recommendable.config.user_class.quoted_table_name}.#{Recommendable.config.user_class.quoted_primary_key} = ? DESC" }.join(', ')
         order = self.class.send(:sanitize_sql_for_assignment, [order, *ids])
 
         Recommendable.query(self.class, ids).order(order).limit(limit).offset(offset)
@@ -26,13 +27,20 @@ module Recommendable
 
         ids = Recommendable.redis.zrevrange(recommended_set, 0, -1, :with_scores => true)
         ids = ids.select { |id, score| score > 0 }.map { |pair| pair.first }
+        ids = sanitize_ids(ids, klass)
 
-        order = ids.map { |id| "#{klass.quoted_table_name}.#{klass.quoted_primary_key} = %d DESC" }.join(', ')
+        order = ids.map { |id| "#{klass.quoted_table_name}.#{klass.quoted_primary_key} = ? DESC" }.join(', ')
         order = klass.send(:sanitize_sql_for_assignment, [order, *ids])
         Recommendable.query(klass, ids).order(order).limit(limit).offset(offset)
       end
 
       private
+
+      # Sanitizes ids using klass type mapping
+      # @private
+      def sanitize_ids(ids, klass)
+        ids.map{ |id| klass.new(klass.primary_key => id).send(klass.primary_key) }.compact
+      end
 
       # Removes an item from a user's set of recommendations
       # @private
