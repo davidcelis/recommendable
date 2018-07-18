@@ -55,29 +55,8 @@ module Recommendable
         def update_similarities_for(user_id)
           user_id = user_id.to_s # For comparison. Redis returns all set members as strings.
           similarity_set = Recommendable::Helpers::RedisKeyMapper.similarity_set_for(user_id)
-
-          # Only calculate similarities for users who have rated the items that
-          # this user has rated
-          relevant_user_ids = Recommendable.config.ratable_classes.inject([]) do |memo, klass|
-            liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id)
-            disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
-
-            item_ids = Recommendable.redis.sunion(liked_set, disliked_set)
-
-            unless item_ids.empty?
-              sets = item_ids.map do |id|
-                liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, id)
-                disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, id)
-
-                [liked_by_set, disliked_by_set]
-              end
-
-              memo | Recommendable.redis.sunion(*sets.flatten)
-            else
-              memo
-            end
-          end
-
+          relevant_user_ids = relevant_user_ids_for(user_id)
+          
           similarity_values = relevant_user_ids.map { |id| similarity_between(user_id, id) }
           Recommendable.redis.pipelined do
             relevant_user_ids.zip(similarity_values).each do |id, similarity_value|
@@ -94,6 +73,27 @@ module Recommendable
           end
 
           true
+        end
+        
+        # Calculate similarities for users who have rated the items as user_id
+        def relevant_user_ids_for(user_id)
+          relevant_user_ids = Recommendable.config.ratable_classes.each_with_object(Set.new) do |klass, memo|
+            liked_set = Recommendable::Helpers::RedisKeyMapper.liked_set_for(klass, user_id)
+            disliked_set = Recommendable::Helpers::RedisKeyMapper.disliked_set_for(klass, user_id)
+            item_ids = Recommendable.redis.sunion(liked_set, disliked_set)
+
+            next if item_ids.empty?
+            sets = item_ids.map do |id|
+              liked_by_set = Recommendable::Helpers::RedisKeyMapper.liked_by_set_for(klass, id)
+              disliked_by_set = Recommendable::Helpers::RedisKeyMapper.disliked_by_set_for(klass, id)
+
+              [liked_by_set, disliked_by_set]
+            end
+
+            memo.merge(Recommendable.redis.sunion(*sets.flatten))
+          end
+          
+          relevant_user_ids.to_a
         end
 
         # Used internally to update this user's prediction values across all
